@@ -1,0 +1,14 @@
+export module corestd;
+
+export import <iostream>;
+export import <vector>;
+export import <unordered_map>;
+export import <memory>;
+export import <string>;
+export import <algorithm>;
+export import <tuple>;
+export import <fstream>;
+export import <sstream>;
+export import <random>;
+export import <array>;
+export import <optional>;

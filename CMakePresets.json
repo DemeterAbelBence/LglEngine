@@ -1,0 +1,21 @@
+{
+    "version": 10,
+    "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+    },
+    "$comment": "CMakePresets.json file for Lgl engine project",
+    "configurePresets": [
+    {
+        "name": "x64-Debug-VS2022",
+        "displayName": "x64 Debug Visual Studio 2022",
+        "generator": "Visual Studio 17 2022",
+        "toolset": "v143",
+        "architecture": {
+            "value": "x64"
+        },
+        "binaryDir": "${sourceDir}/out/build/"
+        }
+    ]
+}
