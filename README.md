@@ -1,5 +1,5 @@
 # LglEngine
-Light Grpahics Library Engine
+Light Graphics Library Engine
 - Package management is not yet implemented
 - Thus building requires the manual download of two zips files
 - The cloud link: https://drive.google.com/drive/folders/1OFFZljUOw9g_wUwm8N1OqbQ_mMzPy7dP?usp=sharing
