@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 4.2.3)
+
 add_library(LglEng STATIC)
 
 if (MSVC)
@@ -26,21 +28,17 @@ set_target_properties(LglEng PROPERTIES
 
 target_sources(LglEng 
 PRIVATE
-    FILE_SET cxx_modules TYPE CXX_MODULES FILES
-    ${CMAKE_CURRENT_LIST_DIR}/engstd.mpp
+    ${CMAKE_CURRENT_LIST_DIR}/eng/Scene.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/eng/Scene.cxx
 
-PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/eng/Scene.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/eng/Scene.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/eng/UserInterface.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/eng/UserInterface.cxx
 
-    ${CMAKE_CURRENT_LIST_DIR}/eng/UserInterface.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/eng/UserInterface.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/eng/WindowManager.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/eng/WindowManager.cxx
 
-    ${CMAKE_CURRENT_LIST_DIR}/eng/WindowManager.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/eng/WindowManager.cpp
-
-    ${CMAKE_CURRENT_LIST_DIR}/eng/CollisionHandler.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/eng/CollisionHandler.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/eng/CollisionHandler.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/eng/CollisionHandler.cxx
 )
 
 target_include_directories(LglEng PUBLIC ${CMAKE_CURRENT_LIST_DIR})

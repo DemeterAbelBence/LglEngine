@@ -1,51 +1,60 @@
+cmake_minimum_required(VERSION 4.2.3)
+
 add_library(LglUtil STATIC)
 
 set_target_properties(LglUtil PROPERTIES
     CXX_STANDARD 23
     CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO
 )
 
 set_target_properties(LglUtil PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib"
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib"
     OUTPUT_NAME "LglUtil"
 )
 
-file(GLOB MATH_SOURCES ${CMAKE_CURRENT_LIST_DIR}/math/*.cpp)
-file(GLOB MATH_HEADERS ${CMAKE_CURRENT_LIST_DIR}/math/*.hpp)
-source_group(Math FILES ${MATH_SOURCES} ${MATH_HEADERS})
+target_sources(LglUtil PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/stb_image.cpp
 
-file(GLOB GLFW_SOURCES ${CMAKE_CURRENT_LIST_DIR}/glfw/*.cpp)
-file(GLOB GLFW_HEADERS ${CMAKE_CURRENT_LIST_DIR}/glfw/*.hpp)
-source_group(Glfw FILES ${GLFW_SOURCES} ${GLFW_HEADERS})
+    ${CMAKE_CURRENT_LIST_DIR}/gl/Debug.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/Debug.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/DebugDrawer.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/DebugDrawer.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/FrameBuffer.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/FrameBuffer.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/GpuProgram.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/GpuProgram.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/Texture.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/Texture.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/VertexArray.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/VertexArray.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/VertexBuffer.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/VertexBuffer.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/VertexBufferLayout.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/gl/VertexBufferLayout.hxx
 
-file(GLOB ASIM_SOURCES ${CMAKE_CURRENT_LIST_DIR}/asim/*.cpp)
-file(GLOB ASIM_HEADERS ${CMAKE_CURRENT_LIST_DIR}/asim/*.hpp)
-source_group(Asim FILES ${ASIM_SOURCES} ${ASIM_HEADERS})
+    ${CMAKE_CURRENT_LIST_DIR}/glfw/keyin.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/glfw/keyin.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/glfw/Mouse.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/glfw/Mouse.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/glfw/Time.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/glfw/Time.hxx
 
-file(GLOB GL_SOURCES ${CMAKE_CURRENT_LIST_DIR}/gl/*.cpp)
-file(GLOB GL_HEADERS ${CMAKE_CURRENT_LIST_DIR}/gl/*.hpp)
-source_group(Gl FILES ${GL_SOURCES} ${GL_HEADERS})
+    ${CMAKE_CURRENT_LIST_DIR}/math/Camera.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/math/Camera.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/math/Dnum.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/math/Dnum.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/math/Quaternion.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/math/Quaternion.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/math/RigidBody.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/math/RigidBody.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/math/Transformation.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/math/Transformation.hxx
 
-target_sources(LglUtil 
-PRIVATE
-    FILE_SET cxx_modules TYPE CXX_MODULES FILES
-    ${CMAKE_CURRENT_LIST_DIR}/utilstd.mpp
-
-PRIVATE
-    ${MATH_HEADERS} 
-    ${MATH_SOURCES}
-
-    ${GLFW_HEADERS} 
-    ${GLFW_SOURCES}
-
-    ${ASIM_HEADERS} 
-    ${ASIM_SOURCES}
-
-    ${GL_HEADERS} 
-    ${GL_SOURCES}
+    ${CMAKE_CURRENT_LIST_DIR}/model/model.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/model/model.hxx
 )
-
-target_include_directories(LglUtil PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(LglUtil PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}
+)

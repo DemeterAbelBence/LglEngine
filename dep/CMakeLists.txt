@@ -1,4 +1,11 @@
+cmake_minimum_required(VERSION 4.2.3)
+
 add_library(LglDeps STATIC)
+
+set_target_properties(LglDeps PROPERTIES
+    CXX_STANDARD 23
+    CXX_STANDARD_REQUIRED YES
+)
 
 set_target_properties(LglDeps PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin"
@@ -6,8 +13,6 @@ set_target_properties(LglDeps PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib"
     OUTPUT_NAME "LglDeps"
 )
-
-target_compile_features(LglDeps PUBLIC cxx_std_20)
 
 file(GLOB IMGUI_SOURCES ${CMAKE_CURRENT_LIST_DIR}/alldeps/imgui/IMGUI/*.cpp )
 file(GLOB IMGUI_HEADERS ${CMAKE_CURRENT_LIST_DIR}/alldeps/imgui/IMGUI/*.h )

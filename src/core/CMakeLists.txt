@@ -1,9 +1,10 @@
+cmake_minimum_required(VERSION 4.2.3)
+
 add_library(LglCore STATIC)
 
 set_target_properties(LglCore PROPERTIES
     CXX_STANDARD 23
     CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO
 )
 
 set_target_properties(LglCore PROPERTIES
@@ -13,23 +14,19 @@ set_target_properties(LglCore PROPERTIES
     OUTPUT_NAME "LglCore"
 )
 
-file(GLOB OBJECTS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/sceneobject/*.cpp)
-file(GLOB OBJECTS_HEADERS ${CMAKE_CURRENT_LIST_DIR}/sceneobject/*.hpp)
+file(GLOB OBJECTS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/sceneobject/*.cxx)
+file(GLOB OBJECTS_HEADERS ${CMAKE_CURRENT_LIST_DIR}/sceneobject/*.hxx)
 source_group(Objects FILES ${OBJECTS_SOURCES} ${OBJECTS_HEADERS})
 
-file(GLOB COLLIDERS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/collision/*.cpp)
-file(GLOB COLLIDERS_HEADERS ${CMAKE_CURRENT_LIST_DIR}/collision/*.hpp)
+file(GLOB COLLIDERS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/collision/*.cxx)
+file(GLOB COLLIDERS_HEADERS ${CMAKE_CURRENT_LIST_DIR}/collision/*.hxx)
 source_group(Colliders FILES ${COLLIDERS_SOURCES} ${COLLIDERS_HEADERS})
 
-file(GLOB_RECURSE VISUAL_SOURCES ${CMAKE_CURRENT_LIST_DIR}/visual/*.cpp)
-file(GLOB_RECURSE VISUAL_HEADERS ${CMAKE_CURRENT_LIST_DIR}/visual/*.hpp)
+file(GLOB_RECURSE VISUAL_SOURCES ${CMAKE_CURRENT_LIST_DIR}/visual/*.cxx)
+file(GLOB_RECURSE VISUAL_HEADERS ${CMAKE_CURRENT_LIST_DIR}/visual/*.hxx)
 source_group(Visual FILES ${VISUAL_SOURCES} ${VISUAL_HEADERS})
 
 target_sources(LglCore 
-PRIVATE
-    FILE_SET cxx_modules TYPE CXX_MODULES FILES
-    ${CMAKE_CURRENT_LIST_DIR}/corestd.mpp
-
 PRIVATE
     ${OBJECTS_HEADERS}
     ${OBJECTS_SOURCES}

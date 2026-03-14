@@ -1,0 +1,21 @@
+
+#include <eng/WindowManager.hxx>
+
+#include "SimulationScene.hxx"
+#include "SimulationInterface.hxx"
+#include "SponzaScene.hxx"
+#include "LightingInterface.hxx"
+
+int main(void) {
+	try {
+		lgl::WindowManager windowManager("Simulation App", 1200, 800, 800, 800);
+		windowManager.defineLayout<SimulationScene, SimulationInterface>();
+		//windowManager.defineLayout<SponzaScene, LightingInterface>();
+		windowManager.renderWindowLoop();
+	}
+	catch (const lgl::utl::except& error) {
+		lgl::Logger::log(lgl::Logger::LGL_ERROR, "Exception: {}\n", error.what());
+	}
+
+    return 0;
+}
