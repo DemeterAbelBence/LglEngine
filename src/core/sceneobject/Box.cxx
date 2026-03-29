@@ -66,7 +66,7 @@ namespace lgl {
 		m_collider->setTransformation(m_transformation.get());
 	}
 
-	Box::Box(const glm::vec3& dimensions, bool isStationary) : SceneObject() {
+	Box::Box(bool isStationary, const glm::vec3& dimensions) : SceneObject() {
 		m_dimensions = dimensions;
 		m_isStationary = isStationary;
 

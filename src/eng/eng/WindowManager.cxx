@@ -87,11 +87,11 @@ namespace lgl {
             Time::calculateDeltaTime();
 
             glfwPollEvents();
-            glViewport(0, 0, m_sceneWidth, m_sceneHeight);
+            m_scene->update(m_mainWindow);
+
             glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            m_scene->update(m_mainWindow);
+			glViewport(0, 0, m_sceneWidth, m_sceneHeight);
             m_scene->draw();
 
             renderUserInterface();

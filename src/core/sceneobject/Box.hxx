@@ -17,7 +17,7 @@ namespace lgl {
 
 	public:
 		Box(bool isStationary, utl::sptr<ModelMesh> modelMesh);
-		Box(const glm::vec3& dimensions, bool isStationary);
+		Box(bool isStationary, const glm::vec3& dimensions);
 
 		ribo::BodyData initializePhysics() override;
 		void stepPhysicsBy(float dt) override;

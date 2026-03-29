@@ -46,8 +46,8 @@ void SimulationScene::initResources() {
 
 		// PHONG PROGRAM
 		auto phong = utl::makeSptr<GpuProgram>("PHONG");
-		phong->addShader(GL_VERTEX_SHADER, "shaders/phong-vert.glsl");
-		phong->addShader(GL_FRAGMENT_SHADER, "shaders/phong-frag.glsl");
+		phong->addShader(GL_VERTEX_SHADER, "shaders/phong/basic-phong-vert.glsl");
+		phong->addShader(GL_FRAGMENT_SHADER, "shaders/phong/basic-phong-frag.glsl");
 		phong->createProgram();
 		m_programs[phong->getProgramName()] = phong;
 
@@ -62,6 +62,11 @@ void SimulationScene::initResources() {
 		m_textures["SUN"] = utl::makeSptr<Texture>(Texture{
 			tex::TextureFromFile("assets/images/sun.jpg"),
 			"sun_texture", ""
+		});
+
+		m_textures["WOOD"] = utl::makeSptr<Texture>(Texture{
+			tex::TextureFromFile("assets/images/box1.jpg"),
+			"texture_base_color", ""
 		});
 
 		// WHITE MATERIAL
@@ -79,7 +84,7 @@ void SimulationScene::initResources() {
 
 		// DEPTH BUFFER
 		m_buffers["DEPTH"] = utl::makeSptr<FrameBuffer>("DEPTH_MAP", 800, 800,
-			GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_COMPONENT);
+			GL_DEPTH_COMPONENT24, GL_FLOAT, GL_DEPTH_COMPONENT);
 	}
 	catch (const utl::except& error) {
 		throw error;
@@ -89,15 +94,19 @@ void SimulationScene::initResources() {
 void SimulationScene::castShadowsOnTerrain() {
 	m_sun->directPerspectiveOf(*m_camera);
 
+	int depthBufferWidth = m_buffers.at("DEPTH")->getWidth();
+	int depthBufferHeight = m_buffers.at("DEPTH")->getHeight();
+	glViewport(0, 0, depthBufferWidth, depthBufferHeight);
+
 	m_terrain->getMesh()->setProgram(m_programs["PATCH_DEPTH"]);
-	m_buffers["DEPTH"]->bind();
+	m_buffers.at("DEPTH")->bind();
 	for (const auto& s : m_sceneObjects) {
 		if (s.get() == m_sun.get()) {
 			continue;
 		}
 		s->draw(*m_camera);
 	}
-	m_buffers["DEPTH"]->unBind();
+	m_buffers.at("DEPTH")->unBind();
 	m_terrain->getMesh()->setProgram(m_programs["PATCH_PBR"]);
 
 	m_camera->resetProjection();
@@ -148,7 +157,7 @@ void SimulationScene::create() {
 		m_sun->m_name = "sun";
 		m_sun->setProgram(m_programs.at("TEX"));
 		m_sun->setTextures({ m_textures.at("SUN") });
-		m_sun->translate(glm::vec3(5.0f, 60.0f, 5.0f));
+		m_sun->translate(glm::vec3(15.0f, 50.0f, -15.0f));
 		m_sceneObjects.push_back(m_sun);
 
 		m_terrain = utl::makeSptr<Terrain>(1.0f, 4);
@@ -161,15 +170,31 @@ void SimulationScene::create() {
 
 		for (int i = 0; i < 3; i++) {
 			float s = 10.0f / (i + 1);
-			auto ironBox = utl::makeSptr<Box>(false, m_modelMeshes.at("IRONBOX"));
-			ironBox->m_name = utl::strFormat("iron_box_{}", i);
-			ironBox->getMesh()->setProgram(m_programs.at("PHONG"));
-			ironBox->getMesh()->setMaterial(m_materials.at("WHITE"));
-			ironBox->translate(glm::vec3(i, 10.0f + i * 10.0f, 0.0f));
-			ironBox->scale(glm::vec3(s, s, s));
-			ironBox->getPhysicsSolver()->makeStateInitial();
-			m_sceneObjects.push_back(ironBox);
+			auto woodBox = utl::makeSptr<Box>(false, glm::vec3(1.0f, 1.0f, 1.0f));
+			woodBox->m_name = utl::strFormat("wood_box_{}", i);
+			woodBox->getMesh()->setProgram(m_programs.at("PHONG"));
+			woodBox->getMesh()->setMaterial(m_materials.at("WHITE"));
+			woodBox->getMesh()->addTexture(m_textures.at("WOOD"));
+			woodBox->translate(glm::vec3(i, 10.0f + i * 10.0f, 0.0f));
+			woodBox->scale(glm::vec3(s, s, s));
+			woodBox->getPhysicsSolver()->makeStateInitial();
+			m_sceneObjects.push_back(woodBox);
 		}
+
+		/*for (int i = 0; i < 1; i++) {
+			for (int j = 0; j < 1; j++) {
+				float s = 10.0f / (i + 1);
+				auto woodBox = utl::makeSptr<Box>(false, glm::vec3(1.0f, 1.0f, 1.0f));
+				woodBox->m_name = utl::strFormat("woodBox_{}", i);
+				woodBox->getMesh()->setProgram(m_programs.at("PHONG"));
+				woodBox->getMesh()->setMaterial(m_materials.at("WHITE"));
+				woodBox->getMesh()->addTexture(m_textures.at("WOOD"));
+				woodBox->translate(glm::vec3(i * 12.0f, 8.0f, j * 12.0f));
+				woodBox->scale(glm::vec3(s, s, s));
+				woodBox->getPhysicsSolver()->makeStateInitial();
+				m_sceneObjects.push_back(woodBox);
+			}
+		}*/
 	} 
 	catch (const utl::except& error) {
 		throw error;
@@ -177,13 +202,13 @@ void SimulationScene::create() {
 }
 
 void SimulationScene::draw() const {
+	CollisionHandler::debugDrawCollisions(m_sceneObjects, *m_camera);
+
 	for (const auto& s : m_sceneObjects) {
 		s->draw(*m_camera);
 	}
 	auto objectInFocus = m_sceneObjects[m_objectIndex];
 	if (objectInFocus.get() != m_terrain.get()) {
-		auto transformation = objectInFocus->getTransformation();
-		objectInFocus->getMesh()->setTransformation(transformation);
 		objectInFocus->getMesh()->drawMeshFrame(*m_camera);
 	}
 }
@@ -206,11 +231,13 @@ void SimulationScene::update(GLFWwindow* window) {
 	}
 
 	m_terrain->updateTerrainParameters();
-	
-	castShadowsOnTerrain();
-	m_sun->lightUpScene(m_sceneObjects, *m_buffers["DEPTH"]);
-
-	CollisionHandler::handleCollisions(m_sceneObjects, *m_camera);
 
 	m_simulationEventHandler.handleEvents(window, this);
+
+	CollisionHandler::handleCollisions(m_sceneObjects);
+
+	m_simulationEventHandler.handleEvents(window, this);
+
+	castShadowsOnTerrain();
+	m_sun->lightUpScene(m_sceneObjects, *m_buffers.at("DEPTH"));
 }

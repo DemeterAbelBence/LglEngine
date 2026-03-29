@@ -16,8 +16,8 @@ namespace lgl {
 
 		m_program->setMat4("MI", m_transformation->makeModelInverseMatrix());
 		m_program->setMat4("M", m_transformation->makeModelMatrix());
-		m_program->setMat4("V", camera.getView());
-		m_program->setMat4("P", camera.getProjection());
+		m_program->setMat4("V", camera.getV());
+		m_program->setMat4("P", camera.getP());
 		m_program->setVec3("eye", camera.getEye());
 
 		if (m_material) {

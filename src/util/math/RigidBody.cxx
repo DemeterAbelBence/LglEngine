@@ -26,7 +26,7 @@ namespace lgl {
     }
 
     void ribo::PhysicsSolver::computeTotalTorque(const utl::vec<glm::vec3>& particles) {
-        //Body.torque = glm::cross(particles[0] - Body.X, Body.force);
+        Body.torque = glm::cross(particles[0] - Body.X, Body.force);
     }
 
     void ribo::PhysicsSolver::updateAngularComponents(float t) {

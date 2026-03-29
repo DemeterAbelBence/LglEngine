@@ -27,5 +27,6 @@ namespace lgl {
 
 		static void initMouse(GLFWwindow* window);
 		static void toggleMouseCapture();
+		static void resetOffsets();
 	};
 }

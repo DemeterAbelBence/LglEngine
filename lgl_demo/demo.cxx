@@ -1,4 +1,3 @@
-
 #include <eng/WindowManager.hxx>
 
 #include "SimulationScene.hxx"
@@ -16,6 +15,8 @@ int main(void) {
 	catch (const lgl::utl::except& error) {
 		lgl::Logger::log(lgl::Logger::LGL_ERROR, "Exception: {}\n", error.what());
 	}
+
+	lgl::Logger::log(lgl::Logger::LGL_EMPTY, "Exiting application...\n");
 
     return 0;
 }

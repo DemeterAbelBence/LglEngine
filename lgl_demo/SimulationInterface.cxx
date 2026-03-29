@@ -26,10 +26,16 @@ void SimulationInterface::renderSimulationSettings() {
         CollisionHandler::enableDebug = !ed;
     }
 
-    bool ei = CollisionHandler::enableInteractions;
-    utl::cstr interactionText = ei ? "Disable interactions" : "Enable interactions";
-    if (ImGui::Button(interactionText)) {
-        CollisionHandler::enableInteractions = !ei;
+    bool edisp = CollisionHandler::enableDisplacement;
+    utl::cstr displacementText = edisp ? "Disable displacement" : "Enable displacement";
+    if (ImGui::Button(displacementText)) {
+        CollisionHandler::enableDisplacement = !edisp;
+    }
+
+    bool eimp = CollisionHandler::enableImpulses;
+    utl::cstr impulsesText = eimp ? "Disable impulses" : "Enable impulses";
+    if (ImGui::Button(impulsesText)) {
+        CollisionHandler::enableImpulses = !eimp;
     }
 
     bool dn = CollisionHandler::draw_normals;
@@ -91,8 +97,8 @@ SimulationInterface::SimulationInterface(GLFWwindow* window, utl::sptr<Scene> sc
 	: UserInterface(window, scene) {
     
 	m_simulationScene = utl::sptrCast<SimulationScene>(scene);
-   /* if (!m_simulationScene) {
-		throw std::exception("'SimulationInterface' can only by initialized with 'SimulationScene' instance");
-    } */
+    if (!m_simulationScene) {
+		throw utl::except("'SimulationInterface' can only by initialized with 'SimulationScene' instance");
+    }
 }
 

@@ -51,8 +51,8 @@ namespace lgl {
 		Camera& operator=(const Camera&& other) = delete;
 
 		glm::vec3 getEye() const { return m_eye; }
-		glm::mat4 getProjection() const { return m_projection; }
-		glm::mat4 getView() const { return m_view; }
+		glm::mat4 getP() const { return m_projection; }
+		glm::mat4 getV() const { return m_view; }
 
 		void setProjection(const glm::mat4& value) { m_projection = value; }
 		void setView(const glm::mat4& value) { m_view = value; }

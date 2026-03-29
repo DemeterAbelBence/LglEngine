@@ -2,12 +2,19 @@
 
 namespace lgl {
     glm::mat4 Camera::createOrthographic() {
-        float x1 = 2.0f / (m_params.right - m_params.left);
-        float x4 = -(m_params.right + m_params.left) / (m_params.right - m_params.left);
-        float y2 = 2.0f / (m_params.top - m_params.bottom);
-        float y4 = -(m_params.top + m_params.bottom) / (m_params.top - m_params.bottom);
-        float z3 = -2.0f / (m_params.far - m_params.near);
-        float z4 = -(m_params.far + m_params.near) / (m_params.far - m_params.near);
+		float n = m_params.near;
+		float f = m_params.far;
+		float l = m_params.left;
+		float r = m_params.right;
+		float t = m_params.top;
+		float b = m_params.bottom;
+
+        float x1 = 2.0f / (r - l);
+        float x4 = -(r + l) / (r - l);
+        float y2 = 2.0f / (t - b);
+        float y4 = -(t + b) / (t - b);
+        float z3 = -2.0f / (f - n);
+        float z4 = -(f + n) / (f - n);
 
         glm::mat4 orthographic;
         orthographic[0] = glm::vec4(x1, 0.0f, 0.0f, x4);
@@ -19,8 +26,12 @@ namespace lgl {
     }
 
     glm::mat4 Camera::createPerspective() {
-        float z3 = -(m_params.far + m_params.near) / (m_params.far - m_params.near);
-        float z4 = -2.0f * m_params.far * m_params.near / (m_params.far - m_params.near);
+		float n = m_params.near;
+        float f = m_params.far;
+
+
+        float z3 = -(f + n) / (f - n);
+        float z4 = -2.0f * f * n / (f - n);
         float angle = 3.14159f * m_params.fov / 2;
         float fov = glm::tan(angle);
         float scale = 1.0f / (fov != 3.14159f / 2 ? fov : 1.0f);
@@ -34,25 +45,30 @@ namespace lgl {
         return perspective;
     }
 
-    glm::mat4 Camera::createViewMatrix() {
-        glm::vec3 dir = glm::normalize(m_direction);
-        glm::vec3 right = glm::normalize(glm::cross(m_up, dir));
-        glm::vec3 up = glm::normalize(glm::cross(dir, right));
+	glm::mat4 Camera::createViewMatrix() {
+		glm::vec3 dir = glm::normalize(m_direction);
+		glm::vec3 right = glm::normalize(glm::cross(m_up, dir));
+		glm::vec3 up = glm::normalize(glm::cross(dir, right));
 
-        glm::mat4 rotation;
-        rotation[0] = glm::vec4(right, 0.0f);
-        rotation[1] = glm::vec4(up, 0.0f);
-        rotation[2] = glm::vec4(dir, 0.0f);
-        rotation[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		float dot = glm::dot(dir, m_up);
+		if (glm::abs(dot) > 0.9999f) {
+			Logger::log(Logger::LGL_WARN, "Camera direction and up vector are nearly parallel (dot = {})\n", dot);
+		}
 
-        glm::mat4 translation;
-        translation[0] = glm::vec4(1.0f, 0.0f, 0.0f, -m_eye.x);
-        translation[1] = glm::vec4(0.0f, 1.0f, 0.0f, -m_eye.y);
-        translation[2] = glm::vec4(0.0f, 0.0f, 1.0f, -m_eye.z);
-        translation[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		glm::mat4 rotation;
+		rotation[0] = glm::vec4(right, 0.0f);
+		rotation[1] = glm::vec4(up, 0.0f);
+		rotation[2] = glm::vec4(dir, 0.0f);
+		rotation[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-        return translation * rotation;
-    }
+		glm::mat4 translation;
+		translation[0] = glm::vec4(1.0f, 0.0f, 0.0f, -m_eye.x);
+		translation[1] = glm::vec4(0.0f, 1.0f, 0.0f, -m_eye.y);
+		translation[2] = glm::vec4(0.0f, 0.0f, 1.0f, -m_eye.z);
+		translation[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+		return translation * rotation;
+	}
 
     Camera::Camera() {
         m_moveSpeed = 8.0f;
@@ -104,6 +120,8 @@ namespace lgl {
         direction.y = glm::sin(glm::radians(m_pitch));
         direction.z = glm::sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
         m_direction = glm::normalize(direction);
+
+        Mouse::resetOffsets();
     }
 
     void Camera::moveForward(int sign) {

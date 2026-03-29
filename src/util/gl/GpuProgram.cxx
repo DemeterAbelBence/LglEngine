@@ -28,12 +28,12 @@ namespace lgl {
 			char* message = new char[length];
 			glGetShaderInfoLog(id, length, &length, message);
 
-			Logger::log(Logger::LGL_ERROR, "Failed to compile {} at path {}\n", shaderTypeToString(type), m_shaders[type].m_path);
+			Logger::log(Logger::LGL_ERROR, "Failed to compile {} at path {}\n{}", shaderTypeToString(type), m_shaders[type].m_path, message);
 
 			delete[] message;
 		}
 		else if (result == GL_TRUE) {
-			Logger::log(Logger::LGL_EMPTY, "Successful {} compilation!\n", shaderTypeToString(type));
+			Logger::log(Logger::LGL_OK, "Successful {} compilation!\n", shaderTypeToString(type));
 		}
 	}
 
@@ -78,7 +78,7 @@ namespace lgl {
 		glDeleteProgram(m_programId);
 		utl::uint id = glCreateProgram();
 
-		Logger::log(Logger::LGL_INFO, "Compilation result of {}\n", m_programName);
+		Logger::log(Logger::LGL_INFO, "Compilation result of {}:\n", m_programName);
 		utl::vec<utl::uint> shaderIds;
 		for (const auto& shader : m_shaders) {
 			if (!shader.second.empty()) {
@@ -108,8 +108,9 @@ namespace lgl {
 				throw utl::runtime(utl::strFormat("Not available shader type: {}", type));
 			}
 
+			utl::str path = utl::strFormat("../../../res/{}", filePath);
 			utl::str& shaderSource = m_shaders[type].m_source;
-			shaderSource = readFileToString(filePath);
+			shaderSource = readFileToString(path);
 			m_shaders[type].m_hash = m_hasher.hash(shaderSource.c_str(), shaderSource.size(), 0);
 			m_shaders[type].m_path = filePath;
 		}
@@ -124,7 +125,8 @@ namespace lgl {
 			if (!shader.second.empty()) {
 				utl::str newSource;
 				try {
-					readShaderSource(newSource, shader.second.m_path);
+					utl::str path = utl::strFormat("../../../res/{}", shader.second.m_path);
+					readShaderSource(newSource, path);
 				}
 				catch (const utl::except& error) {
 					return;

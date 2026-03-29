@@ -13,10 +13,9 @@ import glmmodule;
 namespace lgl {
     class CollisionHandler {
     public:
-        inline static bool apply_impulse = false;
-        inline static bool apply_displacement = false;
         inline static bool enableDebug = true;
-        inline static bool enableInteractions = true;
+		inline static bool enableDisplacement = true;
+        inline static bool enableImpulses = true;
         inline static bool draw_normals = true;
 
         inline static float elasticity = 0.5f;
@@ -25,16 +24,19 @@ namespace lgl {
     private:
         using CONTACT = utl::tup<SceneObject*, SceneObject*, utl::vec<Collider::ContactData>>;
 
+        inline static utl::vec<CONTACT> currentInteractions = utl::vec<CONTACT>();
+
     private:
         static void debugContact(const CONTACT& interaction, const Camera& camera);
         static void drawCollidersOf(const utl::svec<SceneObject>& sceneObjects, const Camera& camera);
 
         static bool isCollidingContact(float relativeVelocity);
-        static utl::vec<CONTACT> calculateInteractions(const const utl::svec<SceneObject>& sceneObjects);
+        static utl::vec<CONTACT> calculateInteractions(const utl::svec<SceneObject>& sceneObjects);
         static void pushObjectsApart(const CONTACT& interaction);
         static void applyImpulse(const CONTACT& interaction);
 
     public:
-        static void handleCollisions(const utl::svec<SceneObject>& sceneObjects, const Camera& camera);
+        static void handleCollisions(const utl::svec<SceneObject>& sceneObjects);
+        static void debugDrawCollisions(const utl::svec<SceneObject>& sceneObjects, const Camera& camera);
     };
 }

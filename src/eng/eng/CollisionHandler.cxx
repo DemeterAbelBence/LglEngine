@@ -40,6 +40,8 @@ namespace lgl {
             CuboidCollider* c1 = dynamic_cast<CuboidCollider*>(s1->getCollider().get());
             CuboidCollider* c2 = dynamic_cast<CuboidCollider*>(s2->getCollider().get());
 
+			float radiusOffset = 0.0005f;
+
             if (c1 != nullptr && c2 != nullptr) {
                 auto transData1 = c1->getTransData();
                 utl::vec<float> dim1 = { transData1.width, transData1.height, transData1.length };
@@ -49,6 +51,7 @@ namespace lgl {
                         r1 = d;
                     }
                 }
+				r1 += radiusOffset;
 
                 auto transData2 = c2->getTransData();
                 utl::vec<float> dim2 = { transData2.width, transData2.height, transData2.length };
@@ -58,6 +61,7 @@ namespace lgl {
                         r2 = d;
                     }
                 }
+				r2 += radiusOffset;
 
                 auto sc1 = SphereCollider(r1, 0);
                 sc1.setTransformation(s1->getTransformation().get());
@@ -93,9 +97,9 @@ namespace lgl {
                     auto s1_collider = s1->getCollider();
                     auto s2_collider = s2->getCollider();
 
-                    if (optimizeCuboids(s1, s2)) {
+                    /*if (optimizeCuboids(s1, s2)) {
                         continue;
-                    }
+                    }*/
 
                     auto contact1 = s1_collider->collidesWith(*s2_collider);
                     auto contact2 = s2_collider->collidesWith(*s1_collider);
@@ -160,21 +164,23 @@ namespace lgl {
             DebugDrawer::setOverrideZ(1);
             DebugDrawer::setMode(GL_LINES);
 
-            /* DebugDrawer::setVertexData({ c.point, c.point + 10.0f * velpa });
-             // DebugDrawer::draw(camera, glm::vec3(1.0f, 0.0f, 0.0f));
+            float debugveclen = 2.0f;
 
-             DebugDrawer::setVertexData({ c.point, c.point + 10.0f * velpb });
-             // DebugDrawer::draw(camera, glm::vec3(0.0f, 0.0f, 1.0f));
+            /*DebugDrawer::setVertexData({c.point, c.point + debugveclen * velpa});
+            DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 0.0f));
 
-             DebugDrawer::setVertexData({ c.point, c.point + 10.0f * vrel });
-             // DebugDrawer::draw(camera, glm::vec3(1.0f, 0.0f, 1.0f));*/
+            DebugDrawer::setVertexData({ c.point, c.point + debugveclen * velpb });
+            DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 1.0f));
 
-             /*DebugDrawer::setVertexData({c.point, c.point + 10.0f * vrelt});
-             // DebugDrawer::draw(camera, glm::vec3(0.0f, 0.0f, 0.0f));*/
+            DebugDrawer::setVertexData({ c.point, c.point + debugveclen * vrel });
+            DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 1.0f));
+
+            DebugDrawer::setVertexData({c.point, c.point + debugveclen * vrelt});
+            DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 0.0f));*/
 
             if (draw_normals) {
                 DebugDrawer::setVertexData({ c.point, c.point + 4.0f * c.normal });
-                // DebugDrawer::draw(camera, glm::vec3(0.5f, 0.5f, 0.0f));
+                DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.5f, 0.5f, 0.0f));
             }
 
             glm::vec3 rA = c.edgeA[0];
@@ -204,14 +210,14 @@ namespace lgl {
                 else {
                     DebugDrawer::setVertexData({ rA, rA + *distanceVector });
                 }
-                // DebugDrawer::draw(camera, glm::vec3(0.0f, 0.0f, 0.0f));
+                DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 0.0f));
             }
         }
 
         DebugDrawer::setMode(GL_POINTS);
         DebugDrawer::setOverrideZ(1);
         DebugDrawer::setVertexData(contactPoints);
-        // DebugDrawer::draw(camera, glm::vec3(0.0f, 1.0f, 0.0f));
+        DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 1.0f, 0.0f));
     }
 
     void CollisionHandler::drawCollidersOf(const utl::svec<SceneObject>& sceneObjects, const Camera& camera) {
@@ -224,7 +230,7 @@ namespace lgl {
                 DebugDrawer::setMode(GL_POINTS);
                 DebugDrawer::setVertexData(points);
                 DebugDrawer::setOverrideZ(0);
-                // DebugDrawer::draw(camera, glm::vec3(1.0f, 0.0f, 0.0f));
+                DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 0.0f));
 
                 utl::vec<utl::vec<glm::vec3>> sideData;
                 sideData.push_back(cuboidCollider->getSideDrawData(0));
@@ -238,7 +244,7 @@ namespace lgl {
                     DebugDrawer::setMode(GL_LINES);
                     DebugDrawer::setOverrideZ(0);
                     DebugDrawer::setVertexData(data);
-                    // DebugDrawer::draw(camera, glm::vec3(0.0f, 0.4f, 0.4f));
+                    DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.4f, 0.4f));
                 }
 
                 utl::vec<glm::vec3> torqueAxis;
@@ -248,7 +254,7 @@ namespace lgl {
                 DebugDrawer::setMode(GL_LINES);
                 DebugDrawer::setOverrideZ(1);
                 DebugDrawer::setVertexData(torqueAxis);
-                // DebugDrawer::draw(camera, glm::vec3(1.0f, 1.0f, 1.0f));
+                DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 1.0f, 1.0f));
             }
 
             auto sphereCollider = dynamic_cast<SphereCollider*>(sceneObject->getCollider().get());
@@ -393,30 +399,30 @@ namespace lgl {
         }
     }
 
-    void CollisionHandler::handleCollisions(const utl::svec<SceneObject>& sceneObjects, const Camera& camera) {
+    void CollisionHandler::handleCollisions(const utl::svec<SceneObject>& sceneObjects) {
+        currentInteractions.clear();
+        currentInteractions = calculateInteractions(sceneObjects);
+        for (const auto& interaction : currentInteractions) {
+            if (enableDisplacement) {
+                pushObjectsApart(interaction);
+            }
+        }
+
+        for (const auto& interaction : currentInteractions) {
+            if (enableImpulses) {
+                applyImpulse(interaction);
+            }
+		}
+    }
+
+    void CollisionHandler::debugDrawCollisions(const utl::svec<SceneObject>& sceneObjects, const Camera& camera) {
         if (enableDebug) {
             drawCollidersOf(sceneObjects, camera);
         }
 
-        auto interactions = calculateInteractions(sceneObjects);
-        for (const auto& interaction : interactions) {
+        for (const auto& interaction : currentInteractions) {
             if (enableDebug) {
                 debugContact(interaction, camera);
-            }
-
-            if (enableInteractions) {
-                applyImpulse(interaction);
-                pushObjectsApart(interaction);
-            }
-
-            if (apply_displacement) {
-                pushObjectsApart(interaction);
-                apply_displacement = false;
-            }
-
-            if (apply_impulse) {
-                applyImpulse(interaction);
-                apply_impulse = false;
             }
         }
     }

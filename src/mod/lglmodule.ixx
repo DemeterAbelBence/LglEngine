@@ -65,11 +65,13 @@ export namespace lgl {
 
 		template<typename T, typename... Args>
 		sptr<T> makeSptr(Args&&... args) {
+			static_assert(std::is_constructible_v<T, Args...>, "T must be constructible with the provided arguments");
 			return std::make_shared<T>(std::forward<Args>(args)...);
 		}
 
 		template<typename T, typename... Args>
 		uptr<T> makeUptr(Args&&... args) {
+			static_assert(std::is_constructible_v<T, Args...>, "T must be constructible with the provided arguments");
 			return std::make_unique<T>(std::forward<Args>(args)...);
 		}
 
@@ -201,6 +203,14 @@ export namespace lgl {
 			LGL_EMPTY
 		};
 
+		enum LogColor {
+			LC_DEFAULT = 7,
+			LC_RED = 12,
+			LC_YELLOW = 14,
+			LC_GREEN = 10,
+			LC_CYAN = 11
+		};
+
 		template<typename... Args>
 		static void log(LogLevel level, std::format_string<Args...> formatString, Args&&... args) {
 			enableAnsiColors();
@@ -211,26 +221,27 @@ export namespace lgl {
 			switch (level) {
 				case LGL_INFO: 
 					levelStr = "[LGL_INFO] "; 
+					SetConsoleTextAttribute(hConsole, LogColor::LC_CYAN);
 					break;
 				case LGL_WARN:
 					levelStr = "[LGL_WARN] "; 
-					SetConsoleTextAttribute(hConsole, 14);
+					SetConsoleTextAttribute(hConsole, LogColor::LC_YELLOW);
 					break;
 				case LGL_ERROR:
 					levelStr = "[LGL_ERROR] ";
-					SetConsoleTextAttribute(hConsole, 12);
+					SetConsoleTextAttribute(hConsole, LogColor::LC_RED);
 					break;
 				case LGL_OK:
 					levelStr = "[LGL_OK] ";
-					SetConsoleTextAttribute(hConsole, 10);
+					SetConsoleTextAttribute(hConsole, LogColor::LC_GREEN);
 					break;
 				case LGL_EMPTY:
 					levelStr = "";
+					SetConsoleTextAttribute(hConsole, LogColor::LC_DEFAULT);
 					break;
 			}
 
-			std::cout << levelStr << formattedMsg;	
-			SetConsoleTextAttribute(hConsole, 7);
+			std::cout << levelStr << formattedMsg;
 		}
 
 		template<typename... Args>

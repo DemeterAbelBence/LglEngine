@@ -38,4 +38,9 @@ namespace lgl {
 			s_isCaptured = true;
 		}
 	}
+
+	void Mouse::resetOffsets() {
+		s_data.offsetX = 0.0;
+		s_data.offsetY = 0.0;
+	}
 }

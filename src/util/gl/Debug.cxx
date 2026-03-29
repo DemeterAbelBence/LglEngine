@@ -38,15 +38,11 @@ namespace lgl {
 		glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
 		glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
 
-		Logger::log(
-			Logger::LGL_INFO,
-			"\nGL Vendor    : {}\nGL Renderer  : {}\nGL Version (string)  : {}\nGL Version (integer) : {}.{}\nGLSL Version : {}\n\n",
-			reinterpret_cast<utl::cstr>(glGetString(GL_VENDOR)),
-			reinterpret_cast<utl::cstr>(glGetString(GL_RENDERER)),
-			reinterpret_cast<utl::cstr>(glGetString(GL_VERSION)),
-			majorVersion, minorVersion,
-			reinterpret_cast<utl::cstr>(glGetString(GL_SHADING_LANGUAGE_VERSION))
-		);
+		Logger::log(Logger::LGL_INFO, "GL Vendor    : {}\n", reinterpret_cast<utl::cstr>(glGetString(GL_VENDOR)));
+		Logger::log(Logger::LGL_INFO, "GL Renderer  : {}\n", reinterpret_cast<utl::cstr>(glGetString(GL_RENDERER)));
+		Logger::log(Logger::LGL_INFO, "GL Version (string)  : {}\n", reinterpret_cast<utl::cstr>(glGetString(GL_VERSION)));
+		Logger::log(Logger::LGL_INFO, "GL Version (integer) : {}.{}\n", majorVersion, minorVersion);
+		Logger::log(Logger::LGL_INFO, "GLSL Version : {}\n\n", reinterpret_cast<utl::cstr>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
 	}
 }
 
