@@ -193,7 +193,10 @@ namespace lgl {
                 auto contact = calculateEdgeIntersection(edgesA[i], vecA, a, edgesB[j], vecB, b);
                 if (contact.has_value()) {
                     contact->depth = calculateDepth(collidee, *contact);
-                    result.push_back(*contact);
+                    if (contact->depth.has_value()) {
+                        result.push_back(*contact);
+					}
+                    
                 }
             }
         }
@@ -233,10 +236,19 @@ namespace lgl {
         for (const Side& side : collidee.getTransData().sides) {
             for (const glm::vec3& point : transData.points) {
                 if (calculateSideIntersection(point, side)) {
-                    glm::vec3 sideCenter = calculateSideCenter(side);
-                    Collider::ContactData contact = { point, side.normal, {}, true, {}, {}, sideCenter };
-                    contact.depth = calculateDepth(collidee, contact);
-                    result.push_back(contact);
+                    Collider::ContactData contact = { 
+                        .point = point, 
+                        .normal = side.normal, 
+                        .depth = {},
+                        .isVertexFace = true, 
+                        .edgeA = {}, 
+                        .edgeB = {}, 
+                        .facePoint = calculateSideCenter(side)
+                    };
+					contact.depth = calculateDepth(collidee, contact);
+                    if (contact.depth.has_value()) {
+                        result.push_back(contact);
+                    }
                 }
             }
         }
@@ -265,8 +277,8 @@ namespace lgl {
         baseData = c.baseData;
         transData = c.transData;
 
-        // WHAT THE HEEEEEEELL
-        transformation = c.transformation;
+        
+        transformation = c.transformation->clone();
     }
 
     utl::vec<glm::vec3> CuboidCollider::getSideDrawData(utl::uint sideIndex) {
@@ -341,8 +353,8 @@ namespace lgl {
 
     utl::vec<Collider::ContactData> CuboidCollider::collidesWith(const TerrainCollider& collidee) const {
         utl::vec<ContactData> result;
-        auto MI = collidee.getTransformation()->makeModelInverseMatrix();
-        auto M = collidee.getTransformation()->makeModelMatrix();
+        glm::mat4 MI = collidee.getTransformation()->makeModelInverseMatrix();
+        glm::mat4 M = collidee.getTransformation()->makeModelMatrix();
         for (const auto& p : transData.subdivision) {
             glm::vec3 tp = glm::vec3(glm::vec4(p, 1.0f) * MI);
             auto e = collidee.evaluateTerrainFormula(tp.x, tp.z);
@@ -397,8 +409,8 @@ namespace lgl {
     }
 
     utl::opt<glm::vec3> CuboidCollider::calculateDepth(const TerrainCollider& collidee, const ContactData& contact) const {
-        auto MI = collidee.getTransformation()->makeModelInverseMatrix();
-        auto M = collidee.getTransformation()->makeModelMatrix();
+        glm::mat4 MI = collidee.getTransformation()->makeModelInverseMatrix();
+        glm::mat4 M = collidee.getTransformation()->makeModelMatrix();
 
         glm::vec3 tp = glm::vec3(glm::vec4(contact.point, 1.0f) * MI);
         auto e = collidee.evaluateTerrainFormula(tp.x, tp.z);

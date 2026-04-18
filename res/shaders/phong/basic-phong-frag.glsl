@@ -58,7 +58,6 @@ void main() {
 		return;
 	}
 
-
 	vec3 half_dir = normalize(p_light_dir + p_view_dir);
 	float light_cos = max(dot(p_normal_vec, p_light_dir), 0.0);
 	float view_cos = max(dot(p_normal_vec, half_dir), 0.0);

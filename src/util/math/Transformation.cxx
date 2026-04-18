@@ -12,6 +12,30 @@ namespace lgl {
 		m_rotationAngle = 0.0f;
 	}
 
+	Transformation::Transformation(const Transformation& other) {
+		m_S = other.m_S;
+		m_R = other.m_R;
+		m_T = other.m_T;
+
+		m_scaling = other.m_scaling;
+		m_translation = other.m_translation;
+		m_rotationAxis = other.m_rotationAxis;
+		m_rotationAngle = other.m_rotationAngle;
+	}
+
+	Transformation& Transformation::operator=(const Transformation& other) {
+		if (this != &other) {
+			m_S = other.m_S;
+			m_R = other.m_R;
+			m_T = other.m_T;
+			m_scaling = other.m_scaling;
+			m_translation = other.m_translation;
+			m_rotationAxis = other.m_rotationAxis;
+			m_rotationAngle = other.m_rotationAngle;
+		}
+		return *this;
+	}
+
 	utl::sptr<Transformation> Transformation::clone() {
 		auto other = utl::makeSptr<Transformation>();
 

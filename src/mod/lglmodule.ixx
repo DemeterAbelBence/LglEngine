@@ -21,9 +21,23 @@ module;
 
 export module lglmodule;
 
+// Helper macro to include the template/type info in static_assert messages
+#if defined(_MSC_VER)
+#define LGL_TYPE_NAME_FUNC __FUNCSIG__
+#else
+#define LGL_TYPE_NAME_FUNC __PRETTY_FUNCTION__
+#endif
+
+// Helpers to stringify line numbers for inclusion in messages
+#define LGL_STR_HELPER(x) #x
+#define LGL_STR(x) LGL_STR_HELPER(x)
+
 export namespace lgl {
 	namespace utl {
 		// Collection utilities
+		template<typename U, typename V>
+		using umap = std::unordered_map<U, V>;
+
 		template<typename T>
 		using imap = std::unordered_map<int, T>;
 
@@ -65,19 +79,39 @@ export namespace lgl {
 
 		template<typename T, typename... Args>
 		sptr<T> makeSptr(Args&&... args) {
-			static_assert(std::is_constructible_v<T, Args...>, "T must be constructible with the provided arguments");
+            static_assert(
+				std::is_constructible_v<T, Args...>,
+				"makeSptr failed: type is not constructible with the provided arguments.\n"
+				"Instantiation: " LGL_TYPE_NAME_FUNC "\n"
+				"Location: " __FILE__ ":" LGL_STR(__LINE__) "\n"
+				"Suggestion: Check that the target type's constructors match the provided argument types and that any implicit conversions are available."
+			);
 			return std::make_shared<T>(std::forward<Args>(args)...);
 		}
 
 		template<typename T, typename... Args>
 		uptr<T> makeUptr(Args&&... args) {
-			static_assert(std::is_constructible_v<T, Args...>, "T must be constructible with the provided arguments");
+            static_assert(
+				std::is_constructible_v<T, Args...>,
+				"makeUptr failed: type is not constructible with the provided arguments.\n"
+				"Instantiation: " LGL_TYPE_NAME_FUNC "\n"
+				"Location: " __FILE__ ":" LGL_STR(__LINE__) "\n"
+				"Suggestion: Check that the target type's constructors match the provided argument types and that any implicit conversions are available."
+			);
 			return std::make_unique<T>(std::forward<Args>(args)...);
 		}
 
-		template<typename U, typename V>
-		sptr<U> sptrCast(V v) {
-			return std::dynamic_pointer_cast<U>(v);
+        template<typename U, typename V>
+		sptr<U> sptrCast(const sptr<V>& v) {
+			auto res = std::dynamic_pointer_cast<U>(v);
+			if (!res) {
+				std::string msg = std::string("sptrCast failed: dynamic_pointer_cast returned nullptr.\n")
+					+ "Instantiation: " + LGL_TYPE_NAME_FUNC + "\n"
+					+ std::string("Location: ") + __FILE__ + ":" LGL_STR(__LINE__) + "\n"
+					+ "Suggestion: Ensure the source shared_ptr actually owns an object of the target type (or derived) and that RTTI is enabled.";
+				throw std::runtime_error(msg);
+			}
+			return res;
 		}
 
 		// Primitive type utilities
@@ -237,11 +271,11 @@ export namespace lgl {
 					break;
 				case LGL_EMPTY:
 					levelStr = "";
-					SetConsoleTextAttribute(hConsole, LogColor::LC_DEFAULT);
 					break;
 			}
 
 			std::cout << levelStr << formattedMsg;
+			SetConsoleTextAttribute(hConsole, LogColor::LC_DEFAULT);
 		}
 
 		template<typename... Args>

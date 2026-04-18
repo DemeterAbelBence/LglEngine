@@ -86,6 +86,8 @@ namespace lgl {
 
             Time::calculateDeltaTime();
 
+			//Logger::log(Logger::LGL_INFO, "Delta Time: {}\n", Time::s_deltaTime);
+
             glfwPollEvents();
             m_scene->update(m_mainWindow);
 

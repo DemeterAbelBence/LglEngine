@@ -33,7 +33,7 @@ namespace lgl {
 		m_transformation = utl::makeSptr<Transformation>();
 		m_mesh->setTransformation(m_transformation);
 		m_mesh->create();
-		m_collider->setTransformation(m_transformation.get());
+		m_collider->setTransformation(m_transformation);
 	}
 
 	void Sun::directPerspectiveOf(Camera& camera) {

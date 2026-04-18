@@ -55,6 +55,9 @@ namespace lgl {
 	public:
 		CuboidCollider(glm::vec3 dimensions);
 		CuboidCollider(const CuboidCollider& c);
+		CuboidCollider(CuboidCollider&& c) noexcept = delete;
+
+		CuboidCollider& operator=(const CuboidCollider& c);
 
 		const CuboidData& getBaseData() const { return baseData; }
 		const CuboidData& getTransData() const { return transData; }

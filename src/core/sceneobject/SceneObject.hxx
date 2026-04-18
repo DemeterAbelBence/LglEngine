@@ -42,6 +42,7 @@ namespace lgl {
 		void setRotation(glm::mat4 R);
 		void updateTransformations();
 
+		virtual utl::sptr<SceneObject> clone();
 		virtual ribo::BodyData initializePhysics();
 		virtual void updateRigidBody();
 		virtual void stepPhysicsBy(float dt);

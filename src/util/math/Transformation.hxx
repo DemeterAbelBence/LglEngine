@@ -20,8 +20,8 @@ namespace lgl {
 	public:
 		Transformation();
 
-		Transformation(const Transformation& other) = delete;
-		Transformation& operator=(const Transformation& other) = delete;
+		Transformation(const Transformation& other);
+		Transformation& operator=(const Transformation& other);
 
 		Transformation(const Transformation&& other) = delete;
 		Transformation& operator=(const Transformation&& other) = delete;

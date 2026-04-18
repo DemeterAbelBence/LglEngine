@@ -1,145 +1,214 @@
 #include "CollisionHandler.hxx"
 
 namespace lgl {
-    bool CollisionHandler::isCollidingContact(float relativeVelocity) {
-        static const float threshold = 0.00001f;
-
-        if (relativeVelocity > threshold) {
-            return false;
-        }
-        if (relativeVelocity > -threshold) {
-            return false;
-        }
-        else {
-            return true;
-        }
-    }
-
-    utl::vec<CollisionHandler::CONTACT> CollisionHandler::calculateInteractions(const utl::svec<SceneObject>& sceneObjects) {
-        utl::vec<CONTACT> interactions;
-        auto isInvalidPair = [&interactions](SceneObject* s1, SceneObject* s2) {
-            if (s1 == s2) {
-                return true;
-            }
-
-            for (const auto& i : interactions) {
-                SceneObject* _s1 = i.get<0>();
-                SceneObject* _s2 = i.get<1>();
-
-                if (s1 == _s1 && s2 == _s2) {
+    utl::vec<CollisionHandler::CONTACT> CollisionHandler::calculateContacts(utl::svec<SceneObject>& sceneObjects) {
+        auto calculateCollisions = [](utl::vec<CONTACT>& interactions, const utl::svec<SceneObject>& sceneObjects) {
+            auto isInvalidPair = [](utl::vec<CONTACT>& interactions, SceneObject* s1, SceneObject* s2) {
+                if (s1 == s2) {
                     return true;
                 }
 
-                if (s1 == _s2 && s2 == _s1) {
-                    return true;
-                }
-            }
-            return false;
-            };
-        auto optimizeCuboids = [](SceneObject* s1, SceneObject* s2) {
-            CuboidCollider* c1 = dynamic_cast<CuboidCollider*>(s1->getCollider().get());
-            CuboidCollider* c2 = dynamic_cast<CuboidCollider*>(s2->getCollider().get());
+                for (const auto& i : interactions) {
+                    SceneObject* _s1 = i.get<0>();
+                    SceneObject* _s2 = i.get<1>();
 
-			float radiusOffset = 0.0005f;
+                    if (s1 == _s1 && s2 == _s2) {
+                        return true;
+                    }
 
-            if (c1 != nullptr && c2 != nullptr) {
-                auto transData1 = c1->getTransData();
-                utl::vec<float> dim1 = { transData1.width, transData1.height, transData1.length };
-                float r1 = 0;
-                for (float d : dim1) {
-                    if (d > r1) {
-                        r1 = d;
+                    if (s1 == _s2 && s2 == _s1) {
+                        return true;
                     }
                 }
-				r1 += radiusOffset;
-
-                auto transData2 = c2->getTransData();
-                utl::vec<float> dim2 = { transData2.width, transData2.height, transData2.length };
-                float r2 = 0;
-                for (float d : dim2) {
-                    if (d > r2) {
-                        r2 = d;
-                    }
-                }
-				r2 += radiusOffset;
-
-                auto sc1 = SphereCollider(r1, 0);
-                sc1.setTransformation(s1->getTransformation().get());
-                sc1.updateTransformations();
-
-                auto sc2 = SphereCollider(r2, 0);
-                sc2.setTransformation(s2->getTransformation().get());
-                sc2.updateTransformations();
-
-                auto coll1 = sc1.collidesWith(sc2);
-                auto coll2 = sc2.collidesWith(sc1);
-                if (coll1.size() > 0 || coll2.size() > 0) {
-                    return false;
-                }
-                else {
-                    return true;
-                }
-
-                sc1.setTransformation(nullptr);
-                sc2.setTransformation(nullptr);
-            }
-            else {
                 return false;
-            }
             };
+            auto optimizeCuboids = [](SceneObject* s1, SceneObject* s2) {
+                CuboidCollider* c1 = dynamic_cast<CuboidCollider*>(s1->getCollider().get());
+                CuboidCollider* c2 = dynamic_cast<CuboidCollider*>(s2->getCollider().get());
 
-        for (int i = 0; i < sceneObjects.size(); i++) {
-            auto s1 = sceneObjects[i].get();
-            for (int j = 0; j < sceneObjects.size(); j++) {
-                auto s2 = sceneObjects[j].get();
+                float radiusOffset = 0.0005f;
 
-                if (!isInvalidPair(s1, s2)) {
-                    auto s1_collider = s1->getCollider();
-                    auto s2_collider = s2->getCollider();
-
-                    /*if (optimizeCuboids(s1, s2)) {
-                        continue;
-                    }*/
-
-                    auto contact1 = s1_collider->collidesWith(*s2_collider);
-                    auto contact2 = s2_collider->collidesWith(*s1_collider);
-
-                    SceneObject* colliderObject;
-                    SceneObject* collideeObject;
-                    utl::vec<Collider::ContactData>* contactData = nullptr;
-
-                    for (const auto& c : contact1) {
-                        if (c.isVertexFace) {
-                            colliderObject = s1;
-                            collideeObject = s2;
-                            contactData = &contact1;
-                            break;
+                if (c1 != nullptr && c2 != nullptr) {
+                    auto transData1 = c1->getTransData();
+                    utl::vec<float> dim1 = { transData1.width, transData1.height, transData1.length };
+                    float r1 = 0;
+                    for (float d : dim1) {
+                        if (d > r1) {
+                            r1 = d;
                         }
                     }
+                    r1 += radiusOffset;
 
-                    for (const auto& c : contact2) {
-                        if (!c.isVertexFace) {
-                            colliderObject = s2;
-                            collideeObject = s1;
-                            contactData = &contact2;
-                            break;
+                    auto transData2 = c2->getTransData();
+                    utl::vec<float> dim2 = { transData2.width, transData2.height, transData2.length };
+                    float r2 = 0;
+                    for (float d : dim2) {
+                        if (d > r2) {
+                            r2 = d;
                         }
                     }
+                    r2 += radiusOffset;
 
-                    if (contactData == nullptr) {
-                        if (contact1.size() > 0) {
-                            interactions.push_back(utl::tup(s1, s2, contact1));
-                        }
+                    auto sc1 = SphereCollider(r1, 0);
+                    sc1.setTransformation(s1->getTransformation());
+                    sc1.updateTransformations();
+
+                    auto sc2 = SphereCollider(r2, 0);
+                    sc2.setTransformation(s2->getTransformation());
+                    sc2.updateTransformations();
+
+                    auto coll1 = sc1.collidesWith(sc2);
+                    auto coll2 = sc2.collidesWith(sc1);
+                    if (coll1.size() > 0 || coll2.size() > 0) {
+                        return false;
                     }
                     else {
-                        auto interaction = utl::tup(colliderObject, collideeObject, *contactData);
-                        interactions.push_back(interaction);
+                        return true;
                     }
+
+                    sc1.setTransformation(nullptr);
+                    sc2.setTransformation(nullptr);
+                }
+                else {
+                    return false;
+                }
+            };
+
+            for (int i = 0; i < sceneObjects.size(); i++) {
+                auto s1 = sceneObjects[i].get();
+                for (int j = 0; j < sceneObjects.size(); j++) {
+                    auto s2 = sceneObjects[j].get();
+
+                    if (!isInvalidPair(interactions, s1, s2)) {
+                        auto s1_collider = s1->getCollider();
+                        auto s2_collider = s2->getCollider();
+
+                        if (optimizeCuboids(s1, s2)) {
+                            continue;
+                        }
+
+                        auto contact1 = s1_collider->collidesWith(*s2_collider);
+                        auto contact2 = s2_collider->collidesWith(*s1_collider);
+
+                        SceneObject* colliderObject;
+                        SceneObject* collideeObject;
+                        utl::vec<Collider::ContactData>* contactData = nullptr;
+
+                        for (const auto& c : contact1) {
+                            if (c.isVertexFace) {
+                                colliderObject = s1;
+                                collideeObject = s2;
+                                contactData = &contact1;
+                                break;
+                            }
+                        }
+
+                        for (const auto& c : contact2) {
+                            if (!c.isVertexFace) {
+                                colliderObject = s2;
+                                collideeObject = s1;
+                                contactData = &contact2;
+                                break;
+                            }
+                        }
+
+                        if (contactData == nullptr) {
+                            if (contact1.size() > 0) {
+                                interactions.push_back(utl::tup(s1, s2, contact1));
+                            }
+                        }
+                        else {
+                            auto interaction = utl::tup(colliderObject, collideeObject, *contactData);
+                            interactions.push_back(interaction);
+                        }
+                    }
+                }
+            }
+        };
+        auto calculateMaxDepth = [](utl::vec<CONTACT>& contacts) {
+            float maxDepth = 0.0f;
+            for (const auto& contact : contacts) {
+                auto contactData = contact.get<2>();
+                for (const auto& c : contactData) {
+                    if (c.depth.has_value()) {
+                        float depth = glm::length(*c.depth);
+                        maxDepth = glm::max(maxDepth, depth);
+                    }
+                }
+            }
+
+            return maxDepth;
+        };
+
+        utl::umap<SceneObject*, ribo::BodyData> sceneSnapshot;
+        for (auto& sceneObject : sceneObjects) {
+            sceneSnapshot[sceneObject.get()] = sceneObject->getPhysicsSolver()->Body;
+        }
+
+        float deltaTime = Time::s_fixedDeltaTime;
+        utl::vec<CONTACT> contacts;
+        calculateCollisions(contacts, sceneObjects);
+
+        if (!enableBisection) {
+            return contacts;
+        }
+
+        if(contacts.size() == 0) {
+            return {};
+        }
+        else {
+            float maxDepth = calculateMaxDepth(contacts);
+            if (maxDepth < depthBias) {
+                return contacts;
+            }
+            else {
+                for (auto& sceneObject : sceneObjects) {
+                    sceneObject->stepPhysicsBy(-deltaTime);
                 }
             }
         }
 
-        return interactions;
+        bool sufficientSeparation = false;
+		float simulationDirection = 1.0f;
+		utl::uint iterCount = 0;
+        while (!sufficientSeparation) {
+            if (iterCount++ > 20) {
+                lgl::Logger::log(lgl::Logger::LGL_INFO, "Bisection reached limit of 20 iterations\n\n", iterCount);
+                for (auto& sceneObject : sceneObjects) {
+                    auto snapshot = sceneSnapshot[sceneObject.get()];
+                    sceneObject->getPhysicsSolver()->Body = snapshot;
+				}
+				calculateCollisions(contacts, sceneObjects);
+                return contacts;
+            }
+
+            deltaTime *= 0.5f;
+
+            for (auto& sceneObject : sceneObjects) {
+                float step = simulationDirection * deltaTime;
+                sceneObject->stepPhysicsBy(step);
+            }
+
+            contacts.clear();
+            calculateCollisions(contacts, sceneObjects);
+
+            if (contacts.size() == 0) {
+                simulationDirection = 1.0f;
+            }
+            else {
+                float maxDepth = calculateMaxDepth(contacts);
+
+                if (maxDepth < depthBias) {
+                    lgl::Logger::log(lgl::Logger::LGL_INFO, "Bisected {} times, reached depth {}\n\n", iterCount, maxDepth);
+                    sufficientSeparation = true;
+                }
+                else {
+                    simulationDirection = -1.0f;
+                }
+            }
+        }
+        
+        return contacts;
     }
 
     void CollisionHandler::debugContact(const CONTACT& interaction, const Camera& camera) {
@@ -164,9 +233,9 @@ namespace lgl {
             DebugDrawer::setOverrideZ(1);
             DebugDrawer::setMode(GL_LINES);
 
-            float debugveclen = 2.0f;
+            float debugveclen = 1.0f;
 
-            /*DebugDrawer::setVertexData({c.point, c.point + debugveclen * velpa});
+            DebugDrawer::setVertexData({c.point, c.point + debugveclen * velpa});
             DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 0.0f));
 
             DebugDrawer::setVertexData({ c.point, c.point + debugveclen * velpb });
@@ -176,9 +245,9 @@ namespace lgl {
             DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 1.0f));
 
             DebugDrawer::setVertexData({c.point, c.point + debugveclen * vrelt});
-            DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 0.0f));*/
+            DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 0.0f));
 
-            if (draw_normals) {
+            if (drawNormals) {
                 DebugDrawer::setVertexData({ c.point, c.point + 4.0f * c.normal });
                 DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.5f, 0.5f, 0.0f));
             }
@@ -317,7 +386,7 @@ namespace lgl {
 
             objectToDisplace->getPhysicsSolver()->Body.X += dis;
             objectToDisplace->updateTransformations();
-            };
+        };
 
         std::array<glm::vec3, 3> directions = { glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f) };
         for (const glm::vec3& d : directions) {
@@ -325,6 +394,20 @@ namespace lgl {
             if (glm::length(projection) > 0.01f) {
                 pushApart(projection, d);
             }
+        }
+    }
+
+    CollisionHandler::ContactType CollisionHandler::getContactType(float relativeVelocity) {
+        static const float threshold = 0.00001f;
+
+        if (relativeVelocity > threshold) {
+            return ContactType::SEPARATING;
+        }
+        if (relativeVelocity > -threshold) {
+            return ContactType::RESTING;
+        }
+        else {
+            return ContactType::COLLIDING;
         }
     }
 
@@ -338,15 +421,17 @@ namespace lgl {
             glm::vec3 rb = c.point - B->X;
             glm::vec3 velpa = A->vel + glm::cross(A->omega, ra);
             glm::vec3 velpb = B->vel + glm::cross(B->omega, rb);
-            float lvreln = glm::dot(c.normal, velpa - velpb);
+            float vreln = glm::dot(c.normal, velpa - velpb);
 
-            if (isCollidingContact(lvreln)) {
+            ContactType contactType = getContactType(vreln);
+
+            if (contactType == ContactType::COLLIDING) {
                 glm::vec3 term1an = A->Iinv * glm::cross(ra, c.normal);
                 glm::vec3 term1bn = B->Iinv * glm::cross(rb, c.normal);
                 float term2an = glm::dot(c.normal, glm::cross(term1an, ra));
                 float term2bn = glm::dot(c.normal, glm::cross(term1bn, rb));
 
-                float numerator = -(1.0f + elasticity) * lvreln;
+                float numerator = -(1.0f + elasticity) * vreln;
                 float denominator = A->invMass + B->invMass + term2an + term2bn;
                 float j = numerator / denominator;
 
@@ -364,7 +449,9 @@ namespace lgl {
                 B->L -= impTorqueB;
                 B->omega = B->Iinv * B->L;
 
-                // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - // 
+                if (!hasFriction) {
+                    continue;
+				}
 
                 glm::vec3 vrel = velpa - velpb;
                 glm::vec3 vrelt = vrel - glm::dot(vrel, c.normal) * c.normal;
@@ -396,21 +483,25 @@ namespace lgl {
                     B->omega = B->Iinv * B->L;
                 }
             }
+
+            if (contactType == ContactType::RESTING) {
+               
+			}
         }
     }
 
-    void CollisionHandler::handleCollisions(const utl::svec<SceneObject>& sceneObjects) {
-        currentInteractions.clear();
-        currentInteractions = calculateInteractions(sceneObjects);
-        for (const auto& interaction : currentInteractions) {
+    void CollisionHandler::handleCollisions(utl::svec<SceneObject>& sceneObjects) {
+        currentContacts.clear();
+        currentContacts = calculateContacts(sceneObjects);
+        for (const auto& contact : currentContacts) {
             if (enableDisplacement) {
-                pushObjectsApart(interaction);
+                pushObjectsApart(contact);
             }
         }
 
-        for (const auto& interaction : currentInteractions) {
+        for (const auto& contact : currentContacts) {
             if (enableImpulses) {
-                applyImpulse(interaction);
+                applyImpulse(contact);
             }
 		}
     }
@@ -420,7 +511,7 @@ namespace lgl {
             drawCollidersOf(sceneObjects, camera);
         }
 
-        for (const auto& interaction : currentInteractions) {
+        for (const auto& interaction : currentContacts) {
             if (enableDebug) {
                 debugContact(interaction, camera);
             }

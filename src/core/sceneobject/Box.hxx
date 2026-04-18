@@ -16,9 +16,11 @@ namespace lgl {
 		const float m_massFactor = 1.0f;
 
 	public:
+		Box();
 		Box(bool isStationary, utl::sptr<ModelMesh> modelMesh);
 		Box(bool isStationary, const glm::vec3& dimensions);
 
+		utl::sptr<SceneObject> clone() override;
 		ribo::BodyData initializePhysics() override;
 		void stepPhysicsBy(float dt) override;
 		void updateRigidBody() override;

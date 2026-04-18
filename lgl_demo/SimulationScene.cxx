@@ -142,7 +142,8 @@ void SimulationScene::advanceSimulation(float deltaTime) {
 
 void SimulationScene::setSimulationSpeed(float speed) {
 	for (auto& event : m_simulationEventHandler.getArgEvents()) {
-		event.getArgRef() = speed;
+		auto& arg = event.getArgRef();
+		arg = arg < 0.0f ? -speed : speed;
 	}
 }
 
@@ -168,7 +169,7 @@ void SimulationScene::create() {
 		m_terrain->getPhysicsSolver()->makeStateInitial();
 		m_sceneObjects.push_back(m_terrain);
 
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 2; i++) {
 			float s = 10.0f / (i + 1);
 			auto woodBox = utl::makeSptr<Box>(false, glm::vec3(1.0f, 1.0f, 1.0f));
 			woodBox->m_name = utl::strFormat("wood_box_{}", i);
@@ -235,8 +236,6 @@ void SimulationScene::update(GLFWwindow* window) {
 	m_simulationEventHandler.handleEvents(window, this);
 
 	CollisionHandler::handleCollisions(m_sceneObjects);
-
-	m_simulationEventHandler.handleEvents(window, this);
 
 	castShadowsOnTerrain();
 	m_sun->lightUpScene(m_sceneObjects, *m_buffers.at("DEPTH"));

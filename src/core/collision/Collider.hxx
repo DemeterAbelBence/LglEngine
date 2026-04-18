@@ -37,7 +37,7 @@ namespace lgl {
 		};
 
 	protected:
-		Transformation* transformation;
+		utl::sptr<Transformation> transformation;
 
 	protected:
 		virtual utl::vec<ContactData> collidesWith(const CuboidCollider& collider) const = 0;
@@ -49,8 +49,8 @@ namespace lgl {
 		virtual utl::opt<glm::vec3> calculateDepth(const TerrainCollider& collidee, const ContactData& contact) const;
 
 	public:
-		void setTransformation(Transformation* value) { transformation = value; }
-		const Transformation* getTransformation() const { return transformation; }
+		void setTransformation(utl::sptr<Transformation> value) { transformation = value; }
+		const utl::sptr<Transformation> getTransformation() const { return transformation; }
 		Collider::GeomType getColliderType() const { return geomType; }
 
 		utl::vec<ContactData> collidesWith(const Collider& collidee) const;

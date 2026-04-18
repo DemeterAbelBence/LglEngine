@@ -16,6 +16,7 @@ void SimulationInterface::renderSimulationSettings() {
     static float simulationSpeed = 0.005f;
     static float elasticity = 0.5f;
     static float slipperiness = 0.5f;
+	static float depthBias = 0.001f;
     static utl::cstr precision = "%.3f";
 
     ImGui::Begin("Simulation settings");
@@ -38,25 +39,32 @@ void SimulationInterface::renderSimulationSettings() {
         CollisionHandler::enableImpulses = !eimp;
     }
 
-    bool dn = CollisionHandler::draw_normals;
+    bool ebis = CollisionHandler::enableBisection;
+    utl::cstr bisectionText = ebis ? "Disable bisection" : "Enable bisection";
+    if (ImGui::Button(bisectionText)) {
+        CollisionHandler::enableBisection = !ebis;
+    }
+
+    bool dn = CollisionHandler::drawNormals;
     utl::cstr normals_text = dn ? "Hide normals" : "Draw normals";
     if (ImGui::Button(normals_text)) {
-        CollisionHandler::draw_normals = !dn;
+        CollisionHandler::drawNormals = !dn;
     }
 
-    if (ImGui::Button("Rollback simulation")) {
-        m_simulationScene->rollbackSimulation();
-    }
+    if (ImGui::Button("Simulate forward")) { m_simulationScene->advanceSimulation(Time::s_deltaTime); }
+    if (ImGui::Button("Simulate backward")) { m_simulationScene->advanceSimulation(-Time::s_deltaTime); }
+    if (ImGui::Button("Rollback simulation")) { m_simulationScene->rollbackSimulation(); }
 
-    if (ImGui::SliderFloat("Simulation Speed", &simulationSpeed, 0.005f, 0.05f, precision, 0)) {
+    if (ImGui::SliderFloat("Simulation Speed", &simulationSpeed, 0.001f, 0.05f, precision, 0)) {
+		Time::s_fixedDeltaTime = simulationSpeed;
         m_simulationScene->setSimulationSpeed(simulationSpeed);
     }
-    if (ImGui::SliderFloat("Elasticity", &elasticity, 0.0f, 1.0f, precision, 0)) {
-        CollisionHandler::elasticity = elasticity;
-    }
-    if (ImGui::SliderFloat("Slipperiness", &slipperiness, 0.0f, 1.0f, precision, 0)) {
-        CollisionHandler::slipperiness = slipperiness;
-    }
+
+    ImGui::SliderFloat("Elasticity", &CollisionHandler::elasticity, 0.0f, 1.0f, precision, 0);
+    ImGui::SliderFloat("Slipperiness", &CollisionHandler::slipperiness, 0.0f, 1.0f, precision, 0);
+    ImGui::SliderFloat("Depth bias", &CollisionHandler::depthBias, 0.0f, 0.01f, "%.5f", 0);
+	ImGui::SliderFloat("Vertex-face threshold", &CuboidCollider::vertexFaceThreshold, 0.0f, 1.0f, precision, 0);
+      
 
 	ImGui::End();   
 }

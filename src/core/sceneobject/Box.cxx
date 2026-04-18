@@ -1,6 +1,22 @@
 #include "Box.hxx"
 
 namespace lgl {
+	utl::sptr<SceneObject> Box::clone() {
+		utl::sptr<Box> other = utl::makeSptr<Box>();
+
+		other->m_mesh = m_mesh;
+		other->m_transformation = utl::makeSptr<Transformation>(*m_transformation);
+		other->m_physicsSolver = utl::makeSptr<ribo::PhysicsSolver>(*m_physicsSolver);
+
+		auto cuboidCollider = utl::sptrCast<CuboidCollider>(m_collider);
+		other->m_collider = utl::makeSptr<CuboidCollider>(*cuboidCollider);
+
+		other->m_dimensions = m_dimensions;
+		other->m_isStationary = m_isStationary;
+
+		return other;
+	}
+
 	ribo::BodyData Box::initializePhysics() {
 		float inverseMass;
 		glm::mat3 Ibody;
@@ -50,6 +66,8 @@ namespace lgl {
 		return bodyData;
 	}
 
+	Box::Box() : SceneObject() {}
+
 	Box::Box(bool isStationary, utl::sptr<ModelMesh> modelMesh) {
 		m_isStationary = isStationary;
 		m_dimensions = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -63,7 +81,7 @@ namespace lgl {
 
 		m_transformation = utl::makeSptr<Transformation>();
 		m_mesh->setTransformation(m_transformation);
-		m_collider->setTransformation(m_transformation.get());
+		m_collider->setTransformation(m_transformation);
 	}
 
 	Box::Box(bool isStationary, const glm::vec3& dimensions) : SceneObject() {
@@ -79,7 +97,7 @@ namespace lgl {
 
 		m_transformation = utl::makeSptr<Transformation>();
 		m_mesh->setTransformation(m_transformation);
-		m_collider->setTransformation(m_transformation.get());
+		m_collider->setTransformation(m_transformation);
 	}
 
 	void Box::stepPhysicsBy(float dt) {

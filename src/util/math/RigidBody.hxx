@@ -35,6 +35,10 @@ namespace lgl {
 
         public:
             PhysicsSolver(BodyData _Body) : Body(_Body) {}
+
+            PhysicsSolver(const PhysicsSolver& other);
+            PhysicsSolver& operator=(const PhysicsSolver& other);
+
             void rollbackToInitial() { Body = Initial; }
             void rollbackToPrevious() { Body = Previous; }
             void makeStateInitial() { Initial = Body; }

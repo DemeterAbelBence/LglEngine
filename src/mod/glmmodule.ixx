@@ -36,7 +36,9 @@ export namespace glm {
 	using glm::ortho;
 	using glm::perspective;
 
-	// Exponential functions
+	// Other functions
+	using glm::max;
+	using glm::min;
 	using glm::sqrt;
 	using glm::abs;
 	using glm::pow;

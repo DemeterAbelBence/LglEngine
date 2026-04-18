@@ -14,6 +14,7 @@ namespace lgl {
         inline static float s_currentTime = 0.0f;
         inline static float s_previousTime = 0.0f;
         inline static float s_deltaTime = 1.0f;
+		inline static float s_fixedDeltaTime = 0.005f;
         inline static float s_frameTime = 1.0f / FPS;
         inline static float s_timePassed = 0.0f;
     public:

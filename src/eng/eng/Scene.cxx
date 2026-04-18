@@ -28,13 +28,13 @@ namespace lgl {
 		m_objectEventHandler.addEvent(KeyEvent<SceneObject, glm::vec3>(
 			Key(GLFW_KEY_S), &SceneObject::translate, glm::vec3(0.0f, -1.0f, 0.0f), false));
 		m_objectEventHandler.addEvent(KeyEvent<SceneObject, glm::vec3>(
-			Key(GLFW_KEY_D), &SceneObject::translate, glm::vec3(1.0f, 0.0f, 0.0f), false));
+			Key(GLFW_KEY_D), &SceneObject::translate, glm::vec3(-1.0f, 0.0f, 0.0f), false));
 		m_objectEventHandler.addEvent(KeyEvent<SceneObject, glm::vec3>(
-			Key(GLFW_KEY_A), &SceneObject::translate, glm::vec3(-1.0f, 0.0f, 0.0f), false));
+			Key(GLFW_KEY_A), &SceneObject::translate, glm::vec3(1.0f, 0.0f, 0.0f), false));
 		m_objectEventHandler.addEvent(KeyEvent<SceneObject, glm::vec3>(
-			Key(GLFW_KEY_LEFT_SHIFT), &SceneObject::translate, glm::vec3(0.0f, 0.0f, -1.0f), false));
+			Key(GLFW_KEY_LEFT_SHIFT), &SceneObject::translate, glm::vec3(0.0f, 0.0f, 1.0f), false));
 		m_objectEventHandler.addEvent(KeyEvent<SceneObject, glm::vec3>(
-			Key(GLFW_KEY_LEFT_CONTROL), &SceneObject::translate, glm::vec3(0.0f, 0.0f, 1.0f), false));
+			Key(GLFW_KEY_LEFT_CONTROL), &SceneObject::translate, glm::vec3(0.0f, 0.0f, -1.0f), false));
 	}
 
 	Scene::Scene() {

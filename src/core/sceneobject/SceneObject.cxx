@@ -29,7 +29,7 @@ namespace lgl {
 		m_transformation = utl::makeSptr<Transformation>();
 		glm::vec3 scaling = glm::vec3(size, size, size);
 		m_transformation->setScaleMatrix(scaling);
-		m_collider->setTransformation(m_transformation.get());
+		m_collider->setTransformation(m_transformation);
 
 		m_mesh->setTransformation(m_transformation);
 	}
@@ -90,6 +90,10 @@ namespace lgl {
 		));
 
 		m_collider->updateTransformations();
+	}
+
+	utl::sptr<SceneObject> SceneObject::clone(){
+		return utl::sptr<SceneObject>();
 	}
 
 	ribo::BodyData SceneObject::initializePhysics() {
