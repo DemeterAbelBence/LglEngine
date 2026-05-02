@@ -41,14 +41,14 @@ void SponzaScene::create() {
 		setObjectMoveSpeed(0.05f);
 
 		m_sun = utl::makeSptr<Sun>(2.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-		m_sun->m_name = "sun";
+		m_sun->setName("sun");
 		m_sun->setProgram(m_programs.at("TEX"));
 		m_sun->setTextures({ m_textures.at("SUN") });
 		m_sun->translate(glm::vec3(5.0f, 60.0f, 5.0f));
 		m_sceneObjects.push_back(m_sun);
 
 		auto sponza = utl::makeSptr<SceneObject>(1.0f, m_modelMeshes["SPONZA"]);
-		sponza->m_name = "sponza";
+		sponza->setName("sponza");
 		sponza->getMesh()->setProgram(m_programs["SPONZA_PBR"]);
 		m_sceneObjects.push_back(sponza);
 

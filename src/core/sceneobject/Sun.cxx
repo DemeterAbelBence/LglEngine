@@ -6,7 +6,7 @@ namespace lgl {
 		m_collider = utl::makeSptr<NullCollider>();
 		m_light = utl::makeUptr<Light>(Light{
 			powerDensity,
-			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::nullvec,
 			glm::normalize(glm::vec3(0.1f, -1.0f, 0.0f)),
 			true
 			});

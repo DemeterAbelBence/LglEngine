@@ -40,11 +40,4 @@ namespace lgl {
 		m_mesh->create();
 		m_collider->setTransformation(m_transformation);
 	}
-
-	void Sphere::stepPhysicsBy(float dt) {
-		glm::vec3 c = dynamic_cast<SphereCollider*>(m_collider.get())->getTransCenter();
-		glm::vec3 v = c + m_radius * glm::vec3(0.0f, 0.0f, 1.0f);
-		m_physicsSolver->computeTotalTorque({ v });
-		m_physicsSolver->updateState(dt);
-	}
 }

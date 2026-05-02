@@ -31,7 +31,6 @@ namespace lgl {
         public:
             BodyData Body;
             BodyData Initial;
-            BodyData Previous;
 
         public:
             PhysicsSolver(BodyData _Body) : Body(_Body) {}
@@ -40,16 +39,11 @@ namespace lgl {
             PhysicsSolver& operator=(const PhysicsSolver& other);
 
             void rollbackToInitial() { Body = Initial; }
-            void rollbackToPrevious() { Body = Previous; }
             void makeStateInitial() { Initial = Body; }
 
-            void computeTotalTorque(const utl::vec<glm::vec3>& particles);
-
-            void updateAngularComponents(float t);
-
-            void updateLinearComponents(float t);
-
-            void updateState(float t);
+            void updateForces();
+            void updateVelocities();
+            void updateState(float dt);
         };
     }
 }

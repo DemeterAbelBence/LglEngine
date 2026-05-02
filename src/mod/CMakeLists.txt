@@ -12,4 +12,5 @@ target_sources(LglMod PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/lglmodule.ixx
     ${CMAKE_CURRENT_LIST_DIR}/glmmodule.ixx
     ${CMAKE_CURRENT_LIST_DIR}/asimmodule.ixx
+    ${CMAKE_CURRENT_LIST_DIR}/qpmodule.ixx
 )

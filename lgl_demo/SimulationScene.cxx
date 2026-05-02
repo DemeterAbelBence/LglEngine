@@ -136,7 +136,9 @@ void SimulationScene::rollbackSimulation() {
 
 void SimulationScene::advanceSimulation(float deltaTime) {
 	for (const auto& sceneObject : m_sceneObjects) {
-		sceneObject->stepPhysicsBy(deltaTime);
+		if (!CollisionHandler::isFrozen(sceneObject.get())) {
+			sceneObject->stepPhysicsBy(deltaTime);
+		}
 	}
 }
 
@@ -155,24 +157,24 @@ void SimulationScene::create() {
 		setSimulationSpeed(0.005f);
 
 		m_sun = utl::makeSptr<Sun>(2.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-		m_sun->m_name = "sun";
+		m_sun->setName("sun");
 		m_sun->setProgram(m_programs.at("TEX"));
 		m_sun->setTextures({ m_textures.at("SUN") });
 		m_sun->translate(glm::vec3(15.0f, 50.0f, -15.0f));
 		m_sceneObjects.push_back(m_sun);
 
 		m_terrain = utl::makeSptr<Terrain>(1.0f, 4);
-		m_terrain->m_name = "terrain";
+		m_terrain->setName("terrain");
 		m_terrain->getTransformation()->setScaleMatrix(glm::vec3(400.0f, 50.0f, 400.0f));
 		m_terrain->translate(glm::vec3(-200.0f, -20.0f, -200.0f));
 		m_terrain->getMesh()->setProgram(m_programs.at("PATCH_PBR"));
 		m_terrain->getPhysicsSolver()->makeStateInitial();
 		m_sceneObjects.push_back(m_terrain);
 
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 1; i++) {
 			float s = 10.0f / (i + 1);
 			auto woodBox = utl::makeSptr<Box>(false, glm::vec3(1.0f, 1.0f, 1.0f));
-			woodBox->m_name = utl::strFormat("wood_box_{}", i);
+			woodBox->setName(utl::strFormat("wood_box_{}", i));
 			woodBox->getMesh()->setProgram(m_programs.at("PHONG"));
 			woodBox->getMesh()->setMaterial(m_materials.at("WHITE"));
 			woodBox->getMesh()->addTexture(m_textures.at("WOOD"));
@@ -233,9 +235,9 @@ void SimulationScene::update(GLFWwindow* window) {
 
 	m_terrain->updateTerrainParameters();
 
-	m_simulationEventHandler.handleEvents(window, this);
-
 	CollisionHandler::handleCollisions(m_sceneObjects);
+
+	m_simulationEventHandler.handleEvents(window, this);
 
 	castShadowsOnTerrain();
 	m_sun->lightUpScene(m_sceneObjects, *m_buffers.at("DEPTH"));

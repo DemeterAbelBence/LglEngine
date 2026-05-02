@@ -21,7 +21,7 @@ namespace lgl {
 
     CuboidCollider::Side CuboidCollider::createSide(const utl::arr<utl::uint, 4>& indices) const {
         utl::arr<glm::vec3, 4> points;
-        glm::vec3 center = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 center = glm::nullvec;
         for (int i = 0; i < indices.size(); ++i) {
             points[i] = baseData.points[indices[i]];
             center += points[i];
@@ -135,8 +135,8 @@ namespace lgl {
         glm::vec3 pa, glm::vec3 va, float a,
         glm::vec3 pb, glm::vec3 vb, float b) const {
 
-        if (va == glm::vec3(0.0f, 0.0f, 0.0f) || vb == glm::vec3(0.0f, 0.0f, 0.0f)) {
-            Logger::log(Logger::LGL_ERROR, "Edge direction vector is zero\n");
+        if (va == glm::nullvec || vb == glm::nullvec) {
+            //Logger::logIf(false, Logger::LGL_ERROR, "Edge direction vector is zero: va={}, vb={}\n", va, vb);
             return {};
         }
 
@@ -267,7 +267,7 @@ namespace lgl {
 
         createCorners();
         createSides();
-        createSubdivision(2);
+        createSubdivision(1);
     }
 
     CuboidCollider::CuboidCollider(const CuboidCollider& c) {
@@ -303,7 +303,7 @@ namespace lgl {
     }
 
     glm::vec3 CuboidCollider::calculateSideCenter(const Side& side) const {
-        glm::vec3 center = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 center = glm::nullvec;
         for (const auto& p : side.points) {
             center += p;
         }
@@ -365,7 +365,15 @@ namespace lgl {
             glm::vec3 ten = glm::vec3(MI * glm::vec4(en, 0.0f));
 
             if (tep.y > p.y) {
-                ContactData contact = { p, glm::normalize(ten), {}, true, {}, {} };
+                ContactData contact = { 
+                    .point = p, 
+                    .normal = glm::normalize(ten), 
+                    .depth = {}, 
+                    .isVertexFace = true, 
+                    .edgeA{}, 
+                    .edgeB{} 
+                };
+
                 contact.depth = calculateDepth(collidee, contact);
                 result.push_back(contact);
             }

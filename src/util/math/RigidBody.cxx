@@ -26,40 +26,40 @@ namespace lgl {
     }
 
     ribo::PhysicsSolver::PhysicsSolver(const PhysicsSolver& other)
-        : Body(other.Body), Initial(other.Initial), Previous(other.Previous) {}
+        : Body(other.Body), Initial(other.Initial) {}
 
     ribo::PhysicsSolver& ribo::PhysicsSolver::operator=(const PhysicsSolver& other) {
         if (this != &other) {
             Body = other.Body;
             Initial = other.Initial;
-            Previous = other.Previous;
         }
         return *this;
     }
 
-    void ribo::PhysicsSolver::computeTotalTorque(const utl::vec<glm::vec3>& particles) {
-        //Body.torque = glm::cross(particles[0] - Body.X, Body.force);
+    void ribo::PhysicsSolver::updateForces() {
+        Body.force = glm::vec3(0.0f, -9.81f, 0.0f);
+		Body.torque = glm::nullvec;
     }
 
-    void ribo::PhysicsSolver::updateAngularComponents(float dt) {
+    void ribo::PhysicsSolver::updateVelocities() {
+        // angular velocity
         Body.Iinv = Body.R * Body.Ibodyinv * glm::transpose(Body.R);
         Body.omega = Body.Iinv * Body.L;
 
-        Body.L += Body.torque * dt;
-        Body.R += star(Body.omega) * Body.R * dt;
-        Body.R = orthonormalize(Body.R);
-    }
-
-    void ribo::PhysicsSolver::updateLinearComponents(float dt) {
+        // linear velocity
         Body.vel = Body.invMass * Body.P;
-
-        Body.P += Body.force * dt;
-        Body.X += Body.vel * dt;
     }
 
     void ribo::PhysicsSolver::updateState(float dt) {
-        Previous = Body;
-        updateAngularComponents(dt);
-        updateLinearComponents(dt);
+        // update momentums
+        Body.P += Body.force * dt;
+        Body.L += Body.torque * dt;
+
+        updateVelocities();
+
+        // update position and orientation
+        Body.X += Body.vel * dt;
+        Body.R += star(Body.omega) * Body.R * dt;
+        Body.R = orthonormalize(Body.R);
     }
 }

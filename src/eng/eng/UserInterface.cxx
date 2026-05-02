@@ -59,9 +59,40 @@ namespace lgl {
         ImGui::End();
     }
 
-    void UserInterface::renderAdditionalUI() {
+    void UserInterface::renderSceneObjectLabels() {
+		/*const auto& camera = m_scene->getCamera();
 
+        for (const auto& sceneObject : m_scene->getSceneObjects()) {
+            utl::str label = sceneObject->getName();
+            glm::vec3 objectPos = sceneObject->getPhysicsSolver()->Body.X;
+
+            // Project world position to clip space using camera projection and view
+            glm::vec4 clipPos = camera->getP() * camera->getV() * glm::vec4(objectPos, 1.0f);
+
+            // Skip points behind the camera or at infinity
+            if (clipPos.w <= 0.0f) {
+                continue;
+            }
+
+            glm::vec3 ndc = glm::vec3(clipPos) / clipPos.w; // normalized device coords (-1..1)
+
+            // Only draw labels for objects inside the view frustum
+            if (ndc.x < -1.0f || ndc.x > 1.0f || ndc.y < -1.0f || ndc.y > 1.0f || ndc.z < -1.0f || ndc.z > 1.0f) {
+                continue;
+            }
+
+            // Convert NDC to screen coordinates (ImGui uses top-left origin)
+            ImVec2 displaySize = ImVec2(io->DisplaySize.x, io->DisplaySize.y);
+            float sx = (ndc.x * 0.5f + 0.5f) * displaySize.x;
+            float sy = (1.0f - (ndc.y * 0.5f + 0.5f)) * displaySize.y;
+
+            ImDrawList* drawList = ImGui::GetForegroundDrawList();
+            ImU32 col = ImGui::GetColorU32(ImGuiCol_Text);
+            drawList->AddText(ImGui::GetFont(), ImGui::GetFontSize(), ImVec2(sx, sy), col, label.c_str());
+        }*/
     }
+
+    void UserInterface::renderAdditionalUI() {}
 
     UserInterface::UserInterface(GLFWwindow* window, utl::sptr<Scene> scene) {
         ImGui::CreateContext();
@@ -91,6 +122,7 @@ namespace lgl {
         renderObjectPicker();
         renderPrimitivePicker();
         renderFrameRateBox();
+        renderSceneObjectLabels();
 
         renderAdditionalUI();
 

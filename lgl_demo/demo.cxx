@@ -5,6 +5,8 @@
 #include "SponzaScene.hxx"
 #include "LightingInterface.hxx"
 
+import qpmodule;
+
 int main(void) {
 	try {
 		lgl::WindowManager windowManager("Simulation App", 1200, 800, 800, 800);
@@ -17,6 +19,8 @@ int main(void) {
 	}
 
 	lgl::Logger::log(lgl::Logger::LGL_EMPTY, "Exiting application...\n");
+
+	//qp::solveDummyQP();
 
     return 0;
 }

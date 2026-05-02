@@ -14,7 +14,6 @@ namespace lgl {
 
 	public:
 		Sphere(float radius);
-		void stepPhysicsBy(float dt) override;
 	};
 }
 

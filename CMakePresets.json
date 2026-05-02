@@ -25,7 +25,10 @@
             "architecture": {
                 "value": "x64"
             },
-            "binaryDir": "${sourceDir}/out/build/"
+            "binaryDir": "${sourceDir}/out/build/",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake"
+            }
         }
     ]
 }

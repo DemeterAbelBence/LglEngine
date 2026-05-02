@@ -22,7 +22,6 @@ namespace lgl {
 
 		utl::sptr<SceneObject> clone() override;
 		ribo::BodyData initializePhysics() override;
-		void stepPhysicsBy(float dt) override;
 		void updateRigidBody() override;
 		void draw(const Camera& camera) const override;
 	};

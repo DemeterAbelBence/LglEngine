@@ -54,4 +54,6 @@ export namespace glm {
 	// Comparison operators
 	using glm::operator==;
 	using glm::operator!=;
+
+	vec3 nullvec = vec3(0.0f, 0.0f, 0.0f);
 }

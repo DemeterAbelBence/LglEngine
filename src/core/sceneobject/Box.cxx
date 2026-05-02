@@ -100,18 +100,6 @@ namespace lgl {
 		m_collider->setTransformation(m_transformation);
 	}
 
-	void Box::stepPhysicsBy(float dt) {
-		CuboidCollider* collider = dynamic_cast<CuboidCollider*>(m_collider.get());
-		auto sides = collider->getTransData().sides;
-		m_physicsSolver->computeTotalTorque({
-			collider->calculateSideCenter(sides[0]),
-			collider->calculateSideCenter(sides[2]),
-			collider->calculateSideCenter(sides[4])
-			});
-		m_physicsSolver->updateState(dt);
-		updateTransformations();
-	}
-
 	void Box::updateRigidBody() {
 		glm::vec3 scaling = m_transformation->getScaling();
 		float w = m_dimensions.x * scaling.x;

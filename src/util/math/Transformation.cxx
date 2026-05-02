@@ -7,7 +7,7 @@ namespace lgl {
 		m_T = glm::mat4(1.0f);
 
 		m_scaling = glm::vec3(1.0f, 1.0f, 1.0f);
-		m_translation = glm::vec3(0.0f, 0.0f, 0.0f);
+		m_translation = glm::nullvec;
 		m_rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
 		m_rotationAngle = 0.0f;
 	}

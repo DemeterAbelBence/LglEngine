@@ -63,7 +63,7 @@ namespace lgl {
 			glm::vec3(0.0f),        // vel 
 			glm::vec3(0.0f),        // omega 
 
-			glm::vec3(0.0f, 0.0f, 0.0f),        // force
+			glm::nullvec,        // force
 			glm::vec3(0.0f)                      // torque
 		};
 		m_physicsSolver = utl::makeSptr<ribo::PhysicsSolver>(bodyData);

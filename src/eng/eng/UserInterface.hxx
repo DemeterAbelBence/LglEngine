@@ -22,6 +22,7 @@ namespace lgl {
 		void renderObjectPicker();
 		void renderPrimitivePicker();
 		void renderFrameRateBox();
+		void renderSceneObjectLabels();
 
 		virtual void renderAdditionalUI();
 

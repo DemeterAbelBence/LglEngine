@@ -20,7 +20,7 @@ namespace lgl {
 		utl::sptr<ribo::PhysicsSolver> m_physicsSolver;
 		utl::sptr<Transformation> m_transformation;
 
-	public:
+	private:
 		utl::str m_name;
 
 	public:
@@ -31,11 +31,13 @@ namespace lgl {
 		const utl::sptr<Collider>& getCollider() const { return m_collider; }
 		const utl::sptr<ribo::PhysicsSolver>& getPhysicsSolver() const { return m_physicsSolver; }
 		const utl::sptr<Transformation>& getTransformation() const { return m_transformation; }
+		const utl::str getName() const { return m_name; }
 
 		void setMesh(utl::sptr<Mesh> mesh) { m_mesh = mesh; }
 		void setProgram(utl::sptr<GpuProgram> program);
 		void setMaterial(utl::sptr<Material> material);
 		void setTextures(const utl::vec<utl::sptr<Texture>>& textures);
+		void setName(const utl::str& name) { m_name = name; }
 
 		void translate(glm::vec3 transalte);
 		void scale(glm::vec3 scale);

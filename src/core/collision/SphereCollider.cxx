@@ -5,8 +5,8 @@ namespace lgl {
 		geomType = C_SPHERE;
 		m_radius = radius;
 
-		m_baseCenter = glm::vec3(0.0f, 0.0f, 0.0f);
-		m_transCenter = glm::vec3(0.0f, 0.0f, 0.0f);;
+		m_baseCenter = glm::nullvec;
+		m_transCenter = glm::nullvec;;
 
 		utl::vec<glm::vec3> points;
 		points.reserve(n);

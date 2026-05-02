@@ -4,7 +4,7 @@
 
 namespace lgl {
 	void lgl::model::AssimpMesh::centerToOrigin(utl::vec<Vertex>& vertices) {
-		glm::vec3 center = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3 center = glm::nullvec;
 		for (const auto& vertex : vertices) {
 			center += vertex.Position;
 		}
@@ -138,8 +138,8 @@ namespace lgl {
 				vertex.BiTangent = glm::normalize(bitang);
 			}
 			else {
-				vertex.Tangent = glm::vec3(0.0f, 0.0f, 0.0f);
-				vertex.BiTangent = glm::vec3(0.0f, 0.0f, 0.0f);
+				vertex.Tangent = glm::nullvec;
+				vertex.BiTangent = glm::nullvec;
 			}
 
 			if (mesh->mTextureCoords[0]) {

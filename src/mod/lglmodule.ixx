@@ -14,6 +14,7 @@ module;
 #include <optional>
 #include <filesystem>
 #include <format>
+#include <unordered_set>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -35,6 +36,9 @@ export module lglmodule;
 export namespace lgl {
 	namespace utl {
 		// Collection utilities
+		template<typename T>
+		using set = std::unordered_set<T>;
+
 		template<typename U, typename V>
 		using umap = std::unordered_map<U, V>;
 
@@ -51,7 +55,7 @@ export namespace lgl {
 					auto msg = std::string("Key ") + key + std::string(" not found in MAP!");
 					throw std::exception(msg.c_str());
 				}
-				return std_map_base::at(key);
+			return std_map_base::at(key);
 			}
 			bool has(std::string key) const {
 				return std_map_base::find(key) != std_map_base::end();
@@ -245,8 +249,9 @@ export namespace lgl {
 			LC_CYAN = 11
 		};
 
-		template<typename... Args>
+      template<typename... Args>
 		static void log(LogLevel level, std::format_string<Args...> formatString, Args&&... args) {
+			// Logging enabled by default for backward compatibility with existing call sites.
 			enableAnsiColors();
 
 			utl::str formattedMsg = std::format(formatString, std::forward<Args>(args)...);
@@ -279,8 +284,10 @@ export namespace lgl {
 		}
 
 		template<typename... Args>
-		static void log(std::format_string<Args...> formatString, Args&&... args) {
-			log(LGL_INFO, formatString, std::forward<Args>(args)...);
+		static void logIf(bool enable, LogLevel level, std::format_string<Args...> formatString, Args&&... args) {
+			if (enable) {
+				log(level, formatString, std::forward<Args>(args)...);
+			}
 		}
 	};
 }

@@ -27,12 +27,6 @@ void SimulationInterface::renderSimulationSettings() {
         CollisionHandler::enableDebug = !ed;
     }
 
-    bool edisp = CollisionHandler::enableDisplacement;
-    utl::cstr displacementText = edisp ? "Disable displacement" : "Enable displacement";
-    if (ImGui::Button(displacementText)) {
-        CollisionHandler::enableDisplacement = !edisp;
-    }
-
     bool eimp = CollisionHandler::enableImpulses;
     utl::cstr impulsesText = eimp ? "Disable impulses" : "Enable impulses";
     if (ImGui::Button(impulsesText)) {
@@ -45,15 +39,39 @@ void SimulationInterface::renderSimulationSettings() {
         CollisionHandler::enableBisection = !ebis;
     }
 
-    bool dn = CollisionHandler::drawNormals;
-    utl::cstr normals_text = dn ? "Hide normals" : "Draw normals";
-    if (ImGui::Button(normals_text)) {
-        CollisionHandler::drawNormals = !dn;
+    ImGui::Separator();
+
+    bool ecl = CollisionHandler::enableContactLog;
+    utl::cstr contactLogText = ecl ? "Disable contact log" : "Enable contact log";
+    if (ImGui::Button(contactLogText)) {
+        CollisionHandler::enableContactLog = !ecl;
     }
 
-    if (ImGui::Button("Simulate forward")) { m_simulationScene->advanceSimulation(Time::s_deltaTime); }
-    if (ImGui::Button("Simulate backward")) { m_simulationScene->advanceSimulation(-Time::s_deltaTime); }
+    bool ebl = CollisionHandler::enableBisectionLog;
+    utl::cstr bisectionLogText = ebl ? "Disable bisection log" : "Enable bisection log";
+    if (ImGui::Button(bisectionLogText)) {
+        CollisionHandler::enableBisectionLog = !ebl;
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::Button("Simulate forward")) { m_simulationScene->advanceSimulation(Time::s_fixedDeltaTime); }
+    if (ImGui::Button("Simulate backward")) { m_simulationScene->advanceSimulation(-Time::s_fixedDeltaTime); }
     if (ImGui::Button("Rollback simulation")) { m_simulationScene->rollbackSimulation(); }
+    
+	SceneObject* currentObject = m_simulationScene->getCurrentSceneObject().get();
+    if(CollisionHandler::isFrozen(currentObject)) {
+        if (ImGui::Button("Unfreeze current")) {
+            CollisionHandler::unfreezeObject(currentObject);
+        }
+    }
+    else {
+        if (ImGui::Button("Freeze current")) {
+            CollisionHandler::freezeObject(currentObject);
+        }
+	}
+
+    ImGui::Separator();
 
     if (ImGui::SliderFloat("Simulation Speed", &simulationSpeed, 0.001f, 0.05f, precision, 0)) {
 		Time::s_fixedDeltaTime = simulationSpeed;
@@ -61,10 +79,9 @@ void SimulationInterface::renderSimulationSettings() {
     }
 
     ImGui::SliderFloat("Elasticity", &CollisionHandler::elasticity, 0.0f, 1.0f, precision, 0);
-    ImGui::SliderFloat("Slipperiness", &CollisionHandler::slipperiness, 0.0f, 1.0f, precision, 0);
-    ImGui::SliderFloat("Depth bias", &CollisionHandler::depthBias, 0.0f, 0.01f, "%.5f", 0);
-	ImGui::SliderFloat("Vertex-face threshold", &CuboidCollider::vertexFaceThreshold, 0.0f, 1.0f, precision, 0);
-      
+    ImGui::SliderFloat("Bisection Bias", &CollisionHandler::bisectionBias, 0.0f, 0.01f, "%.5f", 0);
+    ImGui::SliderFloat("Contact Bias", &CollisionHandler::contactBias, 0.0f, 0.01f, "%.5f", 0);
+	ImGui::SliderFloat("PSD Tolerance", &CollisionHandler::PSDTolerance, 0.0f, 0.001f, "%.7f", 0);
 
 	ImGui::End();   
 }

@@ -1,164 +1,85 @@
 #include "CollisionHandler.hxx"
 
 namespace lgl {
+    CollisionHandler::ContactType CollisionHandler::getContactType(float relativeVelocity) {
+        if (relativeVelocity > contactBias) {
+            return ContactType::SEPARATING;
+        }
+        if (relativeVelocity > -contactBias) {
+            return ContactType::RESTING;
+        }
+        else {
+            return ContactType::COLLIDING;
+        }
+    }
+
     utl::vec<CollisionHandler::CONTACT> CollisionHandler::calculateContacts(utl::svec<SceneObject>& sceneObjects) {
-        auto calculateCollisions = [](utl::vec<CONTACT>& interactions, const utl::svec<SceneObject>& sceneObjects) {
-            auto isInvalidPair = [](utl::vec<CONTACT>& interactions, SceneObject* s1, SceneObject* s2) {
-                if (s1 == s2) {
-                    return true;
-                }
+        auto resolveCollisions = [](utl::vec<CONTACT>& contacts, const utl::svec<SceneObject>& sceneObjects) {
+            bool processedAll = false;
+            utl::svec<SceneObject> underProcess = sceneObjects;
+            utl::uint contactIndex = 0;
 
-                for (const auto& i : interactions) {
-                    SceneObject* _s1 = i.get<0>();
-                    SceneObject* _s2 = i.get<1>();
+            while (!processedAll) {
+                if (!underProcess.empty()) {
+                    SceneObject* s1 = underProcess.back().get();
+                    underProcess.pop_back();
 
-                    if (s1 == _s1 && s2 == _s2) {
-                        return true;
-                    }
+                    for (const auto& s2Ptr : underProcess) {
+                        SceneObject* s2 = s2Ptr.get();
 
-                    if (s1 == _s2 && s2 == _s1) {
-                        return true;
-                    }
-                }
-                return false;
-            };
-            auto optimizeCuboids = [](SceneObject* s1, SceneObject* s2) {
-                CuboidCollider* c1 = dynamic_cast<CuboidCollider*>(s1->getCollider().get());
-                CuboidCollider* c2 = dynamic_cast<CuboidCollider*>(s2->getCollider().get());
-
-                float radiusOffset = 0.0005f;
-
-                if (c1 != nullptr && c2 != nullptr) {
-                    auto transData1 = c1->getTransData();
-                    utl::vec<float> dim1 = { transData1.width, transData1.height, transData1.length };
-                    float r1 = 0;
-                    for (float d : dim1) {
-                        if (d > r1) {
-                            r1 = d;
-                        }
-                    }
-                    r1 += radiusOffset;
-
-                    auto transData2 = c2->getTransData();
-                    utl::vec<float> dim2 = { transData2.width, transData2.height, transData2.length };
-                    float r2 = 0;
-                    for (float d : dim2) {
-                        if (d > r2) {
-                            r2 = d;
-                        }
-                    }
-                    r2 += radiusOffset;
-
-                    auto sc1 = SphereCollider(r1, 0);
-                    sc1.setTransformation(s1->getTransformation());
-                    sc1.updateTransformations();
-
-                    auto sc2 = SphereCollider(r2, 0);
-                    sc2.setTransformation(s2->getTransformation());
-                    sc2.updateTransformations();
-
-                    auto coll1 = sc1.collidesWith(sc2);
-                    auto coll2 = sc2.collidesWith(sc1);
-                    if (coll1.size() > 0 || coll2.size() > 0) {
-                        return false;
-                    }
-                    else {
-                        return true;
-                    }
-
-                    sc1.setTransformation(nullptr);
-                    sc2.setTransformation(nullptr);
-                }
-                else {
-                    return false;
-                }
-            };
-
-            for (int i = 0; i < sceneObjects.size(); i++) {
-                auto s1 = sceneObjects[i].get();
-                for (int j = 0; j < sceneObjects.size(); j++) {
-                    auto s2 = sceneObjects[j].get();
-
-                    if (!isInvalidPair(interactions, s1, s2)) {
                         auto s1_collider = s1->getCollider();
                         auto s2_collider = s2->getCollider();
 
-                        if (optimizeCuboids(s1, s2)) {
-                            continue;
+                        auto collision1 = s1_collider->collidesWith(*s2_collider);
+                        for (const auto& contactData : collision1) {
+                            contacts.push_back({ ++contactIndex, contactData, s1, s2 });
                         }
 
-                        auto contact1 = s1_collider->collidesWith(*s2_collider);
-                        auto contact2 = s2_collider->collidesWith(*s1_collider);
-
-                        SceneObject* colliderObject;
-                        SceneObject* collideeObject;
-                        utl::vec<Collider::ContactData>* contactData = nullptr;
-
-                        for (const auto& c : contact1) {
-                            if (c.isVertexFace) {
-                                colliderObject = s1;
-                                collideeObject = s2;
-                                contactData = &contact1;
-                                break;
+                        auto collision2 = s2_collider->collidesWith(*s1_collider);
+                        for (const auto& contactData : collision2) {
+                            if (contactData.isVertexFace) {
+                                contacts.push_back({ ++contactIndex, contactData, s2, s1 });
                             }
-                        }
-
-                        for (const auto& c : contact2) {
-                            if (!c.isVertexFace) {
-                                colliderObject = s2;
-                                collideeObject = s1;
-                                contactData = &contact2;
-                                break;
-                            }
-                        }
-
-                        if (contactData == nullptr) {
-                            if (contact1.size() > 0) {
-                                interactions.push_back(utl::tup(s1, s2, contact1));
-                            }
-                        }
-                        else {
-                            auto interaction = utl::tup(colliderObject, collideeObject, *contactData);
-                            interactions.push_back(interaction);
                         }
                     }
                 }
+                else {
+                    processedAll = true;
+                }
             }
-        };
+            };
+
         auto calculateMaxDepth = [](utl::vec<CONTACT>& contacts) {
             float maxDepth = 0.0f;
             for (const auto& contact : contacts) {
-                auto contactData = contact.get<2>();
-                for (const auto& c : contactData) {
-                    if (c.depth.has_value()) {
-                        float depth = glm::length(*c.depth);
-                        maxDepth = glm::max(maxDepth, depth);
-                    }
+                auto contactData = contact.get<1>();
+                if (contactData.depth.has_value()) {
+                    float depth = glm::length(*contactData.depth);
+                    maxDepth = glm::max(maxDepth, depth);
                 }
             }
-
             return maxDepth;
         };
+
+        float deltaTime = Time::s_fixedDeltaTime;
+        utl::vec<CONTACT> contacts;
+        resolveCollisions(contacts, sceneObjects);
+
+        if (!enableBisection) {
+            return contacts;
+        }
 
         utl::umap<SceneObject*, ribo::BodyData> sceneSnapshot;
         for (auto& sceneObject : sceneObjects) {
             sceneSnapshot[sceneObject.get()] = sceneObject->getPhysicsSolver()->Body;
         }
 
-        float deltaTime = Time::s_fixedDeltaTime;
-        utl::vec<CONTACT> contacts;
-        calculateCollisions(contacts, sceneObjects);
-
-        if (!enableBisection) {
-            return contacts;
-        }
-
-        if(contacts.size() == 0) {
+        if (contacts.size() == 0) {
             return {};
         }
         else {
             float maxDepth = calculateMaxDepth(contacts);
-            if (maxDepth < depthBias) {
+            if (maxDepth < bisectionBias) {
                 return contacts;
             }
             else {
@@ -169,16 +90,17 @@ namespace lgl {
         }
 
         bool sufficientSeparation = false;
-		float simulationDirection = 1.0f;
-		utl::uint iterCount = 0;
+        float simulationDirection = 1.0f;
+        utl::uint iterCount = 0;
         while (!sufficientSeparation) {
             if (iterCount++ > 20) {
-                lgl::Logger::log(lgl::Logger::LGL_INFO, "Bisection reached limit of 20 iterations\n\n", iterCount);
+                lgl::Logger::logIf(enableBisectionLog, lgl::Logger::LGL_INFO, "Bisection reached limit of 20 iterations\n\n", iterCount);
                 for (auto& sceneObject : sceneObjects) {
                     auto snapshot = sceneSnapshot[sceneObject.get()];
                     sceneObject->getPhysicsSolver()->Body = snapshot;
-				}
-				calculateCollisions(contacts, sceneObjects);
+                }
+                contacts.clear();
+                resolveCollisions(contacts, sceneObjects);
                 return contacts;
             }
 
@@ -190,7 +112,7 @@ namespace lgl {
             }
 
             contacts.clear();
-            calculateCollisions(contacts, sceneObjects);
+            resolveCollisions(contacts, sceneObjects);
 
             if (contacts.size() == 0) {
                 simulationDirection = 1.0f;
@@ -198,8 +120,8 @@ namespace lgl {
             else {
                 float maxDepth = calculateMaxDepth(contacts);
 
-                if (maxDepth < depthBias) {
-                    lgl::Logger::log(lgl::Logger::LGL_INFO, "Bisected {} times, reached depth {}\n\n", iterCount, maxDepth);
+                if (maxDepth < bisectionBias) {
+                    lgl::Logger::logIf(enableBisectionLog, lgl::Logger::LGL_INFO, "Bisected {} times, reached depth {}\n\n", iterCount, maxDepth);
                     sufficientSeparation = true;
                 }
                 else {
@@ -207,23 +129,291 @@ namespace lgl {
                 }
             }
         }
-        
+
         return contacts;
     }
 
-    void CollisionHandler::debugContact(const CONTACT& interaction, const Camera& camera) {
-        auto colliderObject = interaction.get<0>();
-        auto collideeObject = interaction.get<1>();
-        auto contactData = interaction.get<2>();
+    void CollisionHandler::applyImpulses() {
+        Logger::logIf(logContacts, Logger::LGL_INFO, "Applying impulses to objects based on {} contacts:\n", currentContacts.size());
 
-        ribo::BodyData* A = &colliderObject->getPhysicsSolver()->Body;
-        ribo::BodyData* B = &collideeObject->getPhysicsSolver()->Body;
+        if (!enableImpulses) {
+            return;
+        }
 
+		bool hadCollidingContact = true;
+		utl::uint iterCount = 0;
+
+        while (hadCollidingContact) {
+			hadCollidingContact = false;
+
+            if (iterCount++ > 20) {
+                Logger::logIf(enableContactLog, Logger::LGL_INFO, "Impulse resolution reached limit of 20 iterations\n\n", iterCount);
+                return;
+			}
+
+            for (const auto& contact : currentContacts) {
+                utl::uint contactIndex = contact.get<0>();
+                const auto& contactData = contact.get<1>();
+                SceneObject* colliderObject = contact.get<2>();
+                SceneObject* collideeObject = contact.get<3>();
+
+                ribo::BodyData* A = &(colliderObject->getPhysicsSolver()->Body);
+                ribo::BodyData* B = &(collideeObject->getPhysicsSolver()->Body);
+
+                glm::vec3 ra = contactData.point - A->X;
+                glm::vec3 rb = contactData.point - B->X;
+                glm::vec3 velpa = A->vel + glm::cross(A->omega, ra);
+                glm::vec3 velpb = B->vel + glm::cross(B->omega, rb);
+                float vreln = glm::dot(contactData.normal, velpa - velpb);
+
+                ContactType contactType = getContactType(vreln);
+
+                if (contactType == ContactType::COLLIDING) {
+                    Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=COLLIDING, vreln={:.6f}\n",
+                        contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
+
+                    glm::vec3 term1an = A->Iinv * glm::cross(ra, contactData.normal);
+                    glm::vec3 term1bn = B->Iinv * glm::cross(rb, contactData.normal);
+                    float term2an = glm::dot(contactData.normal, glm::cross(term1an, ra));
+                    float term2bn = glm::dot(contactData.normal, glm::cross(term1bn, rb));
+                    float numerator = -(1.0f + elasticity) * vreln;
+                    float denominator = A->invMass + B->invMass + term2an + term2bn;
+                    float j = numerator / denominator;
+
+                    glm::vec3 impForce = j * contactData.normal;
+                    glm::vec3 impTorqueA = glm::cross(ra, impForce);
+                    glm::vec3 impTorqueB = glm::cross(rb, impForce);
+
+                    A->P += impForce;
+                    A->vel = A->P * A->invMass;
+                    A->L += impTorqueA;
+                    A->omega = A->Iinv * A->L;
+
+                    B->P -= impForce;
+                    B->vel = B->P * B->invMass;
+                    B->L -= impTorqueB;
+                    B->omega = B->Iinv * B->L;
+
+					hadCollidingContact = true;
+                }
+
+                if (contactType == ContactType::SEPARATING) {
+                    Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=SEPARATING, vreln={:.6f}\n",
+                        contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
+                }
+
+                if (contactType == ContactType::RESTING) {
+                    Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=RESTING, vreln={:.6f}\n",
+                        contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
+                }
+            }
+        }
+
+        Logger::logIf(logContacts, Logger::LGL_INFO, "Colliding contact eliminated in {} iterations\n\n", iterCount);
+    }
+
+    void CollisionHandler::reclassifyContacts(utl::svec<SceneObject>& sceneObjects) {
+        Logger::logIf(logContacts, Logger::LGL_INFO, "Reclassifying objects based on {} contacts:\n", currentContacts.size());
+
+		restingContacts.clear();
+        for (const auto& contact : currentContacts) {
+            utl::uint contactIndex = contact.get<0>();
+            const auto& contactData = contact.get<1>();
+            SceneObject* colliderObject = contact.get<2>();
+            SceneObject* collideeObject = contact.get<3>();
+
+            ribo::BodyData* A = &(colliderObject->getPhysicsSolver()->Body);
+            ribo::BodyData* B = &(collideeObject->getPhysicsSolver()->Body);
+
+            glm::vec3 ra = contactData.point - A->X;
+            glm::vec3 rb = contactData.point - B->X;
+            glm::vec3 velpa = A->vel + glm::cross(A->omega, ra);
+            glm::vec3 velpb = B->vel + glm::cross(B->omega, rb);
+            float vreln = glm::dot(contactData.normal, velpa - velpb);
+
+            ContactType contactType = getContactType(vreln);
+
+            if (contactType == ContactType::COLLIDING) {
+                Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=COLLIDING, vreln={:.6f}\n",
+                    contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
+            }
+
+            if (contactType == ContactType::SEPARATING) {
+                Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=SEPARATING, vreln={:.6f}\n",
+                    contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
+            }
+
+            if (contactType == ContactType::RESTING) {
+                Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=RESTING, vreln={:.6f}\n",
+                    contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
+
+				restingContacts.push_back(contact);
+            }
+        }
+    }
+
+    void CollisionHandler::resolveRestingContacts() {
+        if (!restingContacts.empty()) {
+            eig::matd A;
+            computeRestingContactMatrix(A);
+            Logger::logIf(logContacts, Logger::LGL_INFO, "Resting contact matrix A:\n");
+            eig::logMatrix(A, logContacts);
+
+            eig::vecd b;
+            computeRestingContactVector(b);
+            Logger::logIf(logContacts, Logger::LGL_INFO, "Resting contact vector b:\n");
+            eig::logVector(b, logContacts);
+            
+
+            if (eig::isPSD(A, PSDTolerance)) {
+                Logger::logIf(logContacts, Logger::LGL_INFO, "Resting contact matrix is positive semi-definite :)\n");
+                eig::vecd forces;
+                if (qp::solveBaraffContactForces(A, b, forces)) {
+                    Logger::logIf(logContacts, Logger::LGL_INFO, "Contact forces solved:\n");
+					eig::logVector(forces, logContacts);
+
+                    for (int i = 0; i < restingContacts.size(); ++i) {
+                        CONTACT& contact = restingContacts[i];
+                        float forceMagnitude = eig::getAsFloatAt(forces, i);
+                        const auto& contactData = contact.get<1>();
+                        SceneObject* colliderObject = contact.get<2>();
+                        SceneObject* collideeObject = contact.get<3>();
+                        glm::vec3 force = forceMagnitude * contactData.normal;
+                        colliderObject->getPhysicsSolver()->Body.force += force;
+						colliderObject->getPhysicsSolver()->Body.torque += glm::cross(contactData.point - colliderObject->getPhysicsSolver()->Body.X, force);
+                        collideeObject->getPhysicsSolver()->Body.force -= force;
+						collideeObject->getPhysicsSolver()->Body.torque -= glm::cross(contactData.point - collideeObject->getPhysicsSolver()->Body.X, force);
+					}
+                }
+            }
+            else {
+                Logger::logIf(logContacts, Logger::LGL_WARN, "\nResting contact matrix is not positive semi-definite :(\n");
+            }
+        }
+
+        Logger::logIf(logContacts, Logger::LGL_EMPTY, "\n-------------------------------------------------------------------\n");
+    }
+
+
+
+    void CollisionHandler::computeRestingContactMatrix(eig::matd& matrix) {
+        auto computeElementAt = [](const CONTACT& ci, const CONTACT& cj) {
+            SceneObject* cia = ci.get<2>();
+            SceneObject* cib = ci.get<3>();
+            SceneObject* cja = cj.get<2>();
+            SceneObject* cjb = cj.get<3>();
+
+            if ((cia != cja) && (cib != cjb) && (cia != cjb) && (cib != cja)) {
+                return 0.0f;
+            }
+
+			Collider::ContactData contactDataI = ci.get<1>();
+			Collider::ContactData contactDataJ = cj.get<1>();
+
+			ribo::BodyData* A = &(cia->getPhysicsSolver()->Body);
+			ribo::BodyData* B = &(cib->getPhysicsSolver()->Body);
+
+			glm::vec3 ni = contactDataI.normal;
+			glm::vec3 nj = contactDataJ.normal;
+			glm::vec3 pi = contactDataI.point;
+			glm::vec3 pj = contactDataJ.point;
+			glm::vec3 ra = pi - A->X;
+			glm::vec3 rb = pi - B->X;
+
+            glm::vec3 force_on_a = glm::nullvec;
+            if (cja == cia) {
+                force_on_a = nj;
+            }
+            else if(cjb == cia) {
+                force_on_a = -nj;
+            }
+            glm::vec3 torque_on_a = glm::cross(pj - A->X, force_on_a);
+
+			glm::vec3 force_on_b = glm::nullvec;
+            if (cja == cib) {
+                force_on_b = nj;
+            }
+            else if (cjb == cib) {
+                force_on_b = -nj;
+			}
+            glm::vec3 torque_on_b = glm::cross(pj - B->X, force_on_b);
+
+			glm::vec3 a_linear = force_on_a * A->invMass;
+			glm::vec3 a_angular = glm::cross(A->Iinv * torque_on_a, ra);
+
+			glm::vec3 b_linear = force_on_b * B->invMass;
+			glm::vec3 b_angular = glm::cross(B->Iinv * torque_on_b, rb);
+
+            return glm::dot(ni, a_linear + a_angular - b_linear - b_angular);
+        };
+
+		int n = static_cast<utl::uint>(restingContacts.size());
+		matrix.resize(n, n);
+
+		for (utl::uint i = 0; i < n; ++i) {
+			for (utl::uint j = 0; j < n; ++j) {
+                float element = computeElementAt(restingContacts[i], restingContacts[j]);
+				eig::setFromFloatAt(matrix, i, j, element);
+			}
+		}
+	}
+
+    void CollisionHandler::computeRestingContactVector(eig::vecd& vector) {
+        int n = static_cast<int>(restingContacts.size());
+        vector.resize(n);
+        int idx = 0;
+        for (const auto& contact : restingContacts) {
+            utl::uint contactIndex = contact.get<0>();
+            const auto& contactData = contact.get<1>();
+            SceneObject* colliderObject = contact.get<2>();
+            SceneObject* collideeObject = contact.get<3>();
+
+            ribo::BodyData* A = &(colliderObject->getPhysicsSolver()->Body);
+            ribo::BodyData* B = &(collideeObject->getPhysicsSolver()->Body);
+
+            glm::vec3 n = contactData.normal;
+            glm::vec3 ra = contactData.point - A->X;
+            glm::vec3 rb = contactData.point - B->X;
+
+            glm::vec3 f_ext_a = A->force;
+            glm::vec3 f_ext_b = B->force;
+            glm::vec3 t_ext_a = A->torque;
+            glm::vec3 t_ext_b = B->torque;
+
+            glm::vec3 a_ext_part = f_ext_a * A->invMass + glm::cross((A->Iinv * t_ext_a), ra);
+            glm::vec3 b_ext_part = f_ext_b * B->invMass + glm::cross((B->Iinv * t_ext_b), rb);
+
+            glm::vec3 a_vel_term1 = glm::cross(A->omega, glm::cross(A->omega, ra));
+            glm::vec3 a_vel_term2 = glm::cross(A->Iinv * glm::cross(A->L, A->omega), ra);
+            glm::vec3 a_vel_part = a_vel_term1 + a_vel_term2;
+
+            glm::vec3 b_vel_term1 = glm::cross(B->omega, glm::cross(B->omega, rb));
+            glm::vec3 b_vel_term2 = glm::cross(B->Iinv * glm::cross(B->L, B->omega), rb);
+            glm::vec3 b_vel_part = b_vel_term1 + b_vel_term2;
+
+            glm::vec3 velpa = A->vel + glm::cross(A->omega, ra);
+            glm::vec3 velpb = B->vel + glm::cross(B->omega, rb);
+
+            glm::vec3 ndot = glm::cross(B->omega, n);
+            float k1 = glm::dot(n, a_ext_part - b_ext_part + a_vel_part - b_vel_part);
+            float k2 = 2.0f * glm::dot(ndot, velpa - velpb);
+
+			eig::setFromFloatAt(vector, idx++, k1 + k2);
+        }
+    }
+
+
+
+    void CollisionHandler::debugContacts(const Camera& camera) {
         utl::vec<glm::vec3> contactPoints;
-        for (const auto& c : contactData) {
-            contactPoints.push_back(c.point);
+        for (const auto& contact : currentContacts) {
+            utl::uint contactIndex = contact.get<0>();
+            Collider::ContactData contactData = contact.get<1>();
+            SceneObject* colliderObject = contact.get<2>();
+            SceneObject* collideeObject = contact.get<3>();
 
-            glm::vec3 ra = c.point - A->X;
+            contactPoints.push_back(contactData.point);
+            /*glm::vec3 ra = c.point - A->X;
             glm::vec3 rb = c.point - B->X;
             glm::vec3 velpa = A->vel + glm::cross(A->omega, ra);
             glm::vec3 velpb = B->vel + glm::cross(B->omega, rb);
@@ -245,7 +435,7 @@ namespace lgl {
             DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 1.0f));
 
             DebugDrawer::setVertexData({c.point, c.point + debugveclen * vrelt});
-            DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 0.0f));
+            DebugDrawer::draw(camera.getV(), camera.getP(), glm::nullvec);
 
             if (drawNormals) {
                 DebugDrawer::setVertexData({ c.point, c.point + 4.0f * c.normal });
@@ -261,26 +451,26 @@ namespace lgl {
                  DebugDrawer::setOverrideZ(1);
 
                  DebugDrawer::setVertexData({ rA, xA });
-                 // DebugDrawer::draw(camera, glm::vec3(0.0f, 0.0f, 0.0f));
+                 // DebugDrawer::draw(camera, glm::nullvec);
 
                  DebugDrawer::setVertexData({ rB, xB });
                  // DebugDrawer::draw(camera, glm::vec3(1.0f, 1.0f, 1.0f));*/
-            }
+                 /*}
 
-            Collider* collider = colliderObject->getCollider().get();
-            Collider* collidee = collideeObject->getCollider().get();
-            std::optional<glm::vec3> distanceVector = collider->calculateContactDepthWith(*collidee, c);
-            if (distanceVector.has_value()) {
-                DebugDrawer::setMode(GL_LINES);
-                DebugDrawer::setOverrideZ(1);
-                if (c.isVertexFace) {
-                    DebugDrawer::setVertexData({ c.point, c.point + *distanceVector });
-                }
-                else {
-                    DebugDrawer::setVertexData({ rA, rA + *distanceVector });
-                }
-                DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 0.0f));
-            }
+                 Collider* collider = colliderObject->getCollider().get();
+                 Collider* collidee = collideeObject->getCollider().get();
+                 std::optional<glm::vec3> distanceVector = collider->calculateContactDepthWith(*collidee, c);
+                 if (distanceVector.has_value()) {
+                     DebugDrawer::setMode(GL_LINES);
+                     DebugDrawer::setOverrideZ(1);
+                     if (c.isVertexFace) {
+                         DebugDrawer::setVertexData({ c.point, c.point + *distanceVector });
+                     }
+                     else {
+                         DebugDrawer::setVertexData({ rA, rA + *distanceVector });
+                     }
+                     DebugDrawer::draw(camera.getV(), camera.getP(), glm::nullvec);
+                 }*/
         }
 
         DebugDrawer::setMode(GL_POINTS);
@@ -347,174 +537,38 @@ namespace lgl {
         }
     }
 
-    void CollisionHandler::pushObjectsApart(const CONTACT& interaction) {
-        auto colliderObject = interaction.get<0>();
-        auto collideeObject = interaction.get<1>();
-        auto contactData = interaction.get<2>();
-        glm::vec3 displacementVector = glm::vec3(0.0f, 0.0f, 0.0f);
-        float max_dist = 0.0f;
-        for (const auto& c : contactData) {
-            if (c.depth.has_value()) {
-                float ld = glm::length(*c.depth);
-                if (ld > max_dist) {
-                    max_dist = ld;
-                    displacementVector = *c.depth;
-                }
-            }
-        }
-
-        if (max_dist == 0.0f) {
-            return;
-        }
-
-        auto pushApart = [&colliderObject, &collideeObject](glm::vec3 dis, glm::vec3 dir) {
-            glm::vec3 colliderPos = colliderObject->getPhysicsSolver()->Body.X;
-            glm::vec3 collideePos = collideeObject->getPhysicsSolver()->Body.X;
-            SceneObject* objectToDisplace;
-
-            if (glm::dot(dir, dis) < 0.0f) {
-                dis = -dis;
-            }
-            if (glm::dot(colliderPos, dir) > glm::dot(collideePos, dir)) {
-                float invMass = colliderObject->getPhysicsSolver()->Body.invMass;
-                objectToDisplace = invMass != 0.0f ? colliderObject : collideeObject;
-            }
-            else {
-                float invMass = collideeObject->getPhysicsSolver()->Body.invMass;
-                objectToDisplace = invMass != 0.0f ? collideeObject : colliderObject;
-            }
-
-            objectToDisplace->getPhysicsSolver()->Body.X += dis;
-            objectToDisplace->updateTransformations();
-        };
-
-        std::array<glm::vec3, 3> directions = { glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f) };
-        for (const glm::vec3& d : directions) {
-            glm::vec3 projection = d * glm::dot(displacementVector, d);
-            if (glm::length(projection) > 0.01f) {
-                pushApart(projection, d);
-            }
-        }
-    }
-
-    CollisionHandler::ContactType CollisionHandler::getContactType(float relativeVelocity) {
-        static const float threshold = 0.00001f;
-
-        if (relativeVelocity > threshold) {
-            return ContactType::SEPARATING;
-        }
-        if (relativeVelocity > -threshold) {
-            return ContactType::RESTING;
-        }
-        else {
-            return ContactType::COLLIDING;
-        }
-    }
-
-    void CollisionHandler::applyImpulse(const CONTACT& interaction) {
-        ribo::BodyData* A = &(interaction.get<0>()->getPhysicsSolver()->Body);
-        ribo::BodyData* B = &(interaction.get<1>()->getPhysicsSolver()->Body);
-        auto contactData = interaction.get<2>();
-
-        for (const auto& c : contactData) {
-            glm::vec3 ra = c.point - A->X;
-            glm::vec3 rb = c.point - B->X;
-            glm::vec3 velpa = A->vel + glm::cross(A->omega, ra);
-            glm::vec3 velpb = B->vel + glm::cross(B->omega, rb);
-            float vreln = glm::dot(c.normal, velpa - velpb);
-
-            ContactType contactType = getContactType(vreln);
-
-            if (contactType == ContactType::COLLIDING) {
-                glm::vec3 term1an = A->Iinv * glm::cross(ra, c.normal);
-                glm::vec3 term1bn = B->Iinv * glm::cross(rb, c.normal);
-                float term2an = glm::dot(c.normal, glm::cross(term1an, ra));
-                float term2bn = glm::dot(c.normal, glm::cross(term1bn, rb));
-
-                float numerator = -(1.0f + elasticity) * vreln;
-                float denominator = A->invMass + B->invMass + term2an + term2bn;
-                float j = numerator / denominator;
-
-                glm::vec3 impForce = j * c.normal;
-                glm::vec3 impTorqueA = glm::cross(ra, impForce);
-                glm::vec3 impTorqueB = glm::cross(rb, impForce);
-
-                A->P += impForce;
-                A->vel = A->P * A->invMass;
-                A->L += impTorqueA;
-                A->omega = A->Iinv * A->L;
-
-                B->P -= impForce;
-                B->vel = B->P * B->invMass;
-                B->L -= impTorqueB;
-                B->omega = B->Iinv * B->L;
-
-                if (!hasFriction) {
-                    continue;
-				}
-
-                glm::vec3 vrel = velpa - velpb;
-                glm::vec3 vrelt = vrel - glm::dot(vrel, c.normal) * c.normal;
-                glm::vec3 tangent = glm::normalize(vrelt);
-
-                if (glm::length(vrelt) > 0.0f) {
-                    glm::vec3 term1at = A->Iinv * glm::cross(ra, tangent);
-                    glm::vec3 term1bt = B->Iinv * glm::cross(rb, tangent);
-                    float term2at = glm::dot(tangent, glm::cross(term1at, ra));
-                    float term2bt = glm::dot(tangent, glm::cross(term1bt, rb));
-
-                    float jtmax = (1.0f - slipperiness) * j;
-                    float denominator = A->invMass + B->invMass + term2at + term2bt;
-                    float jt = glm::length(vrelt) / denominator;
-                    jt = glm::clamp(jt, -jtmax, jtmax);
-
-                    glm::vec3 fricImpForce = -jt * tangent;
-                    glm::vec3 fricImpTorqueA = glm::cross(ra, fricImpForce);
-                    glm::vec3 fricImpTorqueB = glm::cross(rb, fricImpForce);
-
-                    A->P += fricImpForce;
-                    A->vel = A->P * A->invMass;
-                    A->L += fricImpTorqueA;
-                    A->omega = A->Iinv * A->L;
-
-                    B->P -= fricImpForce;
-                    B->vel = B->P * B->invMass;
-                    B->L -= fricImpTorqueB;
-                    B->omega = B->Iinv * B->L;
-                }
-            }
-
-            if (contactType == ContactType::RESTING) {
-               
-			}
-        }
-    }
+    
 
     void CollisionHandler::handleCollisions(utl::svec<SceneObject>& sceneObjects) {
-        currentContacts.clear();
-        currentContacts = calculateContacts(sceneObjects);
-        for (const auto& contact : currentContacts) {
-            if (enableDisplacement) {
-                pushObjectsApart(contact);
+        utl::svec<SceneObject> currentObjects;
+        for (const auto& sceneObject : sceneObjects) {
+            glm::vec3 X = sceneObject->getPhysicsSolver()->Body.X;
+            Logger::logIf(enableContactLog, Logger::LGL_INFO, "Object {} at position ({:.3f}, {:.3f}, {:.3f})\n",
+				sceneObject->getName(), X.x, X.y, X.z);
+
+            if(!isFrozen(sceneObject.get())) {
+                currentObjects.push_back(sceneObject);
             }
         }
 
-        for (const auto& contact : currentContacts) {
-            if (enableImpulses) {
-                applyImpulse(contact);
-            }
-		}
+        currentContacts.clear();
+        currentContacts = calculateContacts(currentObjects);
+
+        if (enableContactLog && currentContacts.size() > 0) {
+			logContacts = true;
+        }
+
+		applyImpulses();
+		reclassifyContacts(currentObjects);
+		resolveRestingContacts();
+
+		logContacts = false;
     }
 
     void CollisionHandler::debugDrawCollisions(const utl::svec<SceneObject>& sceneObjects, const Camera& camera) {
         if (enableDebug) {
             drawCollidersOf(sceneObjects, camera);
-        }
-
-        for (const auto& interaction : currentContacts) {
-            if (enableDebug) {
-                debugContact(interaction, camera);
-            }
+            debugContacts(camera);
         }
     }
 }
