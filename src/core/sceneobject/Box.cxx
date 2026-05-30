@@ -106,6 +106,8 @@ namespace lgl {
 		float h = m_dimensions.y * scaling.y;
 		float l = m_dimensions.z * scaling.z;
 
+		m_dimensions = glm::vec3(w, h, l);
+
 		float& invMass = m_physicsSolver->Body.invMass;
 		invMass = 1.0f / (w * h * l * m_massFactor);
 

@@ -68,9 +68,6 @@ export namespace qp {
         std::vector<Eigen::Triplet<double>> triplets;
         triplets.reserve(n * n);
 
-        // OSQP needs the Hessian to be symmetric.
-        // Supplying the full sparse matrix is fine with OSQP-Eigen,
-        // but keeping it symmetric explicitly is important.
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < n; ++j) {
                 const double value = dense(i, j);
@@ -94,20 +91,13 @@ export namespace qp {
             return false;
         }
 
-        // 1. Symmetrize A defensively.
         Eigen::MatrixXd P_dense = 0.5 * (contactA + contactA.transpose());
 
-        // Optional tiny regularization.
-        // Useful if OSQP complains about near-singular PSD matrices.
         const double regularization = 1e-9;
         P_dense.diagonal().array() += regularization;
 
-        // 2. q = b.
         Eigen::VectorXd q = contactB;
 
-        // 3. Constraint: f >= 0.
-        // OSQP uses l <= Cx <= u.
-        // Here C = I, l = 0, u = +infinity.
         Eigen::SparseMatrix<double> P = denseToSparseUpperSymmetric(P_dense);
 
         Eigen::SparseMatrix<double> C(n, n);
@@ -122,7 +112,6 @@ export namespace qp {
         solver.settings()->setVerbosity(false);
         solver.settings()->setWarmStart(true);
 
-        // For realtime physics, you usually do not need extreme precision.
         solver.settings()->setAbsoluteTolerance(1e-5);
         solver.settings()->setRelativeTolerance(1e-5);
         solver.settings()->setMaxIteration(100);

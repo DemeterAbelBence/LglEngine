@@ -19,11 +19,11 @@ namespace lgl {
         inline static bool enableBisection = true;
 
         inline static bool enableContactLog = true;
-        inline static bool enableBisectionLog = true;
+        inline static bool enableBisectionLog = false;
 
         inline static float elasticity = 0.5f;
 
-        inline static float bisectionBias = 0.00001f;
+        inline static float bisectionBias = 0.0001f;
 		inline static float contactBias = 0.005f;
 		inline static float PSDTolerance = 1e-6f;
 
@@ -41,6 +41,7 @@ namespace lgl {
 		inline static utl::vec<CONTACT> restingContacts = utl::vec<CONTACT>();
 
 		inline static bool logContacts = false;
+		inline static float bisectedTime = -1.0f;
 
     private:
         static utl::vec<CONTACT> calculateContacts(utl::svec<SceneObject>& sceneObjects);

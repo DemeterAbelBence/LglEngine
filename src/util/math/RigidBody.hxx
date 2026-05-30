@@ -31,6 +31,7 @@ namespace lgl {
         public:
             BodyData Body;
             BodyData Initial;
+            BodyData Previous;
 
         public:
             PhysicsSolver(BodyData _Body) : Body(_Body) {}
@@ -41,7 +42,7 @@ namespace lgl {
             void rollbackToInitial() { Body = Initial; }
             void makeStateInitial() { Initial = Body; }
 
-            void updateForces();
+            void initForces();
             void updateVelocities();
             void updateState(float dt);
         };

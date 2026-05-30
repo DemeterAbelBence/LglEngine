@@ -14,6 +14,7 @@ namespace lgl {
     }
 
     utl::vec<CollisionHandler::CONTACT> CollisionHandler::calculateContacts(utl::svec<SceneObject>& sceneObjects) {
+		// This lambda calculates the contacts between all pairs of scene objects and returns a vector of CONTACT tuples.
         auto resolveCollisions = [](utl::vec<CONTACT>& contacts, const utl::svec<SceneObject>& sceneObjects) {
             bool processedAll = false;
             utl::svec<SceneObject> underProcess = sceneObjects;
@@ -47,8 +48,9 @@ namespace lgl {
                     processedAll = true;
                 }
             }
-            };
+        };
 
+		// This lambda function calculates the maximum penetration depth from a vector of contacts.
         auto calculateMaxDepth = [](utl::vec<CONTACT>& contacts) {
             float maxDepth = 0.0f;
             for (const auto& contact : contacts) {
@@ -61,74 +63,78 @@ namespace lgl {
             return maxDepth;
         };
 
+		// Initial collision resolution to get the contacts at the end of the current time step.
         float deltaTime = Time::s_fixedDeltaTime;
         utl::vec<CONTACT> contacts;
         resolveCollisions(contacts, sceneObjects);
 
+		// If bisection is not enabled, return the contacts as they are.
         if (!enableBisection) {
             return contacts;
         }
 
-        utl::umap<SceneObject*, ribo::BodyData> sceneSnapshot;
-        for (auto& sceneObject : sceneObjects) {
-            sceneSnapshot[sceneObject.get()] = sceneObject->getPhysicsSolver()->Body;
-        }
-
+		// If there are no contacts, there's no need for bisection, so return an empty vector.
         if (contacts.size() == 0) {
             return {};
         }
-        else {
-            float maxDepth = calculateMaxDepth(contacts);
-            if (maxDepth < bisectionBias) {
-                return contacts;
-            }
-            else {
-                for (auto& sceneObject : sceneObjects) {
-                    sceneObject->stepPhysicsBy(-deltaTime);
-                }
-            }
+
+		// If the maximum penetration depth is already less than the bisection bias, we can consider the contacts as sufficiently resolved and return them.
+		float finalDepth = calculateMaxDepth(contacts);
+        if(finalDepth < bisectionBias) {
+			Logger::logIf(enableBisectionLog, Logger::LGL_INFO, "Contact depth already below bias, skipping bisection\n\n", finalDepth, bisectionBias);
+            return contacts;
         }
+
+		// Create a snapshot of the current physics state of all scene objects to allow for rolling back during the bisection process.
+		utl::umap<SceneObject*, ribo::BodyData> snapshot;
+		for (auto& sceneObject : sceneObjects) {
+			snapshot[sceneObject.get()] = sceneObject->getPhysicsSolver()->Previous;
+		}
 
         bool sufficientSeparation = false;
-        float simulationDirection = 1.0f;
-        utl::uint iterCount = 0;
-        while (!sufficientSeparation) {
-            if (iterCount++ > 20) {
-                lgl::Logger::logIf(enableBisectionLog, lgl::Logger::LGL_INFO, "Bisection reached limit of 20 iterations\n\n", iterCount);
-                for (auto& sceneObject : sceneObjects) {
-                    auto snapshot = sceneSnapshot[sceneObject.get()];
-                    sceneObject->getPhysicsSolver()->Body = snapshot;
-                }
-                contacts.clear();
-                resolveCollisions(contacts, sceneObjects);
-                return contacts;
-            }
+		float currentTime = 0.0f;
+		float direction = 1.0f;
 
-            deltaTime *= 0.5f;
+		utl::uint maxIterations = 20;
+        utl::uint iterCount = 0;
+
+		// Bisection loop to find the time of impact with sufficient separation between objects.
+        while (!sufficientSeparation) {
+			deltaTime *= 0.5f;
+			currentTime += direction * deltaTime;
 
             for (auto& sceneObject : sceneObjects) {
-                float step = simulationDirection * deltaTime;
-                sceneObject->stepPhysicsBy(step);
+                sceneObject->getPhysicsSolver()->Body = snapshot[sceneObject.get()];
+            }
+            for (auto& sceneObject : sceneObjects) {
+                sceneObject->stepPhysicsBy(currentTime);
+                sceneObject->updateTransformations();
             }
 
-            contacts.clear();
+			contacts.clear();
             resolveCollisions(contacts, sceneObjects);
+            if (contacts.size() > 0) {
+				float maxDepth = calculateMaxDepth(contacts);
+                if (maxDepth < bisectionBias) {
+                    sufficientSeparation = true;
+					finalDepth = maxDepth;
+                    Logger::logIf(enableBisectionLog, Logger::LGL_INFO, "Bisection converged in {} iterations\n", iterCount);
+                }
 
-            if (contacts.size() == 0) {
-                simulationDirection = 1.0f;
+                direction = -1.0f;
             }
             else {
-                float maxDepth = calculateMaxDepth(contacts);
+                direction = 1.0f;
+			}
 
-                if (maxDepth < bisectionBias) {
-                    lgl::Logger::logIf(enableBisectionLog, lgl::Logger::LGL_INFO, "Bisected {} times, reached depth {}\n\n", iterCount, maxDepth);
-                    sufficientSeparation = true;
-                }
-                else {
-                    simulationDirection = -1.0f;
-                }
+            if (iterCount++ > maxIterations) {
+                sufficientSeparation = true;
+                Logger::logIf(enableBisectionLog, Logger::LGL_INFO, "Bisection reached limit of {} iterations\n", maxIterations);
             }
         }
+
+        Logger::logIf(enableBisectionLog, Logger::LGL_INFO, "Bisection final depth: {:.6f}\n\n", finalDepth);
+		bisectedTime = currentTime;
 
         return contacts;
     }
@@ -394,7 +400,24 @@ namespace lgl {
             glm::vec3 velpa = A->vel + glm::cross(A->omega, ra);
             glm::vec3 velpb = B->vel + glm::cross(B->omega, rb);
 
-            glm::vec3 ndot = glm::cross(B->omega, n);
+            glm::vec3 ndot;
+            if (contactData.isVertexFace) {
+                ndot = glm::cross(B->omega, n);
+            }
+            else {
+				glm::vec3 ea = contactData.edgeA[1];
+				glm::vec3 eb = contactData.edgeB[1];
+
+                glm::vec3 eadot = glm::cross(A->omega, ea);
+				glm::vec3 ebdot = glm::cross(B->omega, eb);
+                glm::vec3 n1 = glm::cross(ea, eb);
+				glm::vec3 z = glm::cross(eadot, eb) + glm::cross(ea, ebdot);
+                float l = glm::length(n1);
+                n1 = glm::normalize(n1);
+
+                ndot = (z - glm::cross(glm::cross(z, n1), n1)) / l;
+            }
+
             float k1 = glm::dot(n, a_ext_part - b_ext_part + a_vel_part - b_vel_part);
             float k2 = 2.0f * glm::dot(ndot, velpa - velpb);
 
@@ -412,65 +435,29 @@ namespace lgl {
             SceneObject* colliderObject = contact.get<2>();
             SceneObject* collideeObject = contact.get<3>();
 
+			ribo::BodyData* A = &(colliderObject->getPhysicsSolver()->Body);
+			ribo::BodyData* B = &(collideeObject->getPhysicsSolver()->Body);
+
             contactPoints.push_back(contactData.point);
-            /*glm::vec3 ra = c.point - A->X;
-            glm::vec3 rb = c.point - B->X;
+            glm::vec3 ra = contactData.point - A->X;
+            glm::vec3 rb = contactData.point - B->X;
             glm::vec3 velpa = A->vel + glm::cross(A->omega, ra);
             glm::vec3 velpb = B->vel + glm::cross(B->omega, rb);
             glm::vec3 vrel = velpa - velpb;
-            glm::vec3 vrelt = vrel - glm::dot(vrel, c.normal) * c.normal;
 
             DebugDrawer::setOverrideZ(1);
             DebugDrawer::setMode(GL_LINES);
 
             float debugveclen = 1.0f;
 
-            DebugDrawer::setVertexData({c.point, c.point + debugveclen * velpa});
+            DebugDrawer::setVertexData({contactData.point, contactData.point + debugveclen * velpa});
             DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 0.0f));
 
-            DebugDrawer::setVertexData({ c.point, c.point + debugveclen * velpb });
+            DebugDrawer::setVertexData({ contactData.point, contactData.point + debugveclen * velpb });
             DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 1.0f));
 
-            DebugDrawer::setVertexData({ c.point, c.point + debugveclen * vrel });
+            DebugDrawer::setVertexData({ contactData.point, contactData.point + debugveclen * vrel });
             DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 1.0f));
-
-            DebugDrawer::setVertexData({c.point, c.point + debugveclen * vrelt});
-            DebugDrawer::draw(camera.getV(), camera.getP(), glm::nullvec);
-
-            if (drawNormals) {
-                DebugDrawer::setVertexData({ c.point, c.point + 4.0f * c.normal });
-                DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.5f, 0.5f, 0.0f));
-            }
-
-            glm::vec3 rA = c.edgeA[0];
-            glm::vec3 xA = colliderObject->getPhysicsSolver()->Body.X;
-            glm::vec3 rB = c.edgeB[0];
-            glm::vec3 xB = collideeObject->getPhysicsSolver()->Body.X;
-            if (!c.isVertexFace) {
-                /* DebugDrawer::setMode(GL_POINTS);
-                 DebugDrawer::setOverrideZ(1);
-
-                 DebugDrawer::setVertexData({ rA, xA });
-                 // DebugDrawer::draw(camera, glm::nullvec);
-
-                 DebugDrawer::setVertexData({ rB, xB });
-                 // DebugDrawer::draw(camera, glm::vec3(1.0f, 1.0f, 1.0f));*/
-                 /*}
-
-                 Collider* collider = colliderObject->getCollider().get();
-                 Collider* collidee = collideeObject->getCollider().get();
-                 std::optional<glm::vec3> distanceVector = collider->calculateContactDepthWith(*collidee, c);
-                 if (distanceVector.has_value()) {
-                     DebugDrawer::setMode(GL_LINES);
-                     DebugDrawer::setOverrideZ(1);
-                     if (c.isVertexFace) {
-                         DebugDrawer::setVertexData({ c.point, c.point + *distanceVector });
-                     }
-                     else {
-                         DebugDrawer::setVertexData({ rA, rA + *distanceVector });
-                     }
-                     DebugDrawer::draw(camera.getV(), camera.getP(), glm::nullvec);
-                 }*/
         }
 
         DebugDrawer::setMode(GL_POINTS);
@@ -525,15 +512,6 @@ namespace lgl {
                 DebugDrawer::setOverrideZ(0);
                 // DebugDrawer::draw(camera, glm::vec3(1.0f, 0.0f, 0.0f));
             }
-
-            /* auto nullCollider = dynamic_cast<NullCollider*>(sceneObject->getCollider());
-             if (nullCollider != nullptr) {
-                 utl::vec<glm::vec3> x = { sceneObject->getPhysicsSolver()->Body.X };
-                 DebugDrawer::setMode(GL_POINTS);
-                 DebugDrawer::setVertexData(x);
-                 DebugDrawer::setOverrideZ(1);
-                 // DebugDrawer::draw(camera, glm::vec3(0.8f, 0.8f, 0.0f));
-             }*/
         }
     }
 
@@ -541,10 +519,8 @@ namespace lgl {
 
     void CollisionHandler::handleCollisions(utl::svec<SceneObject>& sceneObjects) {
         utl::svec<SceneObject> currentObjects;
-        for (const auto& sceneObject : sceneObjects) {
-            glm::vec3 X = sceneObject->getPhysicsSolver()->Body.X;
-            Logger::logIf(enableContactLog, Logger::LGL_INFO, "Object {} at position ({:.3f}, {:.3f}, {:.3f})\n",
-				sceneObject->getName(), X.x, X.y, X.z);
+        for (auto& sceneObject : sceneObjects) {
+            sceneObject->getPhysicsSolver()->initForces();
 
             if(!isFrozen(sceneObject.get())) {
                 currentObjects.push_back(sceneObject);
@@ -561,6 +537,14 @@ namespace lgl {
 		applyImpulses();
 		reclassifyContacts(currentObjects);
 		resolveRestingContacts();
+
+		if (bisectedTime >= 0.0f) {
+			float remainingTime = Time::s_fixedDeltaTime - bisectedTime;
+			for (auto& sceneObject : currentObjects) {
+				sceneObject->stepPhysicsBy(remainingTime);
+			}
+			bisectedTime = -1.0f;
+		}
 
 		logContacts = false;
     }

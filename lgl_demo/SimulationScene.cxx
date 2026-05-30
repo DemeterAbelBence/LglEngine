@@ -171,7 +171,7 @@ void SimulationScene::create() {
 		m_terrain->getPhysicsSolver()->makeStateInitial();
 		m_sceneObjects.push_back(m_terrain);
 
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 2; i++) {
 			float s = 10.0f / (i + 1);
 			auto woodBox = utl::makeSptr<Box>(false, glm::vec3(1.0f, 1.0f, 1.0f));
 			woodBox->setName(utl::strFormat("wood_box_{}", i));
@@ -235,9 +235,8 @@ void SimulationScene::update(GLFWwindow* window) {
 
 	m_terrain->updateTerrainParameters();
 
-	CollisionHandler::handleCollisions(m_sceneObjects);
-
 	m_simulationEventHandler.handleEvents(window, this);
+	CollisionHandler::handleCollisions(m_sceneObjects);
 
 	castShadowsOnTerrain();
 	m_sun->lightUpScene(m_sceneObjects, *m_buffers.at("DEPTH"));

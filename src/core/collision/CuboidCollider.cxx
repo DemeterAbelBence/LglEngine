@@ -164,12 +164,12 @@ namespace lgl {
             glm::vec3 ra = pa + alpha * va;
             glm::vec3 rb = pb + beta * vb;
             return Collider::ContactData{
-                glm::vec3((ra + rb) / 2.0f),
-                glm::normalize(glm::cross(vb, va)),
-                {},
-                false,
-                {ra, va},
-                {rb, vb}
+                .point = glm::vec3((ra + rb) / 2.0f),
+                .normal = glm::normalize(glm::cross(vb, va)),
+                .depth = {},
+                .isVertexFace = false,
+                .edgeA = {ra, va},
+                .edgeB = {rb, vb}
             };
         }
     }

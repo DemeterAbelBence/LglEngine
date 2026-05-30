@@ -36,9 +36,14 @@ namespace lgl {
         return *this;
     }
 
-    void ribo::PhysicsSolver::updateForces() {
-        Body.force = glm::vec3(0.0f, -9.81f, 0.0f);
-		Body.torque = glm::nullvec;
+    void ribo::PhysicsSolver::initForces() {
+        if (Body.invMass != 0.0f) {
+            Body.force = glm::vec3(0.0f, -9.81f, 0.0f) / Body.invMass;
+        }
+        else {
+            Body.force = glm::vec3(0.0f);
+		}
+        Body.torque = glm::vec3(0.0f);
     }
 
     void ribo::PhysicsSolver::updateVelocities() {
@@ -51,6 +56,8 @@ namespace lgl {
     }
 
     void ribo::PhysicsSolver::updateState(float dt) {
+        Previous = Body;
+
         // update momentums
         Body.P += Body.force * dt;
         Body.L += Body.torque * dt;
