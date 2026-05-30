@@ -50,7 +50,7 @@ namespace lgl {
             }
         };
 
-		// This lambda function calculates the maximum penetration depth from a vector of contacts.
+		// This lambda calculates the maximum penetration depth from a vector of contacts.
         auto calculateMaxDepth = [](utl::vec<CONTACT>& contacts) {
             float maxDepth = 0.0f;
             for (const auto& contact : contacts) {
@@ -136,6 +136,17 @@ namespace lgl {
         Logger::logIf(enableBisectionLog, Logger::LGL_INFO, "Bisection final depth: {:.6f}\n\n", finalDepth);
 		bisectedTime = currentTime;
 
+        for(const auto& contact : contacts) {
+			glm::vec3 pos = contact.get<1>().point;
+			glm::vec3 nor = contact.get<1>().normal;
+
+			Logger::logIf(enableBisectionLog, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, point=({:.2f}, {:.2f}, {:.2f}), normal=({:.2f}, {:.2f}, {:.2f})\n",
+				contact.get<0>(), contact.get<2>()->getName(), contact.get<3>()->getName(),
+				pos.x, pos.y, pos.z, nor.x, nor.y, nor.z);
+        }
+
+		Logger::logIf(enableBisectionLog, Logger::LGL_EMPTY, "\n");
+
         return contacts;
     }
 
@@ -175,8 +186,8 @@ namespace lgl {
                 ContactType contactType = getContactType(vreln);
 
                 if (contactType == ContactType::COLLIDING) {
-                    Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=COLLIDING, vreln={:.6f}\n",
-                        contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
+                    //Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=COLLIDING, vreln={:.6f}\n",
+                    //    contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
 
                     glm::vec3 term1an = A->Iinv * glm::cross(ra, contactData.normal);
                     glm::vec3 term1bn = B->Iinv * glm::cross(rb, contactData.normal);
@@ -204,13 +215,13 @@ namespace lgl {
                 }
 
                 if (contactType == ContactType::SEPARATING) {
-                    Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=SEPARATING, vreln={:.6f}\n",
-                        contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
+                    //Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=SEPARATING, vreln={:.6f}\n",
+                    //    contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
                 }
 
                 if (contactType == ContactType::RESTING) {
-                    Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=RESTING, vreln={:.6f}\n",
-                        contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
+                   // Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=RESTING, vreln={:.6f}\n",
+                   //    contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
                 }
             }
         }
@@ -272,7 +283,7 @@ namespace lgl {
             
 
             if (eig::isPSD(A, PSDTolerance)) {
-                Logger::logIf(logContacts, Logger::LGL_INFO, "Resting contact matrix is positive semi-definite :)\n");
+                //Logger::logIf(logContacts, Logger::LGL_INFO, "Resting contact matrix is positive semi-definite :)\n");
                 eig::vecd forces;
                 if (qp::solveBaraffContactForces(A, b, forces)) {
                     Logger::logIf(logContacts, Logger::LGL_INFO, "Contact forces solved:\n");
@@ -492,15 +503,6 @@ namespace lgl {
                     DebugDrawer::setVertexData(data);
                     DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.4f, 0.4f));
                 }
-
-                utl::vec<glm::vec3> torqueAxis;
-                torqueAxis.push_back(sceneObject->getPhysicsSolver()->Body.X);
-                glm::vec3 sideCenter = cuboidCollider->calculateSideCenter(transData.sides[0]);
-                torqueAxis.push_back(sideCenter);
-                DebugDrawer::setMode(GL_LINES);
-                DebugDrawer::setOverrideZ(1);
-                DebugDrawer::setVertexData(torqueAxis);
-                DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 1.0f, 1.0f));
             }
 
             auto sphereCollider = dynamic_cast<SphereCollider*>(sceneObject->getCollider().get());

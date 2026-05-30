@@ -1,6 +1,8 @@
 module;
 
 #include <iostream>
+#include <cstdio>
+#include <ctime>
 #include <vector>
 #include <unordered_map>
 #include <memory>
@@ -208,6 +210,17 @@ export namespace lgl {
 		return result;
 	}
 
+	inline bool logToFile = false;
+	inline utl::str logFilePath = []() {
+		CreateDirectoryA("../../logs", nullptr);
+		std::time_t t = std::time(nullptr);
+		std::tm tm{};
+		localtime_s(&tm, &t);
+		char buf[32];
+		std::strftime(buf, sizeof(buf), "lgl_%Y-%m-%d_%H-%M-%S.log", &tm);
+		return std::format("../../logs/{}", buf);
+	}();
+
 	class Logger {
 	private:
 		inline static bool consoleInitialized = false;
@@ -249,38 +262,58 @@ export namespace lgl {
 			LC_CYAN = 11
 		};
 
-      template<typename... Args>
-		static void log(LogLevel level, std::format_string<Args...> formatString, Args&&... args) {
-			// Logging enabled by default for backward compatibility with existing call sites.
-			enableAnsiColors();
+		static utl::str ansiColorCode(LogColor color) {
+			switch (color) {
+				case LC_RED:     return "\033[31m";
+				case LC_YELLOW:  return "\033[33m";
+				case LC_GREEN:   return "\033[32m";
+				case LC_CYAN:    return "\033[36m";
+				default:         return "\033[0m";
+			}
+		}
 
+		template<typename... Args>
+		static void log(LogLevel level, std::format_string<Args...> formatString, Args&&... args) {
 			utl::str formattedMsg = std::format(formatString, std::forward<Args>(args)...);
 
 			utl::str levelStr;
+			LogColor color = LC_DEFAULT;
 			switch (level) {
-				case LGL_INFO: 
-					levelStr = "[LGL_INFO] "; 
-					SetConsoleTextAttribute(hConsole, LogColor::LC_CYAN);
+				case LGL_INFO:
+					levelStr = "[LGL_INFO] ";
+					color = LC_CYAN;
 					break;
 				case LGL_WARN:
-					levelStr = "[LGL_WARN] "; 
-					SetConsoleTextAttribute(hConsole, LogColor::LC_YELLOW);
+					levelStr = "[LGL_WARN] ";
+					color = LC_YELLOW;
 					break;
 				case LGL_ERROR:
 					levelStr = "[LGL_ERROR] ";
-					SetConsoleTextAttribute(hConsole, LogColor::LC_RED);
+					color = LC_RED;
 					break;
 				case LGL_OK:
 					levelStr = "[LGL_OK] ";
-					SetConsoleTextAttribute(hConsole, LogColor::LC_GREEN);
+					color = LC_GREEN;
 					break;
 				case LGL_EMPTY:
 					levelStr = "";
 					break;
 			}
 
-			std::cout << levelStr << formattedMsg;
-			SetConsoleTextAttribute(hConsole, LogColor::LC_DEFAULT);
+			if (logToFile) {
+				FILE* file = nullptr;
+				fopen_s(&file, logFilePath.c_str(), "a");
+				if (file) {
+					fputs(levelStr.c_str(), file);
+					fputs(formattedMsg.c_str(), file);
+					fclose(file);
+				}
+			} else {
+				enableAnsiColors();
+				SetConsoleTextAttribute(hConsole, color);
+				std::cout << levelStr << formattedMsg;
+				SetConsoleTextAttribute(hConsole, LC_DEFAULT);
+			}
 		}
 
 		template<typename... Args>

@@ -41,6 +41,12 @@ void SimulationInterface::renderSimulationSettings() {
 
     ImGui::Separator();
 
+    bool efl = lgl::logToFile;
+    utl::cstr fileLogText = efl ? "Disable file logging" : "Enable file logging";
+    if (ImGui::Button(fileLogText)) {
+        lgl::logToFile = !efl;
+    }
+
     bool ecl = CollisionHandler::enableContactLog;
     utl::cstr contactLogText = ecl ? "Disable contact log" : "Enable contact log";
     if (ImGui::Button(contactLogText)) {
