@@ -19,9 +19,9 @@ namespace lgl {
         inline static bool enableBisection = true;
 
         inline static bool enableContactLog = true;
-        inline static bool enableBisectionLog = false;
+        inline static bool enableBisectionLog = true;
 
-        inline static float elasticity = 0.5f;
+        inline static float elasticity = 0.3f;
 
         inline static float bisectionBias = 0.0001f;
 		inline static float contactBias = 0.005f;

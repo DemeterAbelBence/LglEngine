@@ -183,21 +183,6 @@ void SimulationScene::create() {
 			woodBox->getPhysicsSolver()->makeStateInitial();
 			m_sceneObjects.push_back(woodBox);
 		}
-
-		/*for (int i = 0; i < 1; i++) {
-			for (int j = 0; j < 1; j++) {
-				float s = 10.0f / (i + 1);
-				auto woodBox = utl::makeSptr<Box>(false, glm::vec3(1.0f, 1.0f, 1.0f));
-				woodBox->m_name = utl::strFormat("woodBox_{}", i);
-				woodBox->getMesh()->setProgram(m_programs.at("PHONG"));
-				woodBox->getMesh()->setMaterial(m_materials.at("WHITE"));
-				woodBox->getMesh()->addTexture(m_textures.at("WOOD"));
-				woodBox->translate(glm::vec3(i * 12.0f, 8.0f, j * 12.0f));
-				woodBox->scale(glm::vec3(s, s, s));
-				woodBox->getPhysicsSolver()->makeStateInitial();
-				m_sceneObjects.push_back(woodBox);
-			}
-		}*/
 	} 
 	catch (const utl::except& error) {
 		throw error;

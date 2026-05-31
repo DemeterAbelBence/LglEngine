@@ -210,16 +210,9 @@ export namespace lgl {
 		return result;
 	}
 
-	inline bool logToFile = false;
-	inline utl::str logFilePath = []() {
-		CreateDirectoryA("../../logs", nullptr);
-		std::time_t t = std::time(nullptr);
-		std::tm tm{};
-		localtime_s(&tm, &t);
-		char buf[32];
-		std::strftime(buf, sizeof(buf), "lgl_%Y-%m-%d_%H-%M-%S.log", &tm);
-		return std::format("../../logs/{}", buf);
-	}();
+
+
+
 
 	class Logger {
 	private:
@@ -262,6 +255,13 @@ export namespace lgl {
 			LC_CYAN = 11
 		};
 
+		enum LogMode {
+			BISECTION_LOGS,
+			CONTACT_LOGS,
+			PHYSICS_LOGS,
+			GENERAL_LOGS
+		};
+
 		static utl::str ansiColorCode(LogColor color) {
 			switch (color) {
 				case LC_RED:     return "\033[31m";
@@ -272,6 +272,60 @@ export namespace lgl {
 			}
 		}
 
+		static void setLogMode(LogMode logMode) {
+			utl::str folderName, fileName;
+
+			switch (logMode) {
+			case BISECTION_LOGS:
+				folderName = "bisection";
+				fileName = "lgl_bis_";
+				break;
+			case CONTACT_LOGS:
+				folderName = "contact";
+				fileName = "lgl_con_";
+				break;
+			case PHYSICS_LOGS:
+				folderName = "physics";
+				fileName = "lgl_phy_";
+				break;
+			case GENERAL_LOGS:
+				folderName = "general";
+				fileName = "lgl_gen_";
+				break;
+			}
+
+			CreateDirectoryA("../../logs", nullptr);
+			utl::str folder = std::format("../../logs/{}", folderName);
+			CreateDirectoryA(folder.c_str(), nullptr);
+
+			logPath = std::format("../../logs/{}/{}{}.log", folderName, fileName, logTime);
+
+			currentLogMode = logMode;
+		}
+
+		inline static bool logToFile = false;
+		inline static utl::str logPath;
+		inline static LogMode currentLogMode = GENERAL_LOGS;
+		inline static utl::uint logFrequency = 3;
+		inline static const utl::str logTime = []() {
+			std::time_t t = std::time(nullptr);
+			std::tm tm{};
+			localtime_s(&tm, &t);
+			char buf[32];
+			std::strftime(buf, sizeof(buf), "%Y-%m-%d_%H-%M-%S", &tm);
+			return std::string(buf);
+		}();
+		inline static utl::umap<utl::uint, utl::ull> logCounters = {
+			{BISECTION_LOGS, 0},
+			{CONTACT_LOGS, 0},
+			{PHYSICS_LOGS, 0},
+			{GENERAL_LOGS, 0}
+		};
+
+		static void incrementLogCounterFor(LogMode logMode) {
+			logCounters[logMode]++;
+		}
+
 		template<typename... Args>
 		static void log(LogLevel level, std::format_string<Args...> formatString, Args&&... args) {
 			utl::str formattedMsg = std::format(formatString, std::forward<Args>(args)...);
@@ -279,36 +333,45 @@ export namespace lgl {
 			utl::str levelStr;
 			LogColor color = LC_DEFAULT;
 			switch (level) {
-				case LGL_INFO:
-					levelStr = "[LGL_INFO] ";
-					color = LC_CYAN;
-					break;
-				case LGL_WARN:
-					levelStr = "[LGL_WARN] ";
-					color = LC_YELLOW;
-					break;
-				case LGL_ERROR:
-					levelStr = "[LGL_ERROR] ";
-					color = LC_RED;
-					break;
-				case LGL_OK:
-					levelStr = "[LGL_OK] ";
-					color = LC_GREEN;
-					break;
-				case LGL_EMPTY:
-					levelStr = "";
-					break;
+			case LGL_INFO:
+				levelStr = "[LGL_INFO] ";
+				color = LC_CYAN;
+				break;
+			case LGL_WARN:
+				levelStr = "[LGL_WARN] ";
+				color = LC_YELLOW;
+				break;
+			case LGL_ERROR:
+				levelStr = "[LGL_ERROR] ";
+				color = LC_RED;
+				break;
+			case LGL_OK:
+				levelStr = "[LGL_OK] ";
+				color = LC_GREEN;
+				break;
+			case LGL_EMPTY:
+				levelStr = "";
+				break;
 			}
 
 			if (logToFile) {
-				FILE* file = nullptr;
-				fopen_s(&file, logFilePath.c_str(), "a");
-				if (file) {
-					fputs(levelStr.c_str(), file);
-					fputs(formattedMsg.c_str(), file);
-					fclose(file);
+				auto& counter = logCounters[static_cast<utl::uint>(currentLogMode)];
+				if (counter % logFrequency == 0) {
+					FILE* file = nullptr;
+					fopen_s(&file, logPath.c_str(), "a");
+					if (file) {
+						fputs(levelStr.c_str(), file);
+						fputs(formattedMsg.c_str(), file);
+						fclose(file);
+					}
 				}
-			} else {
+				else if (currentLogMode != GENERAL_LOGS){
+					return;
+				}
+
+				
+			}
+			else {
 				enableAnsiColors();
 				SetConsoleTextAttribute(hConsole, color);
 				std::cout << levelStr << formattedMsg;

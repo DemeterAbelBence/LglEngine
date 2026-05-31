@@ -9,6 +9,8 @@ import qpmodule;
 
 int main(void) {
 	try {
+		lgl::Logger::log(lgl::Logger::LGL_INFO, "Starting application...\n");
+
 		lgl::WindowManager windowManager("Simulation App", 1200, 800, 800, 800);
 		windowManager.defineLayout<SimulationScene, SimulationInterface>();
 		//windowManager.defineLayout<SponzaScene, LightingInterface>();
