@@ -88,12 +88,19 @@ namespace lgl {
         }
 
 		// Create a snapshot of the current physics state of all scene objects to allow for rolling back during the bisection process.
-		utl::umap<SceneObject*, ribo::BodyData> snapshot;
+		utl::umap<SceneObject*, ribo::BodyData> snapshotPrevious;
 		for (auto& sceneObject : sceneObjects) {
-			snapshot[sceneObject.get()] = sceneObject->getPhysicsSolver()->Previous;
+			snapshotPrevious[sceneObject.get()] = sceneObject->getPhysicsSolver()->Previous;
 		}
 
+        utl::umap<SceneObject*, ribo::BodyData> snapshotCurrent;
+        for (auto& sceneObject : sceneObjects) {
+            snapshotCurrent[sceneObject.get()] = sceneObject->getPhysicsSolver()->Body;
+        }
+
         bool sufficientSeparation = false;
+		bool reachedLimit = false;
+
 		float currentTime = 0.0f;
 		float direction = 1.0f;
 
@@ -108,7 +115,7 @@ namespace lgl {
 
 			// roll back all scene objects to the snapshot state and step their physics by the current time.
             for (auto& sceneObject : sceneObjects) {
-                sceneObject->getPhysicsSolver()->Body = snapshot[sceneObject.get()];
+                sceneObject->getPhysicsSolver()->Body = snapshotPrevious[sceneObject.get()];
             }
             for (auto& sceneObject : sceneObjects) {
                 sceneObject->stepPhysicsBy(currentTime);
@@ -133,14 +140,27 @@ namespace lgl {
 			}
 
             if (iterCount++ > maxIterations) {
-                sufficientSeparation = true;
                 Logger::logIf(enableBisectionLog, Logger::LGL_INFO, "Bisection reached limit of {} iterations\n", maxIterations);
+				reachedLimit = true;
+                sufficientSeparation = true;
             }
         }
 
-        Logger::logIf(enableBisectionLog, Logger::LGL_INFO, "Bisection final depth: {:.6f}\n\n", finalDepth);
-		Logger::logIf(enableBisectionLog, Logger::LGL_INFO, "Final time after bisection: {:.6f} seconds\n", currentTime);
-		bisectedTime = currentTime;
+        if (reachedLimit) {
+            for (auto& sceneObject : sceneObjects) {
+                sceneObject->getPhysicsSolver()->Body = snapshotCurrent[sceneObject.get()];
+            }
+
+            contacts.clear();
+            resolveCollisions(contacts, sceneObjects);
+            finalDepth = calculateMaxDepth(contacts);
+			bisectedTime = -1.0f;
+        }
+        else {
+            Logger::logIf(enableBisectionLog, Logger::LGL_INFO, "Bisection final depth: {:.6f}\n\n", finalDepth);
+            Logger::logIf(enableBisectionLog, Logger::LGL_INFO, "Final time after bisection: {:.6f} seconds\n", currentTime);
+            bisectedTime = currentTime;
+        }
 
 		// Log the final contacts after bisection with their positions and normals for debugging purposes.
         for(const auto& contact : contacts) {
@@ -564,9 +584,10 @@ namespace lgl {
             glm::vec3 pos = sceneObject->getPhysicsSolver()->Body.X;
             glm::vec3 vel = sceneObject->getPhysicsSolver()->Body.vel;
             glm::vec3 omega = sceneObject->getPhysicsSolver()->Body.omega;
+            float invMass = sceneObject->getPhysicsSolver()->Body.invMass;
             
-            Logger::logIf(logContacts, Logger::LGL_INFO, "State of {}: position=({:.2f}, {:.2f}, {:.2f}), velocity=({:.2f}, {:.2f}, {:.2f}), omega=({:.2f}, {:.2f}, {:.2f})\n",
-				sceneObject->getName(), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, omega.x, omega.y, omega.z);
+            Logger::logIf(logContacts, Logger::LGL_INFO, "State of {}: position=({:.2f}, {:.2f}, {:.2f}), velocity=({:.2f}, {:.2f}, {:.2f}), omega=({:.2f}, {:.2f}, {:.2f}), invMass={:.6f}\n",
+				sceneObject->getName(), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, omega.x, omega.y, omega.z, invMass);
         }
         Logger::logIf(logContacts, Logger::LGL_EMPTY, "\n-------------------------------------------------------------------\n\n");
 

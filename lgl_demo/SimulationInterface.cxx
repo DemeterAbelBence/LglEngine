@@ -89,6 +89,7 @@ void SimulationInterface::renderSimulationSettings() {
     ImGui::SliderFloat("Bisection Bias", &CollisionHandler::bisectionBias, 0.0f, 0.01f, "%.5f", 0);
     ImGui::SliderFloat("Contact Bias", &CollisionHandler::contactBias, 0.0f, 0.01f, "%.5f", 0);
 	ImGui::SliderFloat("PSD Tolerance", &CollisionHandler::PSDTolerance, 0.0f, 0.001f, "%.7f", 0);
+    ImGui::SliderInt("logFrequency", reinterpret_cast<int*>(&Logger::logFrequency), 1, 32);
 
 	ImGui::End();   
 }
