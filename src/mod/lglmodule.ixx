@@ -145,6 +145,13 @@ export namespace lgl {
 		// workflow utilities
 		using runtime = std::runtime_error;
 		using except = std::exception;
+
+		// Random utilities
+		using rdev = std::random_device;
+		using rng = std::mt19937;
+
+		template<typename T>
+		using udist = std::uniform_real_distribution<T>;
 		
 		template<typename T>
 		using opt = std::optional<T>;

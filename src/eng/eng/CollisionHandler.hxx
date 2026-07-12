@@ -18,8 +18,8 @@ namespace lgl {
         inline static bool enableImpulses = true;
         inline static bool enableBisection = true;
 
-        inline static bool enableContactLog = true;
-        inline static bool enableBisectionLog = true;
+        inline static bool enableContactLog = false;
+        inline static bool enableBisectionLog = false;
 
         inline static float elasticity = 0.3f;
 
@@ -44,6 +44,7 @@ namespace lgl {
 		inline static float bisectedTime = -1.0f;
 
     private:
+        static void resolveCollisions(utl::vec<CONTACT>& contacts, const utl::svec<SceneObject>& sceneObjects);
         static utl::vec<CONTACT> calculateContacts(utl::svec<SceneObject>& sceneObjects);
         static ContactType getContactType(float relativeVelocity);
         static void applyImpulses();

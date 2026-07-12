@@ -2,11 +2,13 @@
 
 namespace lgl {
     glm::mat3 ribo::star(glm::vec3 a) {
-        return glm::mat3(
+        glm::mat3 result = glm::mat3(
             glm::vec3(0.0f, -a[2], a[1]),
             glm::vec3(a[2], 0.0f, -a[0]),
             glm::vec3(-a[1], a[0], 0.0f)
         );
+
+		return result;
     }
 
     glm::mat3 ribo::orthonormalize(const glm::mat3& R) {

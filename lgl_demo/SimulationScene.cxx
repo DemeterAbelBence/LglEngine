@@ -51,6 +51,12 @@ void SimulationScene::initResources() {
 		phong->createProgram();
 		m_programs[phong->getProgramName()] = phong;
 
+		auto mPhong = utl::makeSptr<GpuProgram>("MPHONG");
+		mPhong->addShader(GL_VERTEX_SHADER, "shaders/phong/model-phong-vert.glsl");
+		mPhong->addShader(GL_FRAGMENT_SHADER, "shaders/phong/model-phong-frag.glsl");
+		mPhong->createProgram();
+		m_programs[mPhong->getProgramName()] = mPhong;
+
 		// TEX PROGRAM
 		auto texProgram= utl::makeSptr<GpuProgram>("TEX");
 		texProgram->addShader(GL_FRAGMENT_SHADER, "shaders/basic/tex-frag.glsl");
@@ -114,24 +120,24 @@ void SimulationScene::castShadowsOnTerrain() {
 }
 
 void SimulationScene::rollbackSimulation() {
-	/*std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> momentumDist(-10.0f, 10.0f);
-	std::uniform_real_distribution<float> angleDist(0.0f, 2.0f * 3.14159f);
-	std::uniform_real_distribution<float> axisDist(-1.0f, 1.0f);*/
+	/*utl::rdev rd;
+	utl::rng gen(rd());
+	utl::udist<float> momentumDist(-10.0f, 10.0f);
+	utl::udist<float> angleDist(0.0f, 2.0f * 3.14159f);
+	utl::udist<float> axisDist(-1.0f, 1.0f);*/
 
 	for (int i = 2; i < m_sceneObjects.size(); ++i) {
 		auto s = m_sceneObjects[i];
 		s->resetBodyState();
 	}
 
-	//for (int i = 2; i < m_sceneObjects.size(); ++i) {
-	//	auto s = m_sceneObjects[i];
-	//	glm::vec3 axis = glm::normalize(glm::vec3(axisDist(gen), axisDist(gen), axisDist(gen)));
-	//	s->setRotation(Transformation::makeRotationMatrix(axis, angleDist(gen)));
-	//	s->getPhysicsSolver()->Body.P = glm::vec3(momentumDist(gen), momentumDist(gen), momentumDist(gen));
-	//	s->getPhysicsSolver()->makeStateInitial();
-	//}
+	/*for (int i = 2; i < m_sceneObjects.size(); ++i) {
+		auto s = m_sceneObjects[i];
+		glm::vec3 axis = glm::normalize(glm::vec3(axisDist(gen), axisDist(gen), axisDist(gen)));
+		s->setRotation(Transformation::makeRotationMatrix(axis, angleDist(gen)));
+		s->getPhysicsSolver()->Body.P = glm::vec3(momentumDist(gen), momentumDist(gen), momentumDist(gen));
+		s->getPhysicsSolver()->makeStateInitial();
+	}*/
 }
 
 void SimulationScene::advanceSimulation(float deltaTime) {
@@ -171,7 +177,7 @@ void SimulationScene::create() {
 		m_terrain->getPhysicsSolver()->makeStateInitial();
 		m_sceneObjects.push_back(m_terrain);
 
-		for (int i = 0; i < 1; i++) {
+		/*for (int i = 0; i < 1; i++) {
 			float s = 10.0f / (i + 1);
 			auto woodBox = utl::makeSptr<Box>(false, glm::vec3(1.0f, 1.0f, 1.0f));
 			woodBox->setName(utl::strFormat("wood_box_{}", i));
@@ -182,6 +188,18 @@ void SimulationScene::create() {
 			woodBox->scale(glm::vec3(s, s, s));
 			woodBox->getPhysicsSolver()->makeStateInitial();
 			m_sceneObjects.push_back(woodBox);
+		}*/
+		
+		for (int i = 0; i < 2; i++) {
+			float s = 10.0f / (i + 1);
+			auto ironBox = utl::makeSptr<Box>(false, m_modelMeshes.at("IRONBOX"));
+			ironBox->setName(utl::strFormat("iron_box_{}", i));
+			ironBox->getMesh()->setProgram(m_programs.at("MPHONG"));
+			ironBox->getMesh()->setMaterial(m_materials.at("WHITE"));
+			ironBox->translate(glm::vec3(i, 10.0f + i * 10.0f, 0.0f));
+			ironBox->scale(glm::vec3(s, s, s));
+			ironBox->getPhysicsSolver()->makeStateInitial();
+			m_sceneObjects.push_back(ironBox);
 		}
 	} 
 	catch (const utl::except& error) {

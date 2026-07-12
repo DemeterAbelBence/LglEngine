@@ -60,5 +60,5 @@ void main() {
 	vec3 at = light.powerDensity / (pow(dist, 1.5));
 	vec3 radiance = ka + at * kd * light_cos + at * ks * pow(view_cos, sh);
 	
-	frag_col = vec4(1.0, 1.0, 1.0, 1.0);
+	frag_col = vec4(radiance, 1.0);
 }

@@ -193,9 +193,9 @@ namespace lgl {
                 auto contact = calculateEdgeIntersection(edgesA[i], vecA, a, edgesB[j], vecB, b);
                 if (contact.has_value()) {
                     contact->depth = calculateDepth(collidee, *contact);
-                    if (contact->depth.has_value()) {
+                    //if (contact->depth.has_value()) {
                         result.push_back(*contact);
-					}
+					//}
                     
                 }
             }

@@ -1,58 +1,45 @@
 #include "CollisionHandler.hxx"
 
 namespace lgl {
-    CollisionHandler::ContactType CollisionHandler::getContactType(float relativeVelocity) {
-        if (relativeVelocity > contactBias) {
-            return ContactType::SEPARATING;
-        }
-        if (relativeVelocity > -contactBias) {
-            return ContactType::RESTING;
-        }
-        else {
-            return ContactType::COLLIDING;
+    void CollisionHandler::resolveCollisions(utl::vec<CONTACT>& contacts, const utl::svec<SceneObject>& sceneObjects) {
+        bool processedAll = false;
+        utl::svec<SceneObject> underProcess = sceneObjects;
+        utl::uint contactIndex = 0;
+
+        while (!processedAll) {
+            if (!underProcess.empty()) {
+                SceneObject* s1 = underProcess.back().get();
+                underProcess.pop_back();
+
+                for (const auto& s2Ptr : underProcess) {
+                    SceneObject* s2 = s2Ptr.get();
+
+                    auto s1_collider = s1->getCollider();
+                    auto s2_collider = s2->getCollider();
+
+                    auto collision1 = s1_collider->collidesWith(*s2_collider);
+                    for (const auto& contactData : collision1) {
+                        contacts.push_back({ ++contactIndex, contactData, s1, s2 });
+                    }
+
+                    auto collision2 = s2_collider->collidesWith(*s1_collider);
+                    for (const auto& contactData : collision2) {
+                        if (contactData.isVertexFace) {
+                            contacts.push_back({ ++contactIndex, contactData, s2, s1 });
+                        }
+                    }
+                }
+            }
+            else {
+                processedAll = true;
+            }
         }
     }
 
     utl::vec<CollisionHandler::CONTACT> CollisionHandler::calculateContacts(utl::svec<SceneObject>& sceneObjects) {
-        Logger::setLogMode(Logger::BISECTION_LOGS);
+		Logger::setLogMode(Logger::BISECTION_LOGS);
 
-		// This lambda calculates the contacts between all pairs of scene objects and returns a vector of CONTACT tuples.
-        auto resolveCollisions = [](utl::vec<CONTACT>& contacts, const utl::svec<SceneObject>& sceneObjects) {
-            bool processedAll = false;
-            utl::svec<SceneObject> underProcess = sceneObjects;
-            utl::uint contactIndex = 0;
-
-            while (!processedAll) {
-                if (!underProcess.empty()) {
-                    SceneObject* s1 = underProcess.back().get();
-                    underProcess.pop_back();
-
-                    for (const auto& s2Ptr : underProcess) {
-                        SceneObject* s2 = s2Ptr.get();
-
-                        auto s1_collider = s1->getCollider();
-                        auto s2_collider = s2->getCollider();
-
-                        auto collision1 = s1_collider->collidesWith(*s2_collider);
-                        for (const auto& contactData : collision1) {
-                            contacts.push_back({ ++contactIndex, contactData, s1, s2 });
-                        }
-
-                        auto collision2 = s2_collider->collidesWith(*s1_collider);
-                        for (const auto& contactData : collision2) {
-                            if (contactData.isVertexFace) {
-                                contacts.push_back({ ++contactIndex, contactData, s2, s1 });
-                            }
-                        }
-                    }
-                }
-                else {
-                    processedAll = true;
-                }
-            }
-        };
-
-		// This lambda calculates the maximum penetration depth from a vector of contacts.
+		// Calculates the maximum penetration depth from a vector of contacts.
         auto calculateMaxDepth = [](utl::vec<CONTACT>& contacts) {
             float maxDepth = 0.0f;
             for (const auto& contact : contacts) {
@@ -175,6 +162,18 @@ namespace lgl {
         Logger::logIf(enableBisectionLog, Logger::LGL_EMPTY, "\n-------------------------------------------------------------------\n\n");
 
         return contacts;
+    }
+
+    CollisionHandler::ContactType CollisionHandler::getContactType(float relativeVelocity) {
+        if (relativeVelocity > contactBias) {
+            return ContactType::SEPARATING;
+        }
+        if (relativeVelocity > -contactBias) {
+            return ContactType::RESTING;
+        }
+        else {
+            return ContactType::COLLIDING;
+        }
     }
 
     void CollisionHandler::applyImpulses() {
@@ -316,6 +315,8 @@ namespace lgl {
             
 			// Check if the contact matrix A is positive semi-definite, which is a requirement for solving the quadratic program for contact forces.
             if (eig::isPSD(A, PSDTolerance)) {
+                Logger::logIf(logContacts, Logger::LGL_OK, "Resting contact matrix is positive semi-definite, can solve QP :)\n");
+
                 eig::vecd forces;
                 if (qp::solveBaraffContactForces(A, b, forces)) {
                     Logger::logIf(logContacts, Logger::LGL_INFO, "Contact forces solved:\n");
@@ -339,14 +340,12 @@ namespace lgl {
                 }
             }
             else {
-                Logger::logIf(logContacts, Logger::LGL_WARN, "\nResting contact matrix is not positive semi-definite, cannot solve QP\n");
+                Logger::logIf(logContacts, Logger::LGL_WARN, "Resting contact matrix is not positive semi-definite, cannot solve QP\n");
             }
         }
 
         Logger::logIf(logContacts, Logger::LGL_EMPTY, "\n-------------------------------------------------------------------\n\n");
     }
-
-
 
     void CollisionHandler::computeRestingContactMatrix(eig::matd& matrix) {
         auto computeElementAt = [](const CONTACT& ci, const CONTACT& cj) {
@@ -504,6 +503,19 @@ namespace lgl {
 
             DebugDrawer::setVertexData({ contactData.point, contactData.point + debugveclen * vrel });
             DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 1.0f));
+
+            if (contactData.isVertexFace) {
+                glm::vec3 contactPoint1 = contactData.point;
+                glm::vec3 contactPoint2 = contactPoint1 + *contactData.depth;
+                DebugDrawer::setVertexData({ contactPoint1, contactPoint2 });
+                DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 0.0f));
+            }
+            else {
+				glm::vec3 edgePoint1 = contactData.edgeA[0];
+                glm::vec3 edgePoint2 = contactData.edgeB[0];
+                DebugDrawer::setVertexData({ edgePoint1, edgePoint2 });
+				DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 0.0f));
+            }
         }
 
         DebugDrawer::setMode(GL_POINTS);
