@@ -45,7 +45,10 @@ namespace lgl {
 
     private:
         static void resolveCollisions(utl::vec<CONTACT>& contacts, const utl::svec<SceneObject>& sceneObjects);
-        static utl::vec<CONTACT> calculateContacts(utl::svec<SceneObject>& sceneObjects);
+        static utl::vec<CONTACT> calculateContactsWithBisection(utl::svec<SceneObject>& sceneObjects);
+
+        static utl::vec<CONTACT> calculateContactsWithTranslation(utl::svec<SceneObject>& sceneObjects);
+
         static ContactType getContactType(float relativeVelocity);
         static void applyImpulses();
         static void reclassifyContacts(utl::svec<SceneObject>& sceneObjects);

@@ -36,7 +36,7 @@ namespace lgl {
         }
     }
 
-    utl::vec<CollisionHandler::CONTACT> CollisionHandler::calculateContacts(utl::svec<SceneObject>& sceneObjects) {
+    utl::vec<CollisionHandler::CONTACT> CollisionHandler::calculateContactsWithBisection(utl::svec<SceneObject>& sceneObjects) {
 		Logger::setLogMode(Logger::BISECTION_LOGS);
 
 		// Calculates the maximum penetration depth from a vector of contacts.
@@ -163,6 +163,16 @@ namespace lgl {
 
         return contacts;
     }
+
+    utl::vec<CollisionHandler::CONTACT> CollisionHandler::calculateContactsWithTranslation(utl::svec<SceneObject>& sceneObjects) {
+        // This function calculates all contact points as well as calculateContactsWithBisection
+        // But instead of bisection, it translates objects directly to prevent interpenetration
+
+
+
+        return {};
+    }
+
 
     CollisionHandler::ContactType CollisionHandler::getContactType(float relativeVelocity) {
         if (relativeVelocity > contactBias) {
@@ -570,7 +580,7 @@ namespace lgl {
 
         // Calculate contacts for the current active objects.
         currentContacts.clear();
-        currentContacts = calculateContacts(currentObjects);
+        currentContacts = calculateContactsWithBisection(currentObjects);
         if (enableContactLog && currentContacts.size() > 0) {
 			logContacts = true;
         }
