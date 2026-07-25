@@ -42,7 +42,7 @@ export namespace lgl {
 		using set = std::unordered_set<T>;
 
 		template<typename U, typename V>
-		using umap = std::unordered_map<U, V>;
+		using uvmap = std::unordered_map<U, V>;
 
 		template<typename T>
 		using imap = std::unordered_map<int, T>;
@@ -120,9 +120,18 @@ export namespace lgl {
 			return res;
 		}
 
+		template<typename T>
+		unsigned long long makePointerPairHash(T* ptr1, T* ptr2) {
+			size_t h1 = std::hash<T*>{}(ptr1);
+			size_t h2 = std::hash<T*>{}(ptr2);
+
+			return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
+		}
+
 		// Primitive type utilities
 		using int32 = std::int32_t;
 		using uint = std::uint32_t;
+		using ul = unsigned long;
 		using ull = std::uint64_t;
 		using byte = unsigned char;
 		using cmemptr = const void*;
@@ -322,7 +331,7 @@ export namespace lgl {
 			std::strftime(buf, sizeof(buf), "%Y-%m-%d_%H-%M-%S", &tm);
 			return std::string(buf);
 		}();
-		inline static utl::umap<utl::uint, utl::ull> logCounters = {
+		inline static utl::uvmap<utl::uint, utl::ull> logCounters = {
 			{BISECTION_LOGS, 0},
 			{CONTACT_LOGS, 0},
 			{PHYSICS_LOGS, 0},

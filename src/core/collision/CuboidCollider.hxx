@@ -41,8 +41,8 @@ namespace lgl {
 		void createSubdivision(utl::uint subdivideInto);
 
 	public:
-		inline static float vertexFaceThreshold = 0.4f;
-		inline static float edgeEdgeThreshold = 0.4f;
+		inline static float vertexFaceThreshold = 1.0f;
+		inline static float edgeEdgeThreshold = 1.0f;
 
 	private:
 		utl::vec<glm::vec3> getEdgesOf(const CuboidCollider& collider) const;

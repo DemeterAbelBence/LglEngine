@@ -76,5 +76,5 @@ void main() {
 
 	//float d = texture(DEPTH_MAP, p_texcoords).r;
 
-	frag_col = vec4(radiance, 1.0);
+	frag_col = vec4(radiance, 0.5);
 }

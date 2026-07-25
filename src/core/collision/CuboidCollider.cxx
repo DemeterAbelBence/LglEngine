@@ -193,9 +193,9 @@ namespace lgl {
                 auto contact = calculateEdgeIntersection(edgesA[i], vecA, a, edgesB[j], vecB, b);
                 if (contact.has_value()) {
                     contact->depth = calculateDepth(collidee, *contact);
-                    //if (contact->depth.has_value()) {
+                    if (contact->depth.has_value()) {
                         result.push_back(*contact);
-					//}
+					}
                     
                 }
             }
@@ -385,7 +385,6 @@ namespace lgl {
 
     utl::opt<glm::vec3> CuboidCollider::calculateDepth(const CuboidCollider& collidee, const ContactData& contact) const {
         if (contact.isVertexFace) {
-            glm::normalize(contact.normal);
             float faceDot = glm::dot(contact.point - contact.facePoint, contact.normal);
             if (faceDot >= 0.0f) {
                 return {};

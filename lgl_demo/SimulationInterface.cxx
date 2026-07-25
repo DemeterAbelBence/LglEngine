@@ -39,6 +39,16 @@ void SimulationInterface::renderSimulationSettings() {
         CollisionHandler::enableBisection = !ebis;
     }
 
+	bool epap = CollisionHandler::enablePushingApart;
+	utl::cstr pushingApartText = epap ? "Disable pushing apart" : "Enable pushing apart";
+    if (ImGui::Button(pushingApartText)) {
+        CollisionHandler::enablePushingApart = !epap;
+	}
+
+    if (ImGui::Button("Push apart once")) {
+		CollisionHandler::pushApartOnce = true;
+    }
+
     ImGui::Separator();
 
     bool efl = Logger::logToFile;

@@ -17,6 +17,8 @@ namespace lgl {
         inline static bool enableDebug = true;
         inline static bool enableImpulses = true;
         inline static bool enableBisection = true;
+		inline static bool enablePushingApart = false;
+		inline static bool pushApartOnce = true;
 
         inline static bool enableContactLog = false;
         inline static bool enableBisectionLog = false;
@@ -26,6 +28,7 @@ namespace lgl {
         inline static float bisectionBias = 0.0001f;
 		inline static float contactBias = 0.005f;
 		inline static float PSDTolerance = 1e-6f;
+		inline static float depthBias = 0.000001f;
 
         enum ContactType {
             COLLIDING,
@@ -41,13 +44,13 @@ namespace lgl {
 		inline static utl::vec<CONTACT> restingContacts = utl::vec<CONTACT>();
 
 		inline static bool logContacts = false;
-		inline static float bisectedTime = -1.0f;
+        inline static float bisectedTime = -1.0f;
 
     private:
         static void resolveCollisions(utl::vec<CONTACT>& contacts, const utl::svec<SceneObject>& sceneObjects);
         static utl::vec<CONTACT> calculateContactsWithBisection(utl::svec<SceneObject>& sceneObjects);
 
-        static utl::vec<CONTACT> calculateContactsWithTranslation(utl::svec<SceneObject>& sceneObjects);
+        static void resolveInterpenetrations(utl::svec<SceneObject>& sceneObjects);
 
         static ContactType getContactType(float relativeVelocity);
         static void applyImpulses();
@@ -56,6 +59,8 @@ namespace lgl {
 
         static void computeRestingContactMatrix(eig::matd& matrix);
         static void computeRestingContactVector(eig::vecd& vector);
+
+        static float calculateMaxDepth(utl::vec<CONTACT>& contacts);
 
         static void debugContacts(const Camera& camera);
         static void drawCollidersOf(const utl::svec<SceneObject>& sceneObjects, const Camera& camera);

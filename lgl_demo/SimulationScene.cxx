@@ -177,7 +177,7 @@ void SimulationScene::create() {
 		m_terrain->getPhysicsSolver()->makeStateInitial();
 		m_sceneObjects.push_back(m_terrain);
 
-		/*for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 2; i++) {
 			float s = 10.0f / (i + 1);
 			auto woodBox = utl::makeSptr<Box>(false, glm::vec3(1.0f, 1.0f, 1.0f));
 			woodBox->setName(utl::strFormat("wood_box_{}", i));
@@ -188,9 +188,9 @@ void SimulationScene::create() {
 			woodBox->scale(glm::vec3(s, s, s));
 			woodBox->getPhysicsSolver()->makeStateInitial();
 			m_sceneObjects.push_back(woodBox);
-		}*/
+		}
 		
-		for (int i = 0; i < 2; i++) {
+		/*for (int i = 0; i < 2; i++) {
 			float s = 10.0f / (i + 1);
 			auto ironBox = utl::makeSptr<Box>(false, m_modelMeshes.at("IRONBOX"));
 			ironBox->setName(utl::strFormat("iron_box_{}", i));
@@ -200,7 +200,7 @@ void SimulationScene::create() {
 			ironBox->scale(glm::vec3(s, s, s));
 			ironBox->getPhysicsSolver()->makeStateInitial();
 			m_sceneObjects.push_back(ironBox);
-		}
+		}*/
 	} 
 	catch (const utl::except& error) {
 		throw error;
