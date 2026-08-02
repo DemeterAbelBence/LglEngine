@@ -28,7 +28,8 @@ public:
 	const lgl::utl::sptr<lgl::Sun>& getSun() const { return m_sun; }
 	const auto& getSimulationEventHandler() { return m_simulationEventHandler; }
 
-	void rollbackSimulation();
+	void rollbackToinitial();
+	void rollbackToPrevious();
 	void advanceSimulation(float deltaTime);
 	void setSimulationSpeed(float speed);
 

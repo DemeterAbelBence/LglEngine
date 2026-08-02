@@ -21,33 +21,41 @@ void SimulationInterface::renderSimulationSettings() {
 
     ImGui::Begin("Simulation settings");
 
-    bool ed = CollisionHandler::enableDebug;
-    utl::cstr debugText = ed ? "Disable Debug" : "Enable Debug";
-    if (ImGui::Button(debugText)) {
-        CollisionHandler::enableDebug = !ed;
-    }
+	ImGui::Columns(2, "toggle_columns", false);
 
-    bool eimp = CollisionHandler::enableImpulses;
-    utl::cstr impulsesText = eimp ? "Disable impulses" : "Enable impulses";
-    if (ImGui::Button(impulsesText)) {
-        CollisionHandler::enableImpulses = !eimp;
-    }
+	bool ed = CollisionHandler::enableDebug;
+	utl::cstr debugText = ed ? "Disable Debug" : "Enable Debug";
+	if (ImGui::Button(debugText)) { CollisionHandler::enableDebug = !ed; }
 
-    bool ebis = CollisionHandler::enableBisection;
-    utl::cstr bisectionText = ebis ? "Disable bisection" : "Enable bisection";
-    if (ImGui::Button(bisectionText)) {
-        CollisionHandler::enableBisection = !ebis;
-    }
+	ImGui::NextColumn();
+
+	bool ebis = CollisionHandler::enableBisection;
+	utl::cstr bisectionText = ebis ? "Disable bisection" : "Enable bisection";
+	if (ImGui::Button(bisectionText)) { CollisionHandler::enableBisection = !ebis; }
+
+	ImGui::NextColumn();
+
+	bool eimp = CollisionHandler::enableImpulses;
+	utl::cstr impulsesText = eimp ? "Disable impulses" : "Enable impulses";
+	if (ImGui::Button(impulsesText)) { CollisionHandler::enableImpulses = !eimp; }
+
+	ImGui::NextColumn();
+
+	bool erf = CollisionHandler::enableRestingForces;
+	utl::cstr restingForcesText = erf ? "Disable resting forces" : "Enable resting forces";
+	if (ImGui::Button(restingForcesText)) { CollisionHandler::enableRestingForces = !erf; }
+
+	ImGui::NextColumn();
 
 	bool epap = CollisionHandler::enablePushingApart;
 	utl::cstr pushingApartText = epap ? "Disable pushing apart" : "Enable pushing apart";
-    if (ImGui::Button(pushingApartText)) {
-        CollisionHandler::enablePushingApart = !epap;
-	}
+	if (ImGui::Button(pushingApartText)) { CollisionHandler::enablePushingApart = !epap; }
 
-    if (ImGui::Button("Push apart once")) {
-		CollisionHandler::pushApartOnce = true;
-    }
+	ImGui::NextColumn();
+
+	if (ImGui::Button("Push apart once")) { CollisionHandler::pushApartOnce = true; }
+
+	ImGui::Columns(1);
 
     ImGui::Separator();
 
@@ -74,9 +82,10 @@ void SimulationInterface::renderSimulationSettings() {
 
     if (ImGui::Button("Simulate forward")) { m_simulationScene->advanceSimulation(Time::s_fixedDeltaTime); }
     if (ImGui::Button("Simulate backward")) { m_simulationScene->advanceSimulation(-Time::s_fixedDeltaTime); }
-    if (ImGui::Button("Rollback simulation")) { m_simulationScene->rollbackSimulation(); }
-    
-	SceneObject* currentObject = m_simulationScene->getCurrentSceneObject().get();
+    if (ImGui::Button("Rollback to initial")) { m_simulationScene->rollbackToinitial(); }
+    if (ImGui::Button("Rollback to previous")) { m_simulationScene->rollbackToPrevious(); }
+
+	/*SceneObject* currentObject = m_simulationScene->getCurrentSceneObject().get();
     if(CollisionHandler::isFrozen(currentObject)) {
         if (ImGui::Button("Unfreeze current")) {
             CollisionHandler::unfreezeObject(currentObject);
@@ -86,7 +95,7 @@ void SimulationInterface::renderSimulationSettings() {
         if (ImGui::Button("Freeze current")) {
             CollisionHandler::freezeObject(currentObject);
         }
-	}
+	}*/
 
     ImGui::Separator();
 

@@ -38,6 +38,13 @@ namespace lgl {
         return *this;
     }
 
+    void ribo::PhysicsSolver::rollbackToPrevious() {
+        if (!PreviousStates.empty()) {
+            Body = PreviousStates.back();
+            PreviousStates.pop_back();
+        }
+    }
+
     void ribo::PhysicsSolver::initForces() {
         if (Body.invMass != 0.0f) {
             Body.force = glm::vec3(0.0f, -9.81f, 0.0f) / Body.invMass;
@@ -58,7 +65,10 @@ namespace lgl {
     }
 
     void ribo::PhysicsSolver::updateState(float dt) {
-        Previous = Body;
+        PreviousStates.push_back(Body);
+        if (PreviousStates.size() > 10) {
+			PreviousStates.pop_front();
+        }
 
         // update momentums
         Body.P += Body.force * dt;

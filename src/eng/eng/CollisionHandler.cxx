@@ -76,7 +76,7 @@ namespace lgl {
 		// Create a snapshot of the current physics state of all scene objects to allow for rolling back during the bisection process.
 		utl::uvmap<SceneObject*, ribo::BodyData> snapshotPrevious;
 		for (auto& sceneObject : sceneObjects) {
-			snapshotPrevious[sceneObject.get()] = sceneObject->getPhysicsSolver()->Previous;
+			snapshotPrevious[sceneObject.get()] = sceneObject->getPhysicsSolver()->PreviousStates.back();
 		}
 
 		utl::uvmap<SceneObject*, ribo::BodyData> snapshotCurrent;
@@ -150,6 +150,7 @@ namespace lgl {
 
 		// Log the final contacts after bisection with their positions and normals for debugging purposes.
 		for (const auto& contact : contacts) {
+
 			glm::vec3 pos = contact.get<1>().point;
 			glm::vec3 nor = contact.get<1>().normal;
 
@@ -188,7 +189,7 @@ namespace lgl {
 				auto object1 = objectsPerPair[pairHash].get<0>();
 				auto object2 = objectsPerPair[pairHash].get<1>();
 
-				glm::vec3 displacementVector = glm::vec3(0.0f, 0.0f, 0.0f);
+				Collider::ContactData deepestContactData;
 				float maxDist = 0.0f;
 				for (const auto& contact : pairContacts) {
 					Collider::ContactData contactData = contact.get<1>();
@@ -196,19 +197,42 @@ namespace lgl {
 						float depthLength = glm::length(*contactData.depth);
 						if (depthLength > maxDist) {
 							maxDist = depthLength;
-							displacementVector = *contactData.depth;
+							deepestContactData = contactData;
 						}
 					}
 				}
 
 				if (maxDist == 0.0f) {
-					return;
+					break;
 				}
 
-				auto pushApart = [&object1, &object2](glm::vec3 dis, glm::vec3 dir) {
+				glm::vec3 object1Pos = object1->getPhysicsSolver()->Body.X;
+				glm::vec3 object2Pos = object2->getPhysicsSolver()->Body.X;
+
+				glm::vec3 point = deepestContactData.point;
+				glm::vec3 normal = deepestContactData.normal;
+				glm::vec3 displacement = *deepestContactData.depth;
+
+				SceneObject* objectToDisplace;
+				if (glm::dot(object1Pos - point, normal) > 0.0f) {
+					objectToDisplace = object1;
+				}
+				else if (glm::dot(object2Pos - point, normal) > 0.0f) {
+					objectToDisplace = object2;
+				}
+				else {
+					continue;
+				}
+
+				objectToDisplace->getPhysicsSolver()->Body.X += displacement;
+				objectToDisplace->updateTransformations();
+
+				/*auto pushApart = [&object1, &object2](glm::vec3 dis, glm::vec3 dir) {
 					glm::vec3 object1Pos = object1->getPhysicsSolver()->Body.X;
 					glm::vec3 object2Pos = object2->getPhysicsSolver()->Body.X;
 					SceneObject* objectToDisplace;
+
+					if(glm::dot(object1Pos - ))
 
 					if (glm::dot(dir, dis) < 0.0f) {
 						dis = -dis;
@@ -232,7 +256,7 @@ namespace lgl {
 					if (glm::length(projection) > 0.000001f) {
 						pushApart(projection, dir);
 					}
-				}
+				}*/
 			}
 		
 			contacts.clear();
@@ -257,11 +281,6 @@ namespace lgl {
 	void CollisionHandler::applyImpulses() {
 		Logger::setLogMode(Logger::CONTACT_LOGS);
 		Logger::logIf(logContacts, Logger::LGL_INFO, "Applying impulses to objects based on {} contacts:\n", currentContacts.size());
-
-		// If impulse resolution is not enabled, return immediately without applying any impulses.
-		if (!enableImpulses) {
-			return;
-		}
 
 		bool hadCollidingContact = true;
 		utl::uint iterCount = 0;
@@ -402,10 +421,15 @@ namespace lgl {
 					for (int i = 0; i < restingContacts.size(); ++i) {
 						// Extract contact information from the CONTACT tuple.
 						CONTACT& contact = restingContacts[i];
-						float forceMagnitude = eig::getAsFloatAt(forces, i);
 						const auto& contactData = contact.get<1>();
 						SceneObject* colliderObject = contact.get<2>();
 						SceneObject* collideeObject = contact.get<3>();
+
+						// Track the maximum resting force applied for logging purposes.
+						float forceMagnitude = eig::getAsFloatAt(forces, i);
+						if (forceMagnitude > maxRestingForceApplied) {
+							maxRestingForceApplied = forceMagnitude;
+						}
 
 						// Apply the contact force to both the collider and collidee objects in opposite directions along the contact normal.
 						glm::vec3 force = forceMagnitude * contactData.normal;
@@ -653,9 +677,13 @@ namespace lgl {
 		}
 
 		// Resolve all contact types
-		applyImpulses();
-		reclassifyContacts(currentObjects);
-		resolveRestingContacts();
+		if (enableImpulses) {
+			applyImpulses();
+		}
+		if(enableRestingForces) {
+			reclassifyContacts(currentObjects);
+			resolveRestingContacts();
+		}
 
 		// Stepping the time left after bisection to reach the end of the fixed time step
 		if (bisectedTime >= 0.0f) {

@@ -1,7 +1,7 @@
 #pragma once
 
-import lglmodule;
 import glmmodule;
+import lglmodule;
 
 namespace lgl {
     namespace ribo {
@@ -31,7 +31,7 @@ namespace lgl {
         public:
             BodyData Body;
             BodyData Initial;
-            BodyData Previous;
+            utl::queue<BodyData> PreviousStates;
 
         public:
             PhysicsSolver(BodyData _Body) : Body(_Body) {}
@@ -39,6 +39,7 @@ namespace lgl {
             PhysicsSolver(const PhysicsSolver& other);
             PhysicsSolver& operator=(const PhysicsSolver& other);
 
+            void rollbackToPrevious();
             void rollbackToInitial() { Body = Initial; }
             void makeStateInitial() { Initial = Body; }
 

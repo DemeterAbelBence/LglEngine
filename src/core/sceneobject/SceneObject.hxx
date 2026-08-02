@@ -48,7 +48,6 @@ namespace lgl {
 		virtual ribo::BodyData initializePhysics();
 		virtual void updateRigidBody();
 		virtual void stepPhysicsBy(float dt);
-		virtual void resetBodyState();
 		virtual void draw(const Camera& camera) const;
 		virtual void handleLighting(const Light& light, const FrameBuffer& depthMap, const glm::mat4& L);
 	};

@@ -92,7 +92,7 @@ namespace lgl {
 		m_collider->updateTransformations();
 	}
 
-	utl::sptr<SceneObject> SceneObject::clone(){
+	utl::sptr<SceneObject> SceneObject::clone() {
 		return utl::sptr<SceneObject>();
 	}
 
@@ -105,11 +105,6 @@ namespace lgl {
 
 	void SceneObject::stepPhysicsBy(float dt) {
 		m_physicsSolver->updateState(dt);
-		updateTransformations();
-	}
-
-	void SceneObject::resetBodyState() {
-		m_physicsSolver->rollbackToInitial();
 		updateTransformations();
 	}
 

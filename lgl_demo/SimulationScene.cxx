@@ -119,7 +119,7 @@ void SimulationScene::castShadowsOnTerrain() {
 	m_camera->resetView();
 }
 
-void SimulationScene::rollbackSimulation() {
+void SimulationScene::rollbackToinitial() {
 	/*utl::rdev rd;
 	utl::rng gen(rd());
 	utl::udist<float> momentumDist(-10.0f, 10.0f);
@@ -128,7 +128,8 @@ void SimulationScene::rollbackSimulation() {
 
 	for (int i = 2; i < m_sceneObjects.size(); ++i) {
 		auto s = m_sceneObjects[i];
-		s->resetBodyState();
+		s->getPhysicsSolver()->rollbackToInitial();
+		s->updateTransformations();
 	}
 
 	/*for (int i = 2; i < m_sceneObjects.size(); ++i) {
@@ -138,6 +139,14 @@ void SimulationScene::rollbackSimulation() {
 		s->getPhysicsSolver()->Body.P = glm::vec3(momentumDist(gen), momentumDist(gen), momentumDist(gen));
 		s->getPhysicsSolver()->makeStateInitial();
 	}*/
+}
+
+void SimulationScene::rollbackToPrevious() {
+	for (int i = 2; i < m_sceneObjects.size(); ++i) {
+		auto s = m_sceneObjects[i];
+		s->getPhysicsSolver()->rollbackToPrevious();
+		s->updateTransformations();
+	}
 }
 
 void SimulationScene::advanceSimulation(float deltaTime) {
@@ -177,7 +186,7 @@ void SimulationScene::create() {
 		m_terrain->getPhysicsSolver()->makeStateInitial();
 		m_sceneObjects.push_back(m_terrain);
 
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 3; i++) {
 			float s = 10.0f / (i + 1);
 			auto woodBox = utl::makeSptr<Box>(false, glm::vec3(1.0f, 1.0f, 1.0f));
 			woodBox->setName(utl::strFormat("wood_box_{}", i));

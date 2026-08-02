@@ -17,6 +17,7 @@ module;
 #include <filesystem>
 #include <format>
 #include <unordered_set>
+#include <deque>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -38,6 +39,9 @@ export module lglmodule;
 export namespace lgl {
 	namespace utl {
 		// Collection utilities
+		template<typename T>
+		using queue = std::deque<T>;
+
 		template<typename T>
 		using set = std::unordered_set<T>;
 

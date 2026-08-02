@@ -20,6 +20,8 @@ int main(void) {
 		lgl::Logger::log(lgl::Logger::LGL_ERROR, "Exception: {}\n", error.what());
 	}
 
+	lgl::Logger::log(lgl::Logger::LGL_INFO, "Maximum resting force applied: {}\n", lgl::CollisionHandler::maxRestingForceApplied);
+
 	lgl::Logger::log(lgl::Logger::LGL_EMPTY, "Exiting application...\n");
 
 	//qp::solveDummyQP();

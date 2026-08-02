@@ -15,10 +15,11 @@ namespace lgl {
     class CollisionHandler {
     public:
         inline static bool enableDebug = true;
-        inline static bool enableImpulses = true;
         inline static bool enableBisection = true;
+        inline static bool enableImpulses = true;
+        inline static bool enableRestingForces = false;
 		inline static bool enablePushingApart = false;
-		inline static bool pushApartOnce = true;
+		inline static bool pushApartOnce = false;
 
         inline static bool enableContactLog = false;
         inline static bool enableBisectionLog = false;
@@ -28,7 +29,9 @@ namespace lgl {
         inline static float bisectionBias = 0.0001f;
 		inline static float contactBias = 0.005f;
 		inline static float PSDTolerance = 1e-6f;
-		inline static float depthBias = 0.000001f;
+        inline static float depthBias = 0.000001f;
+
+        inline static float maxRestingForceApplied = 0.0f;
 
         enum ContactType {
             COLLIDING,
