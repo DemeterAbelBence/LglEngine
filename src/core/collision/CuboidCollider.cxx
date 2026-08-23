@@ -163,9 +163,15 @@ namespace lgl {
 
             glm::vec3 ra = pa + alpha * va;
             glm::vec3 rb = pb + beta * vb;
+            glm::vec3 n = glm::normalize(glm::cross(vb, va));
+
+            if (glm::dot(n, ra - rb) < 0.0f) {
+                n = -n;
+            }
+
             return Collider::ContactData{
                 .point = glm::vec3((ra + rb) / 2.0f),
-                .normal = glm::normalize(glm::cross(vb, va)),
+                .normal = -n,
                 .depth = {},
                 .isVertexFace = false,
                 .edgeA = {ra, va},
@@ -273,10 +279,8 @@ namespace lgl {
     CuboidCollider::CuboidCollider(const CuboidCollider& c) {
         geomType = c.geomType;
 
-
         baseData = c.baseData;
         transData = c.transData;
-
         
         transformation = c.transformation->clone();
     }

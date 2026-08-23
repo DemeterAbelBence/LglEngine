@@ -51,6 +51,10 @@ void SimulationInterface::renderSimulationSettings() {
 	utl::cstr pushingApartText = epap ? "Disable pushing apart" : "Enable pushing apart";
 	if (ImGui::Button(pushingApartText)) { CollisionHandler::enablePushingApart = !epap; }
 
+    bool dn = CollisionHandler::drawNormals;
+    utl::cstr drawNormalsText = dn ? "Draw normals" : "Hide normals";
+    if (ImGui::Button(drawNormalsText)) { CollisionHandler::drawNormals = !dn; }
+
 	ImGui::NextColumn();
 
 	if (ImGui::Button("Push apart once")) { CollisionHandler::pushApartOnce = true; }

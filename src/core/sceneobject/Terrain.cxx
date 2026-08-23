@@ -59,7 +59,7 @@ namespace lgl {
 			glm::vec3(0.0f),        // P
 			glm::vec3(0.0f),        // L 
 
-			glm::mat3(1.0f),        // Iinv 
+			glm::mat3(0.0f),        // Iinv 
 			glm::vec3(0.0f),        // vel 
 			glm::vec3(0.0f),        // omega 
 

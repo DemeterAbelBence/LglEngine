@@ -24,9 +24,7 @@ namespace lgl {
 
 					auto collision2 = s2_collider->collidesWith(*s1_collider);
 					for (const auto& contactData : collision2) {
-						if (contactData.isVertexFace) {
-							contacts.push_back({ ++contactIndex, contactData, s2, s1 });
-						}
+						contacts.push_back({ ++contactIndex, contactData, s2, s1 });
 					}
 				}
 			}
@@ -167,101 +165,57 @@ namespace lgl {
 	void CollisionHandler::resolveInterpenetrations(utl::svec<SceneObject>& sceneObjects) {
 		utl::vec<CONTACT> contacts;
 		resolveCollisions(contacts, sceneObjects);
-		float maxDepth = calculateMaxDepth(contacts);
-		utl::uint iterCount = 0;
 
-		while (maxDepth > depthBias) {
-			if (iterCount++ > 5) {
-				lgl::Logger::logIf(enableContactLog, lgl::Logger::LGL_INFO, "Interpenetration resolution reached limit of 5 iterations\n\n");
+		utl::uvmap<utl::ull, utl::vec<CONTACT>> contactsPerPair;
+		utl::uvmap<utl::ull, utl::tup<SceneObject*, SceneObject*>> objectsPerPair;
+
+		for (const auto& contact : contacts) {
+			utl::ull pairHash = utl::makePointerPairHash(contact.get<2>(), contact.get<3>());
+			contactsPerPair[pairHash].push_back(contact);
+			objectsPerPair[pairHash] = { contact.get<2>(), contact.get<3>() };
+		}
+
+		for (const auto& [pairHash, pairContacts] : contactsPerPair) {
+			auto object1 = objectsPerPair[pairHash].get<0>();
+			auto object2 = objectsPerPair[pairHash].get<1>();
+
+			Collider::ContactData deepestContactData;
+			float maxDist = 0.0f;
+			for (const auto& contact : pairContacts) {
+				Collider::ContactData contactData = contact.get<1>();
+				if (contactData.depth.has_value()) {
+					float depthLength = glm::length(*contactData.depth);
+					if (depthLength > maxDist) {
+						maxDist = depthLength;
+						deepestContactData = contactData;
+					}
+				}
+			}
+
+			if (maxDist == 0.0f) {
 				break;
 			}
 
-			utl::uvmap<utl::ull, utl::vec<CONTACT>> contactsPerPair;
-			utl::uvmap<utl::ull, utl::tup<SceneObject*, SceneObject*>> objectsPerPair;
+			glm::vec3 object1Pos = object1->getPhysicsSolver()->Body.X;
+			glm::vec3 object2Pos = object2->getPhysicsSolver()->Body.X;
 
-			for (const auto& contact : contacts) {
-				utl::ull pairHash = utl::makePointerPairHash(contact.get<2>(), contact.get<3>());
-				contactsPerPair[pairHash].push_back(contact);
-				objectsPerPair[pairHash] = { contact.get<2>(), contact.get<3>() };
+			glm::vec3 point = deepestContactData.point;
+			glm::vec3 normal = deepestContactData.normal;
+			glm::vec3 displacement = *deepestContactData.depth;
+
+			SceneObject* objectToDisplace;
+			if (glm::dot(object1Pos - point, normal) > 0.0f) {
+				objectToDisplace = object1;
+			}
+			else if (glm::dot(object2Pos - point, normal) > 0.0f) {
+				objectToDisplace = object2;
+			}
+			else {
+				continue;
 			}
 
-			for (const auto& [pairHash, pairContacts] : contactsPerPair) {
-				auto object1 = objectsPerPair[pairHash].get<0>();
-				auto object2 = objectsPerPair[pairHash].get<1>();
-
-				Collider::ContactData deepestContactData;
-				float maxDist = 0.0f;
-				for (const auto& contact : pairContacts) {
-					Collider::ContactData contactData = contact.get<1>();
-					if (contactData.depth.has_value()) {
-						float depthLength = glm::length(*contactData.depth);
-						if (depthLength > maxDist) {
-							maxDist = depthLength;
-							deepestContactData = contactData;
-						}
-					}
-				}
-
-				if (maxDist == 0.0f) {
-					break;
-				}
-
-				glm::vec3 object1Pos = object1->getPhysicsSolver()->Body.X;
-				glm::vec3 object2Pos = object2->getPhysicsSolver()->Body.X;
-
-				glm::vec3 point = deepestContactData.point;
-				glm::vec3 normal = deepestContactData.normal;
-				glm::vec3 displacement = *deepestContactData.depth;
-
-				SceneObject* objectToDisplace;
-				if (glm::dot(object1Pos - point, normal) > 0.0f) {
-					objectToDisplace = object1;
-				}
-				else if (glm::dot(object2Pos - point, normal) > 0.0f) {
-					objectToDisplace = object2;
-				}
-				else {
-					continue;
-				}
-
-				objectToDisplace->getPhysicsSolver()->Body.X += displacement;
-				objectToDisplace->updateTransformations();
-
-				/*auto pushApart = [&object1, &object2](glm::vec3 dis, glm::vec3 dir) {
-					glm::vec3 object1Pos = object1->getPhysicsSolver()->Body.X;
-					glm::vec3 object2Pos = object2->getPhysicsSolver()->Body.X;
-					SceneObject* objectToDisplace;
-
-					if(glm::dot(object1Pos - ))
-
-					if (glm::dot(dir, dis) < 0.0f) {
-						dis = -dis;
-					}
-					if (glm::dot(object1Pos, dir) > glm::dot(object2Pos, dir)) {
-						float invMass = object1->getPhysicsSolver()->Body.invMass;
-						objectToDisplace = invMass != 0.0f ? object1 : object2;
-					}
-					else {
-						float invMass = object2->getPhysicsSolver()->Body.invMass;
-						objectToDisplace = invMass != 0.0f ? object2 : object1;
-					}
-
-					objectToDisplace->getPhysicsSolver()->Body.X += dis;
-					objectToDisplace->updateTransformations();
-					};
-
-				std::array<glm::vec3, 3> directions = { glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f) };
-				for (const glm::vec3& dir : directions) {
-					glm::vec3 projection = dir * glm::dot(displacementVector, dir);
-					if (glm::length(projection) > 0.000001f) {
-						pushApart(projection, dir);
-					}
-				}*/
-			}
-		
-			contacts.clear();
-			resolveCollisions(contacts, sceneObjects);
-			maxDepth = calculateMaxDepth(contacts);
+			objectToDisplace->getPhysicsSolver()->Body.X += displacement;
+			objectToDisplace->updateTransformations();
 		}
 	}
 
@@ -427,8 +381,8 @@ namespace lgl {
 
 						// Track the maximum resting force applied for logging purposes.
 						float forceMagnitude = eig::getAsFloatAt(forces, i);
-						if (forceMagnitude > maxRestingForceApplied) {
-							maxRestingForceApplied = forceMagnitude;
+						if (forceMagnitude > maxRestingForce) {
+							continue;
 						}
 
 						// Apply the contact force to both the collider and collidee objects in opposite directions along the contact normal.
@@ -604,6 +558,11 @@ namespace lgl {
 
 			DebugDrawer::setVertexData({ contactData.point, contactData.point + debugveclen * vrel });
 			DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 1.0f));
+
+			if (drawNormals) {
+				DebugDrawer::setVertexData({ contactData.point, contactData.point + debugveclen * contactData.normal });
+				DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 1.0f, 0.0f));
+			}
 
 			if (contactData.isVertexFace) {
 				glm::vec3 contactPoint1 = contactData.point;

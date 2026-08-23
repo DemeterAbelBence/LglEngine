@@ -19,19 +19,21 @@ namespace lgl {
         inline static bool enableImpulses = true;
         inline static bool enableRestingForces = false;
 		inline static bool enablePushingApart = false;
+		inline static bool enableSplitImpulse = false;
 		inline static bool pushApartOnce = false;
-
-        inline static bool enableContactLog = false;
+		inline static bool enableContactLog = false;
         inline static bool enableBisectionLog = false;
+		inline static bool drawNormals = false;
 
         inline static float elasticity = 0.3f;
-
         inline static float bisectionBias = 0.0001f;
 		inline static float contactBias = 0.005f;
 		inline static float PSDTolerance = 1e-6f;
         inline static float depthBias = 0.000001f;
+        inline static float maxRestingForce = 2143289344.0f / 2.0f;
 
-        inline static float maxRestingForceApplied = 0.0f;
+        inline static int splitImpulseIterations = 5;
+        inline static float splitImpulseCorrectionFactor = 0.4f;
 
         enum ContactType {
             COLLIDING,

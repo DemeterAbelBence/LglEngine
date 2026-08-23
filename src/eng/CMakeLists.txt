@@ -39,6 +39,9 @@ PRIVATE
 
     ${CMAKE_CURRENT_LIST_DIR}/eng/CollisionHandler.hxx
     ${CMAKE_CURRENT_LIST_DIR}/eng/CollisionHandler.cxx
+
+    ${CMAKE_CURRENT_LIST_DIR}/eng/SceneParser.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/eng/SceneParser.cxx
 )
 
 target_include_directories(LglEng PUBLIC ${CMAKE_CURRENT_LIST_DIR})
