@@ -21,13 +21,8 @@ namespace lgl {
 		};
 
 		struct CuboidData {
-			float width;
-			float length;
-			float height;
-
 			utl::arr<glm::vec3, 8> points;
 			utl::arr<Side, 6> sides;
-			utl::vec<glm::vec3> subdivision;
 		};
 
 	private:
@@ -38,7 +33,6 @@ namespace lgl {
 		void createCorners();
 		void createSides();
 		Side createSide(const utl::arr<utl::uint, 4>& indices) const;
-		void createSubdivision(utl::uint subdivideInto);
 
 	public:
 		inline static float vertexFaceThreshold = 1.0f;

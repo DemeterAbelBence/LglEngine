@@ -2,19 +2,15 @@
 
 namespace lgl {
     void CuboidCollider::createCorners() {
-        float w = baseData.width / 2.0f;
-        float h = baseData.height / 2.0f;
-        float l = baseData.length / 2.0f;
+        baseData.points[0] = glm::vec3(-0.5f, -0.5f, 0.5f);
+        baseData.points[1] = glm::vec3(0.5f, -0.5f, 0.5f);
+        baseData.points[2] = glm::vec3(0.5f, -0.5f, -0.5f);
+        baseData.points[3] = glm::vec3(-0.5f, -0.5f, -0.5f);
 
-        baseData.points[0] = glm::vec3(-w, -h, l);
-        baseData.points[1] = glm::vec3(w, -h, l);
-        baseData.points[2] = glm::vec3(w, -h, -l);
-        baseData.points[3] = glm::vec3(-w, -h, -l);
-
-        baseData.points[4] = glm::vec3(-w, h, l);
-        baseData.points[5] = glm::vec3(w, h, l);
-        baseData.points[6] = glm::vec3(w, h, -l);
-        baseData.points[7] = glm::vec3(-w, h, -l);
+        baseData.points[4] = glm::vec3(-0.5f, 0.5f, 0.5f);
+        baseData.points[5] = glm::vec3(0.5f, 0.5f, 0.5f);
+        baseData.points[6] = glm::vec3(0.5f, 0.5f, -0.5f);
+        baseData.points[7] = glm::vec3(-0.5f, 0.5f, -0.5f);
 
         transData = baseData;
     }
@@ -29,63 +25,6 @@ namespace lgl {
         center /= static_cast<float>(indices.size());
 
         return { points, glm::normalize(center) };
-    }
-
-    void CuboidCollider::createSubdivision(utl::uint subdivideInto) {
-        const float eps = 0.0001f;
-        utl::vec<glm::vec3> totalSubd;
-
-        auto side = baseData.sides[0];
-        glm::vec3 sa = side.points[1] - side.points[0];
-        glm::vec3 sb = side.points[3] - side.points[0];
-        float la = glm::length(sa);
-        float lb = glm::length(sb);
-        float da = la / (float)subdivideInto;
-        float db = lb / (float)subdivideInto;
-        sa = glm::normalize(sa);
-        sb = glm::normalize(sb);
-        utl::vec<glm::vec3> sideSubd;
-        for (float i = 0.0f; i < la + eps; i += da) {
-            for (float j = 0.0f; j < lb + eps; j += db) {
-                glm::vec3 p = side.points[0] + i * sa + j * sb;
-                sideSubd.push_back(p);
-            }
-        }
-        totalSubd.insert(totalSubd.begin(), sideSubd.begin(), sideSubd.end());
-        for (auto& p : sideSubd) {
-            p -= baseData.height * side.normal;
-        }
-        totalSubd.insert(totalSubd.begin(), sideSubd.begin(), sideSubd.end());
-
-        auto p = side.points;
-        utl::vec<glm::vec3> edges;
-        edges.push_back(p[0]); edges.push_back(p[1]);
-        edges.push_back(p[1]); edges.push_back(p[2]);
-        edges.push_back(p[2]); edges.push_back(p[3]);
-        edges.push_back(p[3]); edges.push_back(p[0]);
-        utl::vec<glm::vec3> borderSubd;
-        for (int i = 0; i < edges.size(); i += 2) {
-            glm::vec3 ev = edges[i + 1] - edges[i];
-            glm::vec3 en = glm::normalize(ev);
-            float el = glm::length(ev);
-            float ed = el / (float)subdivideInto;
-            float l = el - ed + eps;
-            for (float j = 0.0f; j < l; j += ed) {
-                glm::vec3 p = edges[i] + j * en;
-                borderSubd.push_back(p);
-            }
-        }
-
-        float dh = baseData.height / (float)subdivideInto;
-        for (float i = dh; i < baseData.height - dh + eps; i += dh) {
-            for (const auto& b : borderSubd) {
-                glm::vec3 p = b - i * side.normal;
-                totalSubd.push_back(p);
-            }
-        }
-
-        baseData.subdivision = totalSubd;
-        transData.subdivision = totalSubd;
     }
 
     void CuboidCollider::createSides() {
@@ -136,7 +75,8 @@ namespace lgl {
         glm::vec3 pb, glm::vec3 vb, float b) const {
 
         if (va == glm::nullvec || vb == glm::nullvec) {
-            //Logger::logIf(false, Logger::LGL_ERROR, "Edge direction vector is zero: va={}, vb={}\n", va, vb);
+            constexpr utl::cstr logText = "Edge direction vector is zero : va = ({:.2f}, {:.2f}, {:.2f}), vb = ({:.2f}, {:.2f}, {:.2f})\n";
+            Logger::logIf(false, Logger::LGL_ERROR, logText, va.x, va.y, va.z, vb.x, vb.y, vb.z);
             return {};
         }
 
@@ -199,9 +139,9 @@ namespace lgl {
                 auto contact = calculateEdgeIntersection(edgesA[i], vecA, a, edgesB[j], vecB, b);
                 if (contact.has_value()) {
                     contact->depth = calculateDepth(collidee, *contact);
-                    //if (contact->depth.has_value()) {
+                    if (contact->depth.has_value()) {
                         result.push_back(*contact);
-					//}
+					}
                 }
             }
         }
@@ -264,15 +204,10 @@ namespace lgl {
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
     CuboidCollider::CuboidCollider(glm::vec3 dimensions) {
-        baseData.width = dimensions.x;
-        baseData.height = dimensions.y;
-        baseData.length = dimensions.z;
-
         geomType = GeomType::C_CUBOID;
 
         createCorners();
         createSides();
-        createSubdivision(1);
     }
 
     CuboidCollider::CuboidCollider(const CuboidCollider& c) {
@@ -317,18 +252,9 @@ namespace lgl {
     void CuboidCollider::updateTransformations() {
         glm::mat4 M = transformation->makeModelMatrix();
         glm::mat4 MI = transformation->makeModelInverseMatrix();
-        glm::vec3 scale = transformation->getScaling();
-
-        transData.width = scale.x * baseData.width;
-        transData.height = scale.y * baseData.height;
-        transData.length = scale.z * baseData.length;
 
         for (int i = 0; i < transData.points.size(); ++i) {
             transData.points[i] = glm::vec3(glm::vec4(baseData.points[i], 1.0f) * M);
-        }
-
-        for (int i = 0; i < transData.subdivision.size(); ++i) {
-            transData.subdivision[i] = glm::vec3(glm::vec4(baseData.subdivision[i], 1.0f) * M);
         }
 
         for (int i = 0; i < transData.sides.size(); ++i) {
@@ -358,7 +284,7 @@ namespace lgl {
         utl::vec<ContactData> result;
         glm::mat4 MI = collidee.getTransformation()->makeModelInverseMatrix();
         glm::mat4 M = collidee.getTransformation()->makeModelMatrix();
-        for (const auto& p : transData.subdivision) {
+        for (const auto& p : transData.points) {
             glm::vec3 tp = glm::vec3(glm::vec4(p, 1.0f) * MI);
             auto e = collidee.evaluateTerrainFormula(tp.x, tp.z);
 
@@ -397,16 +323,35 @@ namespace lgl {
             }
         }
         else {
-            glm::mat4 RT = collidee.getTransformation()->getR() * collidee.getTransformation()->getT();
-            glm::mat4 RTI = glm::inverse(RT);
+			// IS EDGE POINT A INSIDE COLLIDEE CUBOID
+            bool isInsideCollidee = false;
+            glm::mat4 RT1 = collidee.getTransformation()->getR() * collidee.getTransformation()->getT();
+            glm::mat4 RTI1 = glm::inverse(RT1);
             glm::vec3 edgePointA = contact.edgeA[0];
-            edgePointA = glm::vec3(glm::vec4(edgePointA, 1.0f) * RTI);
+            edgePointA = glm::vec3(glm::vec4(edgePointA, 1.0f) * RTI1);
+            glm::vec3 scaling1 = collidee.getTransformation()->getScaling();
+            if (glm::abs(edgePointA.x) < scaling1.x / 2.0f &&
+                glm::abs(edgePointA.y) < scaling1.y / 2.0f &&
+                glm::abs(edgePointA.z) < scaling1.z / 2.0f) {
+                isInsideCollidee = true;
+            }
 
-            if (glm::abs(edgePointA.x) < collidee.getTransData().width / 2.0f &&
-                glm::abs(edgePointA.y) < collidee.getTransData().height / 2.0f &&
-                glm::abs(edgePointA.z) < collidee.getTransData().length / 2.0f) {
+			// IS EDGE POINT B INSIDE COLLIDER CUBOID
+			bool isInsideCollider = false;
+			glm::mat4 RT2 = this->getTransformation()->getR() * this->getTransformation()->getT();
+			glm::mat4 RTI2 = glm::inverse(RT2);
+			glm::vec3 edgePointB = contact.edgeB[0];
+			edgePointB = glm::vec3(glm::vec4(edgePointB, 1.0f) * RTI2);
+            glm::vec3 scaling2 = this->getTransformation()->getScaling();
+            if (glm::abs(edgePointB.x) < scaling2.x / 2.0f &&
+                glm::abs(edgePointB.y) < scaling2.y / 2.0f &&
+                glm::abs(edgePointB.z) < scaling2.z / 2.0f) {
+                isInsideCollider = true;
+            }
 
-                return glm::vec3(contact.edgeB[0] - contact.edgeA[0]);
+            if (isInsideCollidee || isInsideCollider) {
+                glm::vec3 depthVec = glm::vec3(contact.edgeB[0] - contact.edgeA[0]);
+                return isInsideCollidee ? depthVec : -depthVec;
             }
             else {
                 return {};

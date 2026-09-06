@@ -47,12 +47,12 @@ void SimulationInterface::renderSimulationSettings() {
 
 	ImGui::NextColumn();
 
-	bool epap = CollisionHandler::enablePushingApart;
-	utl::cstr pushingApartText = epap ? "Disable pushing apart" : "Enable pushing apart";
-	if (ImGui::Button(pushingApartText)) { CollisionHandler::enablePushingApart = !epap; }
+	bool edp = CollisionHandler::enableDepenetration;
+	utl::cstr depenetrationText = edp ? "Disable depenetration" : "Enable depenetration";
+	if (ImGui::Button(depenetrationText)) { CollisionHandler::enableDepenetration = !edp; }
 
     bool dn = CollisionHandler::drawNormals;
-    utl::cstr drawNormalsText = dn ? "Draw normals" : "Hide normals";
+    utl::cstr drawNormalsText = dn ? "Hide normals" : "Draw normals";
     if (ImGui::Button(drawNormalsText)) { CollisionHandler::drawNormals = !dn; }
 
 	ImGui::NextColumn();
@@ -89,18 +89,6 @@ void SimulationInterface::renderSimulationSettings() {
     if (ImGui::Button("Simulate backward")) { m_simulationScene->advanceSimulation(-Time::s_fixedDeltaTime); }
     if (ImGui::Button("Rollback to initial")) { m_simulationScene->rollbackToinitial(); }
     if (ImGui::Button("Rollback to previous")) { m_simulationScene->rollbackToPrevious(); }
-
-	/*SceneObject* currentObject = m_simulationScene->getCurrentSceneObject().get();
-    if(CollisionHandler::isFrozen(currentObject)) {
-        if (ImGui::Button("Unfreeze current")) {
-            CollisionHandler::unfreezeObject(currentObject);
-        }
-    }
-    else {
-        if (ImGui::Button("Freeze current")) {
-            CollisionHandler::freezeObject(currentObject);
-        }
-	}*/
 
     ImGui::Separator();
 

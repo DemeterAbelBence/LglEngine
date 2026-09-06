@@ -335,10 +335,10 @@ export namespace lgl {
 			currentLogMode = logMode;
 		}
 
-		inline static bool logToFile = false;
+		inline static bool logToFile = true;
 		inline static utl::str logPath;
 		inline static LogMode currentLogMode = GENERAL_LOGS;
-		inline static utl::uint logFrequency = 3;
+		inline static utl::uint logFrequency = 7;
 		inline static const utl::str logTime = []() {
 			std::time_t t = std::time(nullptr);
 			std::tm tm{};

@@ -15,14 +15,14 @@ namespace lgl {
     class CollisionHandler {
     public:
         inline static bool enableDebug = true;
-        inline static bool enableBisection = false;
+        inline static bool enableBisection = true;
         inline static bool enableImpulses = true;
-        inline static bool enableRestingForces = false;
-		inline static bool enablePushingApart = false;
-		inline static bool enableSplitImpulse = false;
+        inline static bool enableRestingForces = true;
+		inline static bool enableDepenetration = false;
 		inline static bool pushApartOnce = false;
-		inline static bool enableContactLog = false;
-        inline static bool enableBisectionLog = false;
+		inline static bool enableContactLog = true;
+        inline static bool enableBisectionLog = true;
+		inline static bool enablePhysicsLog = true;
 		inline static bool drawNormals = false;
         inline static bool logStatesOnce = false;
 
@@ -33,16 +33,12 @@ namespace lgl {
         inline static float depthBias = 0.000001f;
         inline static float maxRestingForce = 2143289344.0f / 2.0f;
 
-        inline static int splitImpulseIterations = 5;
-        inline static float splitImpulseCorrectionFactor = 0.4f;
-
         enum ContactType {
             COLLIDING,
 			SEPARATING,
 			RESTING
         };
 
-    private:
         using CONTACT = utl::tup<utl::uint, Collider::ContactData, SceneObject*, SceneObject*>;
         inline static utl::vec<CONTACT> currentContacts = utl::vec<CONTACT>();
 		inline static utl::vec<CONTACT> restingContacts = utl::vec<CONTACT>();
@@ -51,25 +47,29 @@ namespace lgl {
         inline static float bisectedTime = -1.0f;
 
     private:
+        // Calculate contacts
         static void resolveCollisions(utl::vec<CONTACT>& contacts, const utl::svec<SceneObject>& sceneObjects);
         static utl::vec<CONTACT> calculateContactsWithBisection(utl::svec<SceneObject>& sceneObjects);
 
-        static void resolveInterpenetrations(utl::svec<SceneObject>& sceneObjects);
-
+		// Impulse resolution
         static ContactType getContactType(float relativeVelocity);
         static void applyImpulses();
         static void reclassifyContacts(utl::svec<SceneObject>& sceneObjects);
-		static void resolveRestingContacts();
 
+		// Resting contact resolution
         static void computeRestingContactMatrix(eig::matd& matrix);
         static void computeRestingContactVector(eig::vecd& vector);
+		static void resolveRestingContacts();
 
-        static float calculateMaxDepth(utl::vec<CONTACT>& contacts);
+		// Interpenetration resolution
+        static void resolveInterpenetrations(utl::svec<SceneObject>& sceneObjects);
 
+		// Debug and draw
         static void debugContacts(const Camera& camera);
         static void drawCollidersOf(const utl::svec<SceneObject>& sceneObjects, const Camera& camera);  
 
     public:
+		// Main entry point
         static void handleCollisions(utl::svec<SceneObject>& sceneObjects);
         static void debugDrawCollisions(const utl::svec<SceneObject>& sceneObjects, const Camera& camera);
     };

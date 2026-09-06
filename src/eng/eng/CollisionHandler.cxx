@@ -1,6 +1,79 @@
 #include "CollisionHandler.hxx"
 
 namespace lgl {
+	// Helper functions
+	void logPhysicsStateOfObjects(bool isLoggingEnabled, bool drawSeparator, const utl::svec<SceneObject>& sceneObjects) {
+		for (const auto& sceneObject : sceneObjects) {
+			if (utl::strEquals(sceneObject->getName(), "sun")) {
+				continue;
+			}
+
+			glm::vec3 X = sceneObject->getPhysicsSolver()->Body.X;
+			glm::vec3 V = sceneObject->getPhysicsSolver()->Body.vel;
+			glm::vec3 O = sceneObject->getPhysicsSolver()->Body.omega;
+			glm::vec3 P = sceneObject->getPhysicsSolver()->Body.P;
+			glm::vec3 L = sceneObject->getPhysicsSolver()->Body.L;
+
+			Logger::logIf(isLoggingEnabled, Logger::LGL_INFO, "State of {}:\n", sceneObject->getName());
+			Logger::logIf(isLoggingEnabled, Logger::LGL_INFO, "\tM = {:.6f}\n", sceneObject->getPhysicsSolver()->Body.invMass);
+			Logger::logIf(isLoggingEnabled, Logger::LGL_INFO, "\tX = ({:.2f}, {:.2f}, {:.2f})\n", X.x, X.y, X.z);
+			Logger::logIf(isLoggingEnabled, Logger::LGL_INFO, "\tV = ({:.2f}, {:.2f}, {:.2f})\n", V.x, V.y, V.z);
+			Logger::logIf(isLoggingEnabled, Logger::LGL_INFO, "\tO = ({:.2f}, {:.2f}, {:.2f})\n", O.x, O.y, O.z);
+			Logger::logIf(isLoggingEnabled, Logger::LGL_INFO, "\tP = ({:.2f}, {:.2f}, {:.2f})\n", P.x, P.y, P.z);
+			Logger::logIf(isLoggingEnabled, Logger::LGL_INFO, "\tL = ({:.2f}, {:.2f}, {:.2f})\n", L.x, L.y, L.z);
+		}
+
+		if (drawSeparator) {
+			Logger::logIf(isLoggingEnabled, Logger::LGL_EMPTY, "\n-------------------------------------------------------------------\n\n");
+		}
+	}
+	float calculateRelativeVelocityOf(const CollisionHandler::CONTACT& contact) {
+		// Extract contact information from the CONTACT tuple.
+		utl::uint contactIndex = contact.get<0>();
+		const auto& contactData = contact.get<1>();
+		SceneObject* colliderObject = contact.get<2>();
+		SceneObject* collideeObject = contact.get<3>();
+
+		// Get the physics body data for both the collider and collidee objects.
+		ribo::BodyData* A = &(colliderObject->getPhysicsSolver()->Body);
+		ribo::BodyData* B = &(collideeObject->getPhysicsSolver()->Body);
+
+		// Calculate the relative velocity at the contact point and determine the contact type (colliding, separating, or resting).
+		glm::vec3 ra = contactData.point - A->X;
+		glm::vec3 rb = contactData.point - B->X;
+		glm::vec3 velpa = A->vel + glm::cross(A->omega, ra);
+		glm::vec3 velpb = B->vel + glm::cross(B->omega, rb);
+		float vreln = glm::dot(contactData.normal, velpa - velpb);
+
+		return vreln;
+	}
+	utl::str contactTypeToString(CollisionHandler::ContactType type) {
+		switch (type) {
+		case CollisionHandler::ContactType::COLLIDING:
+			return "COLLIDING";
+		case CollisionHandler::ContactType::SEPARATING:
+			return "SEPARATING";
+		case CollisionHandler::ContactType::RESTING:
+			return "RESTING";
+		default:
+			throw utl::runtime("Invalid ContactType enum value");
+		}
+	}
+	float calculateMaxDepth(utl::vec<CollisionHandler::CONTACT>& contacts) {
+		float maxDepth = 0.0f;
+		for (const auto& contact : contacts) {
+			auto contactData = contact.get<1>();
+			if (contactData.depth.has_value()) {
+				float depth = glm::length(*contactData.depth);
+				maxDepth = glm::max(maxDepth, depth);
+			}
+		}
+		return maxDepth;
+	}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+
+
+	// calculate contacts
 	void CollisionHandler::resolveCollisions(utl::vec<CONTACT>& contacts, const utl::svec<SceneObject>& sceneObjects) {
 		bool processedAll = false;
 		utl::svec<SceneObject> underProcess = sceneObjects;
@@ -22,12 +95,12 @@ namespace lgl {
 						contacts.push_back({ ++contactIndex, contactData, s1, s2 });
 					}
 
-					/*auto collision2 = s2_collider->collidesWith(*s1_collider);
+					auto collision2 = s2_collider->collidesWith(*s1_collider);
 					for (const auto& contactData : collision2) {
-						//if (contactData.isVertexFace) {
+						if (contactData.isVertexFace) {
 							contacts.push_back({ ++contactIndex, contactData, s2, s1 });
-						//}
-					}*/
+						}
+					}
 				}
 			}
 			else {
@@ -35,19 +108,6 @@ namespace lgl {
 			}
 		}
 	}
-
-	float CollisionHandler::calculateMaxDepth(utl::vec<CONTACT>& contacts) {
-		float maxDepth = 0.0f;
-		for (const auto& contact : contacts) {
-			auto contactData = contact.get<1>();
-			if (contactData.depth.has_value()) {
-				float depth = glm::length(*contactData.depth);
-				maxDepth = glm::max(maxDepth, depth);
-			}
-		}
-		return maxDepth;
-	}
-
 	utl::vec<CollisionHandler::CONTACT> CollisionHandler::calculateContactsWithBisection(utl::svec<SceneObject>& sceneObjects) {
 		Logger::setLogMode(Logger::BISECTION_LOGS);
 
@@ -158,66 +218,9 @@ namespace lgl {
 
 		return contacts;
 	}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-	void CollisionHandler::resolveInterpenetrations(utl::svec<SceneObject>& sceneObjects) {
-		utl::vec<CONTACT> contacts;
-		resolveCollisions(contacts, sceneObjects);
-
-		utl::uvmap<utl::ull, utl::vec<CONTACT>> contactsPerPair;
-		utl::uvmap<utl::ull, utl::tup<SceneObject*, SceneObject*>> objectsPerPair;
-
-		for (const auto& contact : contacts) {
-			utl::ull pairHash = utl::makePointerPairHash(contact.get<2>(), contact.get<3>());
-			contactsPerPair[pairHash].push_back(contact);
-			objectsPerPair[pairHash] = { contact.get<2>(), contact.get<3>() };
-		}
-
-		for (const auto& [pairHash, pairContacts] : contactsPerPair) {
-			auto object1 = objectsPerPair[pairHash].get<0>();
-			auto object2 = objectsPerPair[pairHash].get<1>();
-
-			Collider::ContactData deepestContactData;
-			float maxDist = 0.0f;
-			for (const auto& contact : pairContacts) {
-				Collider::ContactData contactData = contact.get<1>();
-				if (contactData.depth.has_value()) {
-					float depthLength = glm::length(*contactData.depth);
-					if (depthLength > maxDist) {
-						maxDist = depthLength;
-						deepestContactData = contactData;
-					}
-				}
-			}
-
-			if (maxDist == 0.0f) {
-				break;
-			}
-
-			glm::vec3 object1Pos = object1->getPhysicsSolver()->Body.X;
-			glm::vec3 object2Pos = object2->getPhysicsSolver()->Body.X;
-
-			glm::vec3 point = deepestContactData.point;
-			glm::vec3 normal = deepestContactData.normal;
-			glm::vec3 displacement = *deepestContactData.depth;
-
-			SceneObject* objectToDisplace;
-			if (glm::dot(object1Pos - point, normal) > 0.0f) {
-				objectToDisplace = object1;
-			}
-			else if (glm::dot(object2Pos - point, normal) > 0.0f) {
-				objectToDisplace = object2;
-			}
-			else {
-				continue;
-			}
-
-			objectToDisplace->getPhysicsSolver()->Body.X += displacement;
-			objectToDisplace->updateTransformations();
-		}
-	}
-
-
-
+	// Impulse resolution
 	CollisionHandler::ContactType CollisionHandler::getContactType(float relativeVelocity) {
 		if (relativeVelocity > contactBias) {
 			return ContactType::SEPARATING;
@@ -229,10 +232,26 @@ namespace lgl {
 			return ContactType::COLLIDING;
 		}
 	}
-
 	void CollisionHandler::applyImpulses() {
 		Logger::setLogMode(Logger::CONTACT_LOGS);
 		Logger::logIf(logContacts, Logger::LGL_INFO, "Applying impulses to objects based on {} contacts:\n", currentContacts.size());
+
+		utl::uint collidingContactsCount = 0;
+		for(const auto& contact : currentContacts) {
+			float vreln = calculateRelativeVelocityOf(contact);
+
+			Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type={}, vreln={:.6f}\n",
+				contact.get<0>(), contact.get<2>()->getName(), contact.get<3>()->getName(), contactTypeToString(getContactType(vreln)), vreln);
+		
+			if (getContactType(vreln) == ContactType::COLLIDING) {
+				collidingContactsCount++;
+			}
+		}
+
+		if (collidingContactsCount == 0) {
+			Logger::logIf(logContacts, Logger::LGL_INFO, "No colliding contacts found, skipping impulse resolution\n\n");
+			return;
+		}
 
 		bool hadCollidingContact = true;
 		utl::uint iterCount = 0;
@@ -299,107 +318,38 @@ namespace lgl {
 
 		Logger::logIf(logContacts, Logger::LGL_INFO, "Colliding contact eliminated in {} iterations\n\n", iterCount);
 	}
-
 	void CollisionHandler::reclassifyContacts(utl::svec<SceneObject>& sceneObjects) {
 		Logger::logIf(logContacts, Logger::LGL_INFO, "Reclassifying objects based on {} contacts:\n", currentContacts.size());
 
 		// Clear the restingContacts vector and reclassify each contact after impulses were applied during colliding contact elimination.
 		restingContacts.clear();
 		for (const auto& contact : currentContacts) {
-			// Extract contact information from the CONTACT tuple.
-			utl::uint contactIndex = contact.get<0>();
-			const auto& contactData = contact.get<1>();
-			SceneObject* colliderObject = contact.get<2>();
-			SceneObject* collideeObject = contact.get<3>();
-
-			// Get the physics body data for both the collider and collidee objects.
-			ribo::BodyData* A = &(colliderObject->getPhysicsSolver()->Body);
-			ribo::BodyData* B = &(collideeObject->getPhysicsSolver()->Body);
-
-			// Calculate the relative velocity at the contact point and determine the contact type (colliding, separating, or resting).
-			glm::vec3 ra = contactData.point - A->X;
-			glm::vec3 rb = contactData.point - B->X;
-			glm::vec3 velpa = A->vel + glm::cross(A->omega, ra);
-			glm::vec3 velpb = B->vel + glm::cross(B->omega, rb);
-			float vreln = glm::dot(contactData.normal, velpa - velpb);
-
+			utl::str colliderName = contact.get<2>()->getName();
+			utl::str collideeName = contact.get<3>()->getName();
+			float vreln = calculateRelativeVelocityOf(contact);
 			ContactType contactType = getContactType(vreln);
 
 			if (contactType == ContactType::COLLIDING) {
-				Logger::logIf(logContacts, Logger::LGL_WARN, "Contact{}: collider={}, collidee={}, type=COLLIDING, vreln={:.6f}\n",
-					contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
+				Logger::logIf(logContacts, Logger::LGL_WARN, "Contact{}: collider={}, collidee={}, type={}, vreln={:.6f}\n",
+					contact.get<0>(), colliderName, collideeName, contactTypeToString(contactType), vreln);
 			}
 
 			if (contactType == ContactType::SEPARATING) {
-				Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=SEPARATING, vreln={:.6f}\n",
-					contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
+				Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type={}, vreln={:.6f}\n",
+					contact.get<0>(), colliderName, collideeName, contactTypeToString(contactType), vreln);
 			}
 
 			if (contactType == ContactType::RESTING) {
-				Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type=RESTING, vreln={:.6f}\n",
-					contactIndex, colliderObject->getName(), collideeObject->getName(), vreln);
+				Logger::logIf(logContacts, Logger::LGL_INFO, "Contact{}: collider={}, collidee={}, type={}, vreln={:.6f}\n",
+					contact.get<0>(), colliderName, collideeName, contactTypeToString(contactType), vreln);
 
 				restingContacts.push_back(contact);
 			}
 		}
 	}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-	void CollisionHandler::resolveRestingContacts() {
-		// If there are resting contacts, we need to solve for the contact forces that will prevent interpenetration and 
-		// allow the objects to rest on each other without sinking or bouncing.
-
-		if (!restingContacts.empty()) {
-			// Compute the contact matrix for the resting contacts
-			eig::matd A;
-			computeRestingContactMatrix(A);
-			Logger::logIf(logContacts, Logger::LGL_INFO, "Resting contact matrix A:\n");
-			eig::logMatrix(A, logContacts);
-
-			// Compute the contact vector b for the resting contacts
-			eig::vecd b;
-			computeRestingContactVector(b);
-			Logger::logIf(logContacts, Logger::LGL_INFO, "Resting contact vector b:\n");
-			eig::logVector(b, logContacts);
-
-			// Check if the contact matrix A is positive semi-definite, which is a requirement for solving the quadratic program for contact forces.
-			if (eig::isPSD(A, PSDTolerance)) {
-				Logger::logIf(logContacts, Logger::LGL_OK, "Resting contact matrix is positive semi-definite, can solve QP :)\n");
-
-				eig::vecd forces;
-				if (qp::solveBaraffContactForces(A, b, forces)) {
-					Logger::logIf(logContacts, Logger::LGL_INFO, "Contact forces solved:\n");
-					eig::logVector(forces, logContacts);
-
-					for (int i = 0; i < restingContacts.size(); ++i) {
-						// Extract contact information from the CONTACT tuple.
-						CONTACT& contact = restingContacts[i];
-						const auto& contactData = contact.get<1>();
-						SceneObject* colliderObject = contact.get<2>();
-						SceneObject* collideeObject = contact.get<3>();
-
-						// Track the maximum resting force applied for logging purposes.
-						float forceMagnitude = eig::getAsFloatAt(forces, i);
-						if (forceMagnitude > maxRestingForce) {
-							continue;
-						}
-
-						// Apply the contact force to both the collider and collidee objects in opposite directions along the contact normal.
-						glm::vec3 force = forceMagnitude * contactData.normal;
-						colliderObject->getPhysicsSolver()->Body.force += force;
-						colliderObject->getPhysicsSolver()->Body.torque += glm::cross(contactData.point - colliderObject->getPhysicsSolver()->Body.X, force);
-						collideeObject->getPhysicsSolver()->Body.force -= force;
-						collideeObject->getPhysicsSolver()->Body.torque -= glm::cross(contactData.point - collideeObject->getPhysicsSolver()->Body.X, force);
-					}
-				}
-			}
-			else {
-				Logger::logIf(logContacts, Logger::LGL_WARN, "Resting contact matrix is not positive semi-definite, cannot solve QP\n");
-			}
-		}
-
-		Logger::logIf(logContacts, Logger::LGL_EMPTY, "\n-------------------------------------------------------------------\n\n");
-	}
-
+	// Resting contact resolution
 	void CollisionHandler::computeRestingContactMatrix(eig::matd& matrix) {
 		auto computeElementAt = [](const CONTACT& ci, const CONTACT& cj) {
 			SceneObject* cia = ci.get<2>();
@@ -461,7 +411,6 @@ namespace lgl {
 			}
 		}
 	}
-
 	void CollisionHandler::computeRestingContactVector(eig::vecd& vector) {
 		int n = static_cast<int>(restingContacts.size());
 		vector.resize(n);
@@ -522,9 +471,126 @@ namespace lgl {
 			eig::setFromFloatAt(vector, idx++, k1 + k2);
 		}
 	}
+	void CollisionHandler::resolveRestingContacts() {
+		// If there are resting contacts, we need to solve for the contact forces that will prevent interpenetration and 
+		// allow the objects to rest on each other without sinking or bouncing.
 
+		Logger::setLogMode(Logger::CONTACT_LOGS);
 
+		if (!restingContacts.empty()) {
+			// Compute the contact matrix for the resting contacts
+			eig::matd A;
+			computeRestingContactMatrix(A);
+			Logger::logIf(logContacts, Logger::LGL_INFO, "Resting contact matrix A:\n");
+			eig::logMatrix(A, logContacts);
 
+			// Compute the contact vector b for the resting contacts
+			eig::vecd b;
+			computeRestingContactVector(b);
+			Logger::logIf(logContacts, Logger::LGL_INFO, "Resting contact vector b:\n");
+			eig::logVector(b, logContacts);
+
+			// Check if the contact matrix A is positive semi-definite, which is a requirement for solving the quadratic program for contact forces.
+			if (eig::isPSD(A, PSDTolerance)) {
+				Logger::logIf(logContacts, Logger::LGL_OK, "Resting contact matrix is positive semi-definite, can solve QP :)\n");
+
+				eig::vecd forces;
+				if (qp::solveBaraffContactForces(A, b, forces)) {
+					Logger::logIf(logContacts, Logger::LGL_INFO, "Contact forces solved:\n");
+					eig::logVector(forces, logContacts);
+
+					for (int i = 0; i < restingContacts.size(); ++i) {
+						// Extract contact information from the CONTACT tuple.
+						CONTACT& contact = restingContacts[i];
+						const auto& contactData = contact.get<1>();
+						SceneObject* colliderObject = contact.get<2>();
+						SceneObject* collideeObject = contact.get<3>();
+
+						// Track the maximum resting force applied for logging purposes.
+						float forceMagnitude = eig::getAsFloatAt(forces, i);
+						if (forceMagnitude > maxRestingForce) {
+							Logger::logIf(logContacts, Logger::LGL_WARN, "Resting force calculation diverged or too large\n");
+							continue;
+						}
+
+						// Apply the contact force to both the collider and collidee objects in opposite directions along the contact normal.
+						glm::vec3 force = forceMagnitude * contactData.normal;
+						colliderObject->getPhysicsSolver()->Body.force += force;
+						colliderObject->getPhysicsSolver()->Body.torque += glm::cross(contactData.point - colliderObject->getPhysicsSolver()->Body.X, force);
+						collideeObject->getPhysicsSolver()->Body.force -= force;
+						collideeObject->getPhysicsSolver()->Body.torque -= glm::cross(contactData.point - collideeObject->getPhysicsSolver()->Body.X, force);
+					}
+				}
+			}
+			else {
+				Logger::logIf(logContacts, Logger::LGL_WARN, "Resting contact matrix is not positive semi-definite, cannot solve QP\n");
+			}
+		}
+
+		Logger::logIf(logContacts, Logger::LGL_EMPTY, "\n-------------------------------------------------------------------\n\n");
+	}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+
+	// Interpenetration resolution
+	void CollisionHandler::resolveInterpenetrations(utl::svec<SceneObject>& sceneObjects) {
+		utl::vec<CONTACT> contacts;
+		resolveCollisions(contacts, sceneObjects);
+
+		utl::uvmap<utl::ull, utl::vec<CONTACT>> contactsPerPair;
+		utl::uvmap<utl::ull, utl::tup<SceneObject*, SceneObject*>> objectsPerPair;
+
+		for (const auto& contact : contacts) {
+			utl::ull pairHash = utl::makePointerPairHash(contact.get<2>(), contact.get<3>());
+			contactsPerPair[pairHash].push_back(contact);
+			objectsPerPair[pairHash] = { contact.get<2>(), contact.get<3>() };
+		}
+
+		for (const auto& [pairHash, pairContacts] : contactsPerPair) {
+			auto object1 = objectsPerPair[pairHash].get<0>();
+			auto object2 = objectsPerPair[pairHash].get<1>();
+
+			Collider::ContactData deepestContactData;
+			float maxDist = 0.0f;
+			for (const auto& contact : pairContacts) {
+				Collider::ContactData contactData = contact.get<1>();
+				if (contactData.depth.has_value()) {
+					float depthLength = glm::length(*contactData.depth);
+					if (depthLength > maxDist) {
+						maxDist = depthLength;
+						deepestContactData = contactData;
+					}
+				}
+			}
+
+			if (maxDist == 0.0f) {
+				break;
+			}
+
+			glm::vec3 object1Pos = object1->getPhysicsSolver()->Body.X;
+			glm::vec3 object2Pos = object2->getPhysicsSolver()->Body.X;
+
+			glm::vec3 point = deepestContactData.point;
+			glm::vec3 normal = deepestContactData.normal;
+			glm::vec3 displacement = *deepestContactData.depth;
+
+			SceneObject* objectToDisplace;
+			if (glm::dot(object1Pos - point, normal) > 0.0f) {
+				objectToDisplace = object1;
+			}
+			else if (glm::dot(object2Pos - point, normal) > 0.0f) {
+				objectToDisplace = object2;
+			}
+			else {
+				continue;
+			}
+
+			objectToDisplace->getPhysicsSolver()->Body.X += displacement;
+			objectToDisplace->updateTransformations();
+		}
+	}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+
+	// Debug and draw
 	void CollisionHandler::debugContacts(const Camera& camera) {
 		utl::vec<glm::vec3> contactPoints;
 		for (const auto& contact : currentContacts) {
@@ -587,13 +653,11 @@ namespace lgl {
 		DebugDrawer::setVertexData(contactPoints);
 		DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 1.0f, 0.0f));
 	}
-
 	void CollisionHandler::drawCollidersOf(const utl::svec<SceneObject>& sceneObjects, const Camera& camera) {
 		for (auto& sceneObject : sceneObjects) {
 			auto cuboidCollider = dynamic_cast<CuboidCollider*>(sceneObject->getCollider().get());
 			if (cuboidCollider != nullptr) {
-				auto transData = cuboidCollider->getTransData();
-				auto p = transData.subdivision;
+				auto p = cuboidCollider->getTransData().points; 
 				auto points = utl::vec<glm::vec3>(p.begin(), p.end());
 				DebugDrawer::setMode(GL_POINTS);
 				DebugDrawer::setVertexData(points);
@@ -617,28 +681,12 @@ namespace lgl {
 			}
 		}
 	}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-
-
+	// Main entry point
 	void CollisionHandler::handleCollisions(utl::svec<SceneObject>& sceneObjects) {
-		Logger::logIf(logStatesOnce, Logger::LGL_INFO, "Pre-collision state of objects with elasticity {}:\n\n", elasticity);
-		for (const auto& sceneObject : sceneObjects) {
-			glm::vec3 X = sceneObject->getPhysicsSolver()->Body.X;
-			glm::vec3 V = sceneObject->getPhysicsSolver()->Body.vel;
-			glm::vec3 O = sceneObject->getPhysicsSolver()->Body.omega;
-			glm::vec3 P = sceneObject->getPhysicsSolver()->Body.P;
-			glm::vec3 L = sceneObject->getPhysicsSolver()->Body.L;
-
-			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "State of {}:\n", sceneObject->getName());
-			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "\tM = {:.6f}\n", sceneObject->getPhysicsSolver()->Body.invMass);
-			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "\tX = ({:.2f}, {:.2f}, {:.2f})\n", X.x, X.y, X.z);
-			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "\tV = ({:.2f}, {:.2f}, {:.2f})\n", V.x, V.y, V.z);
-			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "\tO = ({:.2f}, {:.2f}, {:.2f})\n", O.x, O.y, O.z);
-			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "\tP = ({:.2f}, {:.2f}, {:.2f})\n", P.x, P.y, P.z);
-			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "\tL = ({:.2f}, {:.2f}, {:.2f})\n\n", L.x, L.y, L.z);
-		}
-
 		if (logStatesOnce) {
+			logPhysicsStateOfObjects(logStatesOnce, true, sceneObjects);
 			logStatesOnce = false;
 		}
 
@@ -673,7 +721,7 @@ namespace lgl {
 		}
 
 		// After all physics calculations resolve unrealistic interpenetrations
-		if (enablePushingApart) {
+		if (enableDepenetration) {
 			resolveInterpenetrations(sceneObjects);
 		}
 		else if(pushApartOnce){
@@ -681,12 +729,15 @@ namespace lgl {
 			pushApartOnce = false;
 		}
 
+		lgl::Logger::setLogMode(lgl::Logger::PHYSICS_LOGS);
+		Logger::logIf(enablePhysicsLog, Logger::LGL_INFO, "Post-collision state of all objects:\n\n");
+		logPhysicsStateOfObjects(enablePhysicsLog, true, sceneObjects);
+
 		Logger::incrementLogCounterFor(Logger::BISECTION_LOGS);
 		Logger::incrementLogCounterFor(Logger::CONTACT_LOGS);
 		Logger::incrementLogCounterFor(Logger::PHYSICS_LOGS);
 		logContacts = false;
 	}
-
 	void CollisionHandler::debugDrawCollisions(const utl::svec<SceneObject>& sceneObjects, const Camera& camera) {
 		if (enableDebug) {
 			drawCollidersOf(sceneObjects, camera);
