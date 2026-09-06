@@ -22,10 +22,12 @@ namespace lgl {
 						contacts.push_back({ ++contactIndex, contactData, s1, s2 });
 					}
 
-					auto collision2 = s2_collider->collidesWith(*s1_collider);
+					/*auto collision2 = s2_collider->collidesWith(*s1_collider);
 					for (const auto& contactData : collision2) {
-						contacts.push_back({ ++contactIndex, contactData, s2, s1 });
-					}
+						//if (contactData.isVertexFace) {
+							contacts.push_back({ ++contactIndex, contactData, s2, s1 });
+						//}
+					}*/
 				}
 			}
 			else {
@@ -53,11 +55,6 @@ namespace lgl {
 		float deltaTime = Time::s_fixedDeltaTime;
 		utl::vec<CONTACT> contacts;
 		resolveCollisions(contacts, sceneObjects);
-
-		// If bisection is not enabled, return the contacts as they are.
-		if (!enableBisection) {
-			return contacts;
-		}
 
 		// If there are no contacts, there's no need for bisection, so return an empty vector.
 		if (contacts.size() == 0) {
@@ -218,6 +215,7 @@ namespace lgl {
 			objectToDisplace->updateTransformations();
 		}
 	}
+
 
 
 	CollisionHandler::ContactType CollisionHandler::getContactType(float relativeVelocity) {
@@ -575,6 +573,12 @@ namespace lgl {
 				glm::vec3 edgePoint2 = contactData.edgeB[0];
 				DebugDrawer::setVertexData({ edgePoint1, edgePoint2 });
 				DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 0.0f));
+
+				DebugDrawer::setMode(GL_POINTS);
+				DebugDrawer::setVertexData({ edgePoint1 });
+				DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 1.0f));
+				DebugDrawer::setVertexData({ edgePoint2 });
+				DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 1.0f));
 			}
 		}
 
@@ -617,69 +621,69 @@ namespace lgl {
 
 
 	void CollisionHandler::handleCollisions(utl::svec<SceneObject>& sceneObjects) {
+		Logger::logIf(logStatesOnce, Logger::LGL_INFO, "Pre-collision state of objects with elasticity {}:\n\n", elasticity);
+		for (const auto& sceneObject : sceneObjects) {
+			glm::vec3 X = sceneObject->getPhysicsSolver()->Body.X;
+			glm::vec3 V = sceneObject->getPhysicsSolver()->Body.vel;
+			glm::vec3 O = sceneObject->getPhysicsSolver()->Body.omega;
+			glm::vec3 P = sceneObject->getPhysicsSolver()->Body.P;
+			glm::vec3 L = sceneObject->getPhysicsSolver()->Body.L;
 
-		// Initialize forces for all scene objects and filter out frozen objects to get the current active objects for collision handling.
-		utl::svec<SceneObject> currentObjects;
-		for (auto& sceneObject : sceneObjects) {
-			sceneObject->getPhysicsSolver()->initForces();
-
-			if (!isFrozen(sceneObject.get())) {
-				currentObjects.push_back(sceneObject);
-			}
+			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "State of {}:\n", sceneObject->getName());
+			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "\tM = {:.6f}\n", sceneObject->getPhysicsSolver()->Body.invMass);
+			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "\tX = ({:.2f}, {:.2f}, {:.2f})\n", X.x, X.y, X.z);
+			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "\tV = ({:.2f}, {:.2f}, {:.2f})\n", V.x, V.y, V.z);
+			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "\tO = ({:.2f}, {:.2f}, {:.2f})\n", O.x, O.y, O.z);
+			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "\tP = ({:.2f}, {:.2f}, {:.2f})\n", P.x, P.y, P.z);
+			Logger::logIf(logStatesOnce, Logger::LGL_INFO, "\tL = ({:.2f}, {:.2f}, {:.2f})\n\n", L.x, L.y, L.z);
 		}
 
-		// Calculate contacts for the current active objects.
+		if (logStatesOnce) {
+			logStatesOnce = false;
+		}
+
+		// Clear the current contacts and calculate new contacts
 		currentContacts.clear();
-		currentContacts = calculateContactsWithBisection(currentObjects);
+		if (enableBisection) {
+			currentContacts = calculateContactsWithBisection(sceneObjects);
+		}
+		else {
+			resolveCollisions(currentContacts, sceneObjects);
+		}
+
+		// Handle the calculated contacts
 		if (enableContactLog && currentContacts.size() > 0) {
 			logContacts = true;
 		}
-
-		// Resolve all contact types
 		if (enableImpulses) {
 			applyImpulses();
 		}
 		if(enableRestingForces) {
-			reclassifyContacts(currentObjects);
+			reclassifyContacts(sceneObjects);
 			resolveRestingContacts();
 		}
 
 		// Stepping the time left after bisection to reach the end of the fixed time step
 		if (bisectedTime >= 0.0f) {
 			float remainingTime = Time::s_fixedDeltaTime - bisectedTime;
-			for (auto& sceneObject : currentObjects) {
+			for (auto& sceneObject : sceneObjects) {
 				sceneObject->stepPhysicsBy(remainingTime);
 			}
 			bisectedTime = -1.0f;
 		}
 
-
+		// After all physics calculations resolve unrealistic interpenetrations
 		if (enablePushingApart) {
-			resolveInterpenetrations(currentObjects);
+			resolveInterpenetrations(sceneObjects);
 		}
 		else if(pushApartOnce){
-			resolveInterpenetrations(currentObjects);
+			resolveInterpenetrations(sceneObjects);
 			pushApartOnce = false;
 		}
-
-		// Log the post-collision state of objects for debugging purposes.
-		Logger::setLogMode(Logger::PHYSICS_LOGS);
-		Logger::logIf(logContacts, Logger::LGL_INFO, "Post-collision state of objects with elasticity {}:\n", elasticity);
-		for (const auto& sceneObject : sceneObjects) {
-			glm::vec3 pos = sceneObject->getPhysicsSolver()->Body.X;
-			glm::vec3 vel = sceneObject->getPhysicsSolver()->Body.vel;
-			glm::vec3 omega = sceneObject->getPhysicsSolver()->Body.omega;
-			float invMass = sceneObject->getPhysicsSolver()->Body.invMass;
-
-			Logger::logIf(logContacts, Logger::LGL_INFO, "State of {}: position=({:.2f}, {:.2f}, {:.2f}), velocity=({:.2f}, {:.2f}, {:.2f}), omega=({:.2f}, {:.2f}, {:.2f}), invMass={:.6f}\n",
-				sceneObject->getName(), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, omega.x, omega.y, omega.z, invMass);
-		}
-		Logger::logIf(logContacts, Logger::LGL_EMPTY, "\n-------------------------------------------------------------------\n\n");
 
 		Logger::incrementLogCounterFor(Logger::BISECTION_LOGS);
 		Logger::incrementLogCounterFor(Logger::CONTACT_LOGS);
 		Logger::incrementLogCounterFor(Logger::PHYSICS_LOGS);
-
 		logContacts = false;
 	}
 

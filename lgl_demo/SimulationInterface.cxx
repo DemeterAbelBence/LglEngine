@@ -58,6 +58,7 @@ void SimulationInterface::renderSimulationSettings() {
 	ImGui::NextColumn();
 
 	if (ImGui::Button("Push apart once")) { CollisionHandler::pushApartOnce = true; }
+    if (ImGui::Button("Log states once")) { CollisionHandler::logStatesOnce = true; }
 
 	ImGui::Columns(1);
 
@@ -113,6 +114,21 @@ void SimulationInterface::renderSimulationSettings() {
     ImGui::SliderFloat("Contact Bias", &CollisionHandler::contactBias, 0.0f, 0.01f, "%.5f", 0);
 	ImGui::SliderFloat("PSD Tolerance", &CollisionHandler::PSDTolerance, 0.0f, 0.001f, "%.7f", 0);
     ImGui::SliderInt("logFrequency", reinterpret_cast<int*>(&Logger::logFrequency), 1, 32);
+
+    ImGui::Separator();
+
+    static char sceneSaveName[128] = "";
+    ImGui::InputText("Scene Save Name", sceneSaveName, IM_ARRAYSIZE(sceneSaveName));
+    
+    if (ImGui::Button("Save Scene")) {
+        utl::str savePath = utl::strFormat("{}/{}", ribo::baseSerializationPath, sceneSaveName);
+        m_simulationScene->saveObjectStates(savePath);
+    }
+
+    if (ImGui::Button("Load Scene")) {
+        utl::str savePath = utl::strFormat("{}/{}", ribo::baseSerializationPath, sceneSaveName);
+		m_simulationScene->loadObjectStates(savePath);
+    }
 
 	ImGui::End();   
 }

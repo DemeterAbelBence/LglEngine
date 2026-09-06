@@ -2,10 +2,6 @@
 
 #include "SimulationScene.hxx"
 #include "SimulationInterface.hxx"
-#include "SponzaScene.hxx"
-#include "LightingInterface.hxx"
-
-import qpmodule;
 
 int main(void) {
 	try {
@@ -21,8 +17,6 @@ int main(void) {
 	}
 
 	lgl::Logger::log(lgl::Logger::LGL_EMPTY, "Exiting application...\n");
-
-	//qp::solveDummyQP();
 
     return 0;
 }

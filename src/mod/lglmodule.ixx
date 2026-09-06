@@ -159,6 +159,18 @@ export namespace lgl {
 		using runtime = std::runtime_error;
 		using except = std::exception;
 
+		// File stream utilities
+		using ios = std::ios;
+		using ifstream = std::ifstream;
+		using ofstream = std::ofstream;
+
+		inline void createDirectories(const std::string& path) {
+			std::filesystem::path p(path);
+			if (auto parent = p.parent_path(); !parent.empty()) {
+				std::filesystem::create_directories(parent);
+			}
+		}
+
 		// Random utilities
 		using rdev = std::random_device;
 		using rng = std::mt19937;

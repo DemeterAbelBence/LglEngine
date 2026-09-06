@@ -27,6 +27,12 @@ namespace lgl {
 
         glm::mat3 orthonormalize(const glm::mat3& R);
 
+        void serializeBodyDataInto(utl::str filename, const BodyData& body);
+
+		BodyData deserializeBodyDataFrom(utl::str filename);
+
+		static constexpr utl::cstr baseSerializationPath = "../../../res/physics";
+
         class PhysicsSolver {
         public:
             BodyData Body;

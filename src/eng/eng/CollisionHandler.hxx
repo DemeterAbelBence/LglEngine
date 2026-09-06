@@ -15,7 +15,7 @@ namespace lgl {
     class CollisionHandler {
     public:
         inline static bool enableDebug = true;
-        inline static bool enableBisection = true;
+        inline static bool enableBisection = false;
         inline static bool enableImpulses = true;
         inline static bool enableRestingForces = false;
 		inline static bool enablePushingApart = false;
@@ -24,6 +24,7 @@ namespace lgl {
 		inline static bool enableContactLog = false;
         inline static bool enableBisectionLog = false;
 		inline static bool drawNormals = false;
+        inline static bool logStatesOnce = false;
 
         inline static float elasticity = 0.3f;
         inline static float bisectionBias = 0.0001f;
@@ -42,8 +43,6 @@ namespace lgl {
         };
 
     private:
-        inline static utl::set<SceneObject*> forzenObjects = utl::set<SceneObject*>();
-
         using CONTACT = utl::tup<utl::uint, Collider::ContactData, SceneObject*, SceneObject*>;
         inline static utl::vec<CONTACT> currentContacts = utl::vec<CONTACT>();
 		inline static utl::vec<CONTACT> restingContacts = utl::vec<CONTACT>();
@@ -68,13 +67,9 @@ namespace lgl {
         static float calculateMaxDepth(utl::vec<CONTACT>& contacts);
 
         static void debugContacts(const Camera& camera);
-        static void drawCollidersOf(const utl::svec<SceneObject>& sceneObjects, const Camera& camera);
+        static void drawCollidersOf(const utl::svec<SceneObject>& sceneObjects, const Camera& camera);  
 
     public:
-		static void unfreezeObject(SceneObject* object) { forzenObjects.erase(object); }
-		static void freezeObject(SceneObject* object) { forzenObjects.insert(object); }
-		static bool isFrozen(SceneObject* object) { return forzenObjects.contains(object); }
-
         static void handleCollisions(utl::svec<SceneObject>& sceneObjects);
         static void debugDrawCollisions(const utl::svec<SceneObject>& sceneObjects, const Camera& camera);
     };

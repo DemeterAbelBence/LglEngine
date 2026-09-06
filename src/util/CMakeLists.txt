@@ -47,8 +47,8 @@ target_sources(LglUtil PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/math/Dnum.hxx
     ${CMAKE_CURRENT_LIST_DIR}/math/Quaternion.cxx
     ${CMAKE_CURRENT_LIST_DIR}/math/Quaternion.hxx
-    ${CMAKE_CURRENT_LIST_DIR}/math/RigidBody.cxx
-    ${CMAKE_CURRENT_LIST_DIR}/math/RigidBody.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/math/ribo.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/math/ribo.hxx
     ${CMAKE_CURRENT_LIST_DIR}/math/Transformation.cxx
     ${CMAKE_CURRENT_LIST_DIR}/math/Transformation.hxx
 

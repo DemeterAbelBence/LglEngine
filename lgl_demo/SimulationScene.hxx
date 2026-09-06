@@ -6,8 +6,6 @@ import glmmodule;
 #include <eng/Scene.hxx>
 #include <sceneobject/Sun.hxx>
 #include <sceneobject/Terrain.hxx>
-#include <sceneobject/Box.hxx>
-#include <collision/TerrainData.hxx>
 
 class SimulationScene : public lgl::Scene {
 private:
@@ -18,7 +16,6 @@ private:
 
 private:
 	void initSimulationEvents();
-	void initResources();
 	void castShadowsOnTerrain();
 
 public:

@@ -4,7 +4,7 @@ import lglmodule;
 import glmmodule;
 
 #include <gl/FrameBuffer.hxx>
-#include <math/RigidBody.hxx>
+#include <math/ribo.hxx>
 
 #include <visual/mesh/Mesh.hxx>
 #include <visual/mesh/ModelMesh.hxx>

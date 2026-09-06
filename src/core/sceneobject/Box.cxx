@@ -108,21 +108,23 @@ namespace lgl {
 
 		m_dimensions = glm::vec3(w, h, l);
 
-		float& invMass = m_physicsSolver->Body.invMass;
-		invMass = 1.0f / (w * h * l * m_massFactor);
+		if (!m_isStationary) {
+			float& invMass = m_physicsSolver->Body.invMass;
+			invMass = 1.0f / (w * h * l * m_massFactor);
 
-		glm::mat3& I = m_physicsSolver->Body.Ibody;
-		I = 1.0f / (12.0f * invMass) * glm::mat3(
-			glm::vec3(h * h + l * l, 0.0f, 0.0f),
-			glm::vec3(0.0f, w * w + l * l, 0.0f),
-			glm::vec3(0.0f, 0.0f, w * w + h * h)
-		);
+			glm::mat3& I = m_physicsSolver->Body.Ibody;
+			I = 1.0f / (12.0f * invMass) * glm::mat3(
+				glm::vec3(h * h + l * l, 0.0f, 0.0f),
+				glm::vec3(0.0f, w * w + l * l, 0.0f),
+				glm::vec3(0.0f, 0.0f, w * w + h * h)
+			);
 
-		glm::mat3& Iinv = m_physicsSolver->Body.Ibodyinv;
-		Iinv = glm::inverse(I);
+			glm::mat3& Iinv = m_physicsSolver->Body.Ibodyinv;
+			Iinv = glm::inverse(I);
 
-		glm::vec3& force = m_physicsSolver->Body.force;
-		force = glm::vec3(0.0f, -9.81f, 0.0f) / invMass;
+			glm::vec3& force = m_physicsSolver->Body.force;
+			force = glm::vec3(0.0f, -9.81f, 0.0f) / invMass;
+		}
 	}
 
 	void Box::draw(const Camera& camera) const {

@@ -78,4 +78,29 @@ namespace lgl {
 			arg.z = arg.z > 0.0f ? speed : arg.z;
 		}
 	}
+
+	void Scene::saveObjectStates(utl::str path) {
+		lgl::Logger::log(Logger::LGL_INFO, "Saving object states to path: {}\n", path);
+		for (const auto& s : m_sceneObjects) {
+			utl::str filepath = utl::strFormat("{}/{}.bin", path, s->getName());
+			const ribo::BodyData& body = s->getPhysicsSolver()->Body;
+			ribo::serializeBodyDataInto(filepath, body);
+		}
+	}
+
+	void Scene::loadObjectStates(utl::str path) {
+		lgl::Logger::log(Logger::LGL_INFO, "Loading object states from path: {}\n", path);
+		for (const auto& s : m_sceneObjects) {
+			try {
+				utl::str filepath = utl::strFormat("{}/{}.bin", path, s->getName());
+				ribo::BodyData body = ribo::deserializeBodyDataFrom(filepath);
+				s->getPhysicsSolver()->Body = body;
+				s->updateTransformations();
+			}
+			catch (const utl::runtime& error) {
+				Logger::log(Logger::LGL_ERROR, "{}\n", error.what());
+				continue;
+			}
+		}
+	}
 }

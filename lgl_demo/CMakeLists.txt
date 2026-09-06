@@ -17,13 +17,10 @@ target_sources(Demo PRIVATE
 
     ${CMAKE_CURRENT_LIST_DIR}/SimulationScene.hxx
     ${CMAKE_CURRENT_LIST_DIR}/SimulationScene.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/SimulationResourceRepository.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/SimulationResourceRepository.cxx
     ${CMAKE_CURRENT_LIST_DIR}/SimulationInterface.hxx
     ${CMAKE_CURRENT_LIST_DIR}/SimulationInterface.cxx
-
-    ${CMAKE_CURRENT_LIST_DIR}/SponzaScene.hxx
-    ${CMAKE_CURRENT_LIST_DIR}/SponzaScene.cxx
-    ${CMAKE_CURRENT_LIST_DIR}/LightingInterface.hxx
-    ${CMAKE_CURRENT_LIST_DIR}/LightingInterface.cxx
 )
 
 target_link_libraries(Demo PRIVATE LglEng)
