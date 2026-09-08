@@ -9,16 +9,15 @@ import glmmodule;
 #include <collision/CuboidCollider.hxx>
 
 namespace lgl {
-	class Box : public SceneObject {
+	class Box final : public SceneObject {
 	private:
-		glm::vec3 m_dimensions;
 		bool m_isStationary;
 		const float m_massFactor = 1.0f;
 
 	public:
 		Box();
 		Box(bool isStationary, utl::sptr<ModelMesh> modelMesh);
-		Box(bool isStationary, const glm::vec3& dimensions);
+		Box(bool isStationary);
 
 		utl::sptr<SceneObject> clone() override;
 		ribo::BodyData initializePhysics() override;

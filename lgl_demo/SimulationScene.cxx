@@ -106,7 +106,7 @@ void SimulationScene::create() {
 
 		for (int i = 0; i < 2; i++) {
 			float s = 10.0f / (i + 1);
-			auto woodBox = utl::makeSptr<Box>(false, glm::vec3(1.0f, 1.0f, 1.0f));
+			auto woodBox = utl::makeSptr<Box>(false);
 			woodBox->setName(utl::strFormat("wood_box_{}", i));
 			woodBox->getMesh()->setProgram(m_resources->getProgram("PHONG"));
 			woodBox->getMesh()->setMaterial(m_resources->getMaterial("WHITE"));

@@ -203,7 +203,7 @@ namespace lgl {
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-    CuboidCollider::CuboidCollider(glm::vec3 dimensions) {
+    CuboidCollider::CuboidCollider() {
         geomType = GeomType::C_CUBOID;
 
         createCorners();

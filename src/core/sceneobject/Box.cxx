@@ -11,7 +11,6 @@ namespace lgl {
 		auto cuboidCollider = utl::sptrCast<CuboidCollider>(m_collider);
 		other->m_collider = utl::makeSptr<CuboidCollider>(*cuboidCollider);
 
-		other->m_dimensions = m_dimensions;
 		other->m_isStationary = m_isStationary;
 
 		return other;
@@ -23,16 +22,12 @@ namespace lgl {
 		glm::mat3 Ibodyinv;
 		glm::vec3 force;
 
-		float w = m_dimensions.x;
-		float h = m_dimensions.y;
-		float l = m_dimensions.z;
-
 		if (!m_isStationary) {
-			inverseMass = 1.0f / (w * h * l * m_massFactor);
+			inverseMass = 1.0f / m_massFactor;
 			Ibody = 1.0f / (12.0f * inverseMass) * glm::mat3(
-				glm::vec3(h * h + l * l, 0.0f, 0.0f),
-				glm::vec3(0.0f, w * w + l * l, 0.0f),
-				glm::vec3(0.0f, 0.0f, w * w + h * h)
+				glm::vec3(2.0f, 0.0f, 0.0f),
+				glm::vec3(0.0f, 2.0f, 0.0f),
+				glm::vec3(0.0f, 0.0f, 2.0f)
 			);
 
 			Ibodyinv = glm::inverse(Ibody);
@@ -70,30 +65,26 @@ namespace lgl {
 
 	Box::Box(bool isStationary, utl::sptr<ModelMesh> modelMesh) {
 		m_isStationary = isStationary;
-		m_dimensions = glm::vec3(1.0f, 1.0f, 1.0f);
 
 		auto bodyData = initializePhysics();
 		m_physicsSolver = utl::makeSptr<ribo::PhysicsSolver>(bodyData);
 
 		m_mesh = modelMesh;
-		m_mesh->create();
-		m_collider = utl::makeSptr<CuboidCollider>(m_dimensions);
+		m_collider = utl::makeSptr<CuboidCollider>();
 
 		m_transformation = utl::makeSptr<Transformation>();
 		m_mesh->setTransformation(m_transformation);
 		m_collider->setTransformation(m_transformation);
 	}
 
-	Box::Box(bool isStationary, const glm::vec3& dimensions) : SceneObject() {
-		m_dimensions = dimensions;
+	Box::Box(bool isStationary) : SceneObject() {
 		m_isStationary = isStationary;
 
 		auto bodyData = initializePhysics();
 		m_physicsSolver = utl::makeSptr<ribo::PhysicsSolver>(bodyData);
 
-		m_mesh = utl::makeSptr<CuboidMesh>(m_dimensions);
-		m_mesh->create();
-		m_collider = utl::makeSptr<CuboidCollider>(m_dimensions);
+		m_mesh = utl::makeSptr<CuboidMesh>();
+		m_collider = utl::makeSptr<CuboidCollider>();
 
 		m_transformation = utl::makeSptr<Transformation>();
 		m_mesh->setTransformation(m_transformation);
@@ -102,11 +93,9 @@ namespace lgl {
 
 	void Box::updateRigidBody() {
 		glm::vec3 scaling = m_transformation->getScaling();
-		float w = m_dimensions.x * scaling.x;
-		float h = m_dimensions.y * scaling.y;
-		float l = m_dimensions.z * scaling.z;
-
-		m_dimensions = glm::vec3(w, h, l);
+		float w = scaling.x;
+		float h = scaling.y;
+		float l = scaling.z;
 
 		if (!m_isStationary) {
 			float& invMass = m_physicsSolver->Body.invMass;

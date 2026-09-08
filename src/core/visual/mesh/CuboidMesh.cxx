@@ -2,25 +2,22 @@
 
 namespace lgl {
     void CuboidMesh::createPoints() {
-        float w = m_width / 2.0f;
-        float h = m_height / 2.0f;
-        float l = m_length / 2.0f;
+        m_points[0] = glm::vec3(-0.5f, -0.5f, 0.5f);
+        m_points[1] = glm::vec3(0.5f, -0.5f, 0.5f);
+        m_points[2] = glm::vec3(0.5f, -0.5f, -0.5f);
+        m_points[3] = glm::vec3(-0.5f, -0.5f, -0.5f);
 
-        m_points[0] = glm::vec3(-w, -h, l);
-        m_points[1] = glm::vec3(w, -h, l);
-        m_points[2] = glm::vec3(w, -h, -l);
-        m_points[3] = glm::vec3(-w, -h, -l);
-
-        m_points[4] = glm::vec3(-w, h, l);
-        m_points[5] = glm::vec3(w, h, l);
-        m_points[6] = glm::vec3(w, h, -l);
-        m_points[7] = glm::vec3(-w, h, -l);
+        m_points[4] = glm::vec3(-0.5f, 0.5f, 0.5f);
+        m_points[5] = glm::vec3(0.5f, 0.5f, 0.5f);
+        m_points[6] = glm::vec3(0.5f, 0.5f, -0.5f);
+        m_points[7] = glm::vec3(-0.5f, 0.5f, -0.5f);
     }
 
     void CuboidMesh::createSide(const utl::arr<utl::uint, 4>& indices) {
         glm::vec3 sideCenter = glm::vec3(0.0f);
-        for (utl::uint i : indices)
+        for (utl::uint i : indices) {
             sideCenter += m_points[i];
+        }
         sideCenter /= static_cast<float>(indices.size());
 
         glm::vec3 normal = sideCenter - calculateCenter();
@@ -43,18 +40,16 @@ namespace lgl {
         m_vertexArray->addBuffer(*m_vertexBuffer, *m_vertexBufferLayout);
     }
 
-    CuboidMesh::CuboidMesh(glm::vec3 dimensions) : Mesh() {
-        m_width = dimensions.x;
-        m_height = dimensions.y;
-        m_length = dimensions.z;
-    }
-
     void CuboidMesh::setResources(utl::sptr<GpuProgram> program, utl::sptr<Material> material, const std::vector<utl::sptr<Texture>>& textures) {
         m_program = program;
         m_material = material;
         for (auto texture : textures) {
             addTexture(texture);
         }
+    }
+
+    CuboidMesh::CuboidMesh() : Mesh() {
+        create();
     }
 
     glm::vec3 CuboidMesh::calculateCenter() const {

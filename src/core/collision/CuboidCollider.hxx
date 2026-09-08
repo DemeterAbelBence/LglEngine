@@ -47,7 +47,7 @@ namespace lgl {
 		utl::vec<ContactData> vertexFaceCollision(const CuboidCollider& collidee) const;
 
 	public:
-		CuboidCollider(glm::vec3 dimensions);
+		CuboidCollider();
 		CuboidCollider(const CuboidCollider& c);
 		CuboidCollider(CuboidCollider&& c) noexcept = delete;
 

@@ -6,7 +6,7 @@ import glmmodule;
 #include <visual/mesh/Mesh.hxx>
 
 namespace lgl {
-	class CuboidMesh : public Mesh {
+	class CuboidMesh final : public Mesh {
 
 	private:
 		struct VertexData {
@@ -17,10 +17,6 @@ namespace lgl {
 		utl::vec<VertexData> m_vertexData;
 
 	private:
-		float m_height;
-		float m_width;
-		float m_length;
-
 		utl::arr<glm::vec3, 8> m_points;
 
 	private:
@@ -29,7 +25,7 @@ namespace lgl {
 		void setBufferData(utl::cmemptr data, utl::uint size);
 
 	public:
-		CuboidMesh(glm::vec3 dimensions);
+		CuboidMesh();
 		glm::vec3 calculateCenter() const;
 		void setResources(utl::sptr<GpuProgram> program, utl::sptr<Material> material, const utl::vec<utl::sptr<Texture>>& textures);
 

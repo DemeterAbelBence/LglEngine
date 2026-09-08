@@ -39,17 +39,6 @@ namespace lgl {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
         glDebugMessageCallback(&lgl::outputDebugMessage, (const void*)NULL);
-
-        // Trigger a test debug message to verify the callback is working
-        {
-            const char* testMsg = "Debug callback test: Hello from application";
-            glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION,
-                                 GL_DEBUG_TYPE_MARKER,
-                                 1u,
-                                 GL_DEBUG_SEVERITY_HIGH,
-                                 static_cast<GLsizei>(std::strlen(testMsg)),
-                                 testMsg);
-        }
     }
 
     void WindowManager::renderUserInterface() {
