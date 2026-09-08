@@ -335,7 +335,7 @@ export namespace lgl {
 			currentLogMode = logMode;
 		}
 
-		inline static bool logToFile = true;
+		inline static bool logToFile = false;
 		inline static utl::str logPath;
 		inline static LogMode currentLogMode = GENERAL_LOGS;
 		inline static utl::uint logFrequency = 7;
@@ -355,7 +355,12 @@ export namespace lgl {
 		};
 
 		static void incrementLogCounterFor(LogMode logMode) {
-			logCounters[logMode]++;
+			try {
+				logCounters.at(static_cast<utl::uint>(logMode))++;
+			}
+			catch (const std::out_of_range& e) {
+				throw std::runtime_error("Invalid log mode");
+			}
 		}
 
 		template<typename... Args>

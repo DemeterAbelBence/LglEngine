@@ -78,6 +78,7 @@ namespace lgl {
 		glDeleteProgram(m_programId);
 		utl::uint id = glCreateProgram();
 
+		Logger::setLogMode(Logger::GENERAL_LOGS);
 		Logger::log(Logger::LGL_INFO, "Compilation result of {}:\n", m_programName);
 		utl::vec<utl::uint> shaderIds;
 		for (const auto& shader : m_shaders) {

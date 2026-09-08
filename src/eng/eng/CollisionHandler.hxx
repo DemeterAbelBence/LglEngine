@@ -20,9 +20,9 @@ namespace lgl {
         inline static bool enableRestingForces = true;
 		inline static bool enableDepenetration = false;
 		inline static bool pushApartOnce = false;
-		inline static bool enableContactLog = true;
-        inline static bool enableBisectionLog = true;
-		inline static bool enablePhysicsLog = true;
+		inline static bool enableContactLog = false;
+        inline static bool enableBisectionLog = false;
+		inline static bool enablePhysicsLog = false;
 		inline static bool drawNormals = false;
         inline static bool logStatesOnce = false;
 

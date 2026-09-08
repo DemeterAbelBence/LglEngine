@@ -4,6 +4,15 @@ import lglmodule;
 
 #include <GLEW/glew.h>
 
+// Ensure APIENTRY is defined for the callback signature on platforms that need it
+#ifndef APIENTRY
+#if defined(_WIN32) || defined(_WIN64)
+#define APIENTRY __stdcall
+#else
+#define APIENTRY
+#endif
+#endif
+
 namespace lgl {
 	utl::str debugSourceToString(GLenum source);
 
@@ -11,7 +20,8 @@ namespace lgl {
 
 	utl::str debugSeverityToString(GLenum severity);
 
-	void outputDebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, 
+	// Must use APIENTRY calling convention so it matches GLDEBUGPROC on Windows
+	void APIENTRY outputDebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity,
 		GLsizei length, const GLchar* message, const void* userParam);
 
 	void initializeDebugContext();
