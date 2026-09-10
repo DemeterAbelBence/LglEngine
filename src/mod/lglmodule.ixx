@@ -331,7 +331,7 @@ export namespace lgl {
 			currentLogMode = logMode;
 		}
 
-		inline static bool logToFile = true;
+		inline static bool logToFile = false;
 		inline static utl::str logPath;
 		inline static LogMode currentLogMode = GENERAL_LOGS;
 		inline static utl::uint logFrequency = 7;

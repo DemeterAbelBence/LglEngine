@@ -14,81 +14,95 @@ void SimulationInterface::renderLightingPicker() {
 
 void SimulationInterface::renderSimulationSettings() {
     static float simulationSpeed = 0.005f;
-    static float elasticity = 0.5f;
-    static float slipperiness = 0.5f;
-	static float depthBias = 0.001f;
     static utl::cstr precision = "%.3f";
 
     ImGui::Begin("Simulation settings");
 
-	ImGui::Columns(2, "toggle_columns", false);
+    // onToggle is a plain function pointer (no new std symbols)
+    auto toggleButton = [&](bool& flag, utl::cstr onText, utl::cstr offText, void (*onToggle)(bool) = nullptr) {
+        bool current = flag;
+        utl::cstr text = current ? onText : offText;
+        // Switch mapping: true -> red, false -> green
+        const ImVec4& col = current ? m_redBtn : m_greenBtn;
+        const ImVec4& colHov = current ? m_redBtnHov : m_greenBtnHov;
+        const ImVec4& colAct = current ? m_redBtnAct : m_greenBtnAct;
+        ImGui::PushStyleColor(ImGuiCol_Button, col);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colHov);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, colAct);
+        if (ImGui::Button(text, ImVec2(m_buttonWidth, 0))) {
+            flag = !current;
+            if (onToggle) onToggle(flag);
+        }
+        ImGui::PopStyleColor(3);
+    };
 
-	bool ed = CollisionHandler::enableDebug;
-	utl::cstr debugText = ed ? "Disable Debug" : "Enable Debug";
-	if (ImGui::Button(debugText)) { CollisionHandler::enableDebug = !ed; }
+    ImGui::Columns(2, "toggle_columns", false);
 
-	ImGui::NextColumn();
+    toggleButton(CollisionHandler::enableDebug, "Disable Debug", "Enable Debug");
 
-	bool ebis = CollisionHandler::enableBisection;
-	utl::cstr bisectionText = ebis ? "Disable bisection" : "Enable bisection";
-	if (ImGui::Button(bisectionText)) { CollisionHandler::enableBisection = !ebis; }
+    ImGui::NextColumn();
 
-	ImGui::NextColumn();
+    toggleButton(CollisionHandler::enableBisection, "Disable bisection", "Enable bisection");
 
-	bool eimp = CollisionHandler::enableImpulses;
-	utl::cstr impulsesText = eimp ? "Disable impulses" : "Enable impulses";
-	if (ImGui::Button(impulsesText)) { CollisionHandler::enableImpulses = !eimp; }
+    ImGui::NextColumn();
 
-	ImGui::NextColumn();
+    toggleButton(CollisionHandler::enableImpulses, "Disable impulses", "Enable impulses");
 
-	bool erf = CollisionHandler::enableRestingForces;
-	utl::cstr restingForcesText = erf ? "Disable resting forces" : "Enable resting forces";
-	if (ImGui::Button(restingForcesText)) { CollisionHandler::enableRestingForces = !erf; }
+    ImGui::NextColumn();
 
-	ImGui::NextColumn();
+    toggleButton(CollisionHandler::enableRestingForces, "Disable resting forces", "Enable resting forces");
 
-	bool edp = CollisionHandler::enableDepenetration;
-	utl::cstr depenetrationText = edp ? "Disable depenetration" : "Enable depenetration";
-	if (ImGui::Button(depenetrationText)) { CollisionHandler::enableDepenetration = !edp; }
+    ImGui::NextColumn();
 
-    bool dn = CollisionHandler::drawNormals;
-    utl::cstr drawNormalsText = dn ? "Hide normals" : "Draw normals";
-    if (ImGui::Button(drawNormalsText)) { CollisionHandler::drawNormals = !dn; }
+    toggleButton(CollisionHandler::enableDepenetration, "Disable depenetration", "Enable depenetration");
 
-	ImGui::NextColumn();
+    toggleButton(CollisionHandler::drawVectors, "Hide vectors", "Draw vectors");
 
-	if (ImGui::Button("Push apart once")) { CollisionHandler::pushApartOnce = true; }
-    if (ImGui::Button("Log states once")) { CollisionHandler::logStatesOnce = true; }
+    toggleButton(m_simulationScene->s_randomizeRollback, "Disable random rollback", "Enable random rollback");
 
-	ImGui::Columns(1);
+    ImGui::NextColumn();
+
+    ImGui::PushStyleColor(ImGuiCol_Button, m_blueBtn);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, m_blueBtnHov);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, m_blueBtnAct);
+    if (ImGui::Button("Push apart once", ImVec2(m_buttonWidth, 0))) { 
+        CollisionHandler::pushApartOnce = true; 
+        m_simulationScene->handleCollisions();
+    }
+    if (ImGui::Button("Log states once", ImVec2(m_buttonWidth, 0))) { 
+        CollisionHandler::logStatesOnce = true; 
+    }
+    ImGui::PopStyleColor(3);
+
+    toggleButton(m_simulationScene->s_lockSimulation, "Unlock simulation", "Lock simulation");
+
+    ImGui::Columns(1);
 
     ImGui::Separator();
 
-    bool efl = Logger::logToFile;
-    utl::cstr fileLogText = efl ? "Disable file logging" : "Enable file logging";
-    if (ImGui::Button(fileLogText)) {
-        Logger::logToFile = !efl;
-        lgl::Logger::setLogMode(lgl::Logger::GENERAL_LOGS);
-    }
+    // File logging toggle (use toggleButton to get color + optional onToggle)
+    // Use a plain function pointer initialized from a captureless lambda
+    void (*fileLogToggleFunc)(bool) = [](bool enabled) {
+        if (enabled) lgl::Logger::setLogMode(lgl::Logger::GENERAL_LOGS);
+    };
+    toggleButton(Logger::logToFile, "Disable file logging", "Enable file logging", fileLogToggleFunc);
 
-    bool ecl = CollisionHandler::enableContactLog;
-    utl::cstr contactLogText = ecl ? "Disable contact log" : "Enable contact log";
-    if (ImGui::Button(contactLogText)) {
-        CollisionHandler::enableContactLog = !ecl;
-    }
+    // Contact log toggle
+    toggleButton(CollisionHandler::enableContactLog, "Disable contact log", "Enable contact log", nullptr);
 
-    bool ebl = CollisionHandler::enableBisectionLog;
-    utl::cstr bisectionLogText = ebl ? "Disable bisection log" : "Enable bisection log";
-    if (ImGui::Button(bisectionLogText)) {
-        CollisionHandler::enableBisectionLog = !ebl;
-    }
+    // Bisection log toggle
+    toggleButton(CollisionHandler::enableBisectionLog, "Disable bisection log", "Enable bisection log", nullptr);
 
     ImGui::Separator();
 
-    if (ImGui::Button("Simulate forward")) { m_simulationScene->advanceSimulation(Time::s_fixedDeltaTime); }
-    if (ImGui::Button("Simulate backward")) { m_simulationScene->advanceSimulation(-Time::s_fixedDeltaTime); }
-    if (ImGui::Button("Rollback to initial")) { m_simulationScene->rollbackToinitial(); }
-    if (ImGui::Button("Rollback to previous")) { m_simulationScene->rollbackToPrevious(); }
+    ImGui::PushStyleColor(ImGuiCol_Button, m_blueBtn);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, m_blueBtnHov);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, m_blueBtnAct);
+    if (ImGui::Button("Simulate forward", ImVec2(m_buttonWidth, 0))) { m_simulationScene->advanceSimulation(Time::s_fixedDeltaTime); }
+    if (ImGui::Button("Simulate backward", ImVec2(m_buttonWidth, 0))) { m_simulationScene->advanceSimulation(-Time::s_fixedDeltaTime); }
+    if (ImGui::Button("Rollback to initial", ImVec2(m_buttonWidth, 0))) { m_simulationScene->rollbackToinitial(); }
+    if (ImGui::Button("Rollback to previous", ImVec2(m_buttonWidth, 0))) { m_simulationScene->rollbackToPrevious(); }
+    ImGui::PopStyleColor(3);
 
     ImGui::Separator();
 
@@ -108,15 +122,19 @@ void SimulationInterface::renderSimulationSettings() {
     static char sceneSaveName[128] = "";
     ImGui::InputText("Scene Save Name", sceneSaveName, IM_ARRAYSIZE(sceneSaveName));
     
-    if (ImGui::Button("Save Scene")) {
+    ImGui::PushStyleColor(ImGuiCol_Button, m_blueBtn);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, m_blueBtnHov);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, m_blueBtnAct);
+    if (ImGui::Button("Save Scene", ImVec2(m_buttonWidth, 0))) {
         utl::str savePath = utl::strFormat("{}/{}", ribo::baseSerializationPath, sceneSaveName);
         m_simulationScene->saveObjectStates(savePath);
     }
 
-    if (ImGui::Button("Load Scene")) {
+    if (ImGui::Button("Load Scene", ImVec2(m_buttonWidth, 0))) {
         utl::str savePath = utl::strFormat("{}/{}", ribo::baseSerializationPath, sceneSaveName);
-		m_simulationScene->loadObjectStates(savePath);
+        m_simulationScene->loadObjectStates(savePath);
     }
+    ImGui::PopStyleColor(3);
 
 	ImGui::End();   
 }
@@ -139,9 +157,13 @@ void SimulationInterface::renderTerrainSettings() {
     ImGui::SliderFloat("phase", &phase, 0.0f, 25.0f, precision, 0);
     ImGui::SliderInt("iterations", &iterations, 1, 32);
 
-    if (ImGui::Button("Reset to default")) {
+    ImGui::PushStyleColor(ImGuiCol_Button, m_blueBtn);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, m_blueBtnHov);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, m_blueBtnAct);
+    if (ImGui::Button("Reset to default", ImVec2(m_buttonWidth, 0))) {
         amplitude = 0.0f; frequency = 0.0f; phase = 0.1f; iterations = 3;
     }
+    ImGui::PopStyleColor(3);
     ImGui::End();
 
     m_simulationScene->getTerrain()->setParameters(amplitude, frequency, phase, iterations);

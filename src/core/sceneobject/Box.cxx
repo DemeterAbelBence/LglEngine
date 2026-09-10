@@ -2,15 +2,13 @@
 
 namespace lgl {
 	utl::sptr<SceneObject> Box::clone() {
-		utl::sptr<Box> other = utl::makeSptr<Box>();
+		auto cuboidCollider = utl::sptrCast<CuboidCollider>(m_collider);
 
+		utl::sptr<Box> other = utl::makeSptr<Box>();
 		other->m_mesh = m_mesh;
 		other->m_transformation = utl::makeSptr<Transformation>(*m_transformation);
 		other->m_physicsSolver = utl::makeSptr<ribo::PhysicsSolver>(*m_physicsSolver);
-
-		auto cuboidCollider = utl::sptrCast<CuboidCollider>(m_collider);
 		other->m_collider = utl::makeSptr<CuboidCollider>(*cuboidCollider);
-
 		other->m_isStationary = m_isStationary;
 
 		return other;

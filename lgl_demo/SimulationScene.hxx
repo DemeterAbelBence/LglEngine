@@ -14,6 +14,11 @@ private:
 
 	lgl::keyin::KeyEventHandler<SimulationScene, float> m_simulationEventHandler;
 
+public:
+	inline static bool s_randomizeRollback = false;
+	inline static bool s_lockSimulation = true;
+
+
 private:
 	void initSimulationEvents();
 	void castShadowsOnTerrain();
@@ -24,7 +29,9 @@ public:
 	const lgl::utl::sptr<lgl::Terrain>& getTerrain() const { return m_terrain; }
 	const lgl::utl::sptr<lgl::Sun>& getSun() const { return m_sun; }
 	const auto& getSimulationEventHandler() { return m_simulationEventHandler; }
+	void handleCollisions() { lgl::CollisionHandler::handleCollisions(m_sceneObjects); }
 
+	void loadFromFile(const lgl::utl::str& path);
 	void rollbackToinitial();
 	void rollbackToPrevious();
 	void advanceSimulation(float deltaTime);

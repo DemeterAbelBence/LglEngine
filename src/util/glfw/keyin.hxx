@@ -132,10 +132,10 @@ namespace lgl {
 		bool KeyEventHandler<C, A>::handleEvents(GLFWwindow* window, C* c) {
 			bool eventOccured = false;
 			for (auto& event : m_events) {
-				eventOccured = event.applyKeyLogic(window, c);
+				eventOccured = (eventOccured || event.applyKeyLogic(window, c));
 			}
 			for (auto& argEvent : m_argEvents) {
-				eventOccured = argEvent.applyKeyLogic(window, c);
+				eventOccured = (eventOccured || argEvent.applyKeyLogic(window, c));
 			}
 			return eventOccured;
 		}

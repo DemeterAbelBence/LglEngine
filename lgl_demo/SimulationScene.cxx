@@ -38,26 +38,32 @@ void SimulationScene::castShadowsOnTerrain() {
 	m_camera->resetView();
 }
 
-void SimulationScene::rollbackToinitial() {
-	/*utl::rdev rd;
-	utl::rng gen(rd());
-	utl::udist<float> momentumDist(-10.0f, 10.0f);
-	utl::udist<float> angleDist(0.0f, 2.0f * 3.14159f);
-	utl::udist<float> axisDist(-1.0f, 1.0f);*/
+void SimulationScene::loadFromFile(const utl::str& path) {
 
+}
+
+void SimulationScene::rollbackToinitial() {
 	for (int i = 2; i < m_sceneObjects.size(); ++i) {
 		auto s = m_sceneObjects[i];
 		s->getPhysicsSolver()->rollbackToInitial();
 		s->updateTransformations();
 	}
 
-	/*for (int i = 2; i < m_sceneObjects.size(); ++i) {
-		auto s = m_sceneObjects[i];
-		glm::vec3 axis = glm::normalize(glm::vec3(axisDist(gen), axisDist(gen), axisDist(gen)));
-		s->setRotation(Transformation::makeRotationMatrix(axis, angleDist(gen)));
-		s->getPhysicsSolver()->Body.P = glm::vec3(momentumDist(gen), momentumDist(gen), momentumDist(gen));
-		s->getPhysicsSolver()->makeStateInitial();
-	}*/
+	if (s_randomizeRollback) {
+		utl::rdev rd;
+		utl::rng gen(rd());
+		utl::udist<float> momentumDist(-10.0f, 10.0f);
+		utl::udist<float> angleDist(0.0f, 2.0f * 3.14159f);
+		utl::udist<float> axisDist(-1.0f, 1.0f);
+
+		for (int i = 2; i < m_sceneObjects.size(); ++i) {
+			auto s = m_sceneObjects[i];
+			glm::vec3 axis = glm::normalize(glm::vec3(axisDist(gen), axisDist(gen), axisDist(gen)));
+			s->setRotation(Transformation::makeRotationMatrix(axis, angleDist(gen)));
+			s->getPhysicsSolver()->Body.P = glm::vec3(momentumDist(gen), momentumDist(gen), momentumDist(gen));
+			s->getPhysicsSolver()->makeStateInitial();
+		}
+	}
 }
 
 void SimulationScene::rollbackToPrevious() {
@@ -72,6 +78,7 @@ void SimulationScene::advanceSimulation(float deltaTime) {
 	for (const auto& sceneObject : m_sceneObjects) {
 		sceneObject->stepPhysicsBy(deltaTime);
 	}
+	CollisionHandler::handleCollisions(m_sceneObjects);
 }
 
 void SimulationScene::setSimulationSpeed(float speed) {
@@ -116,18 +123,6 @@ void SimulationScene::create() {
 			woodBox->getPhysicsSolver()->makeStateInitial();
 			m_sceneObjects.push_back(woodBox);
 		}
-		
-		/*for (int i = 0; i < 2; i++) {
-			float s = 10.0f / (i + 1);
-			auto ironBox = utl::makeSptr<Box>(false, m_modelMeshes.at("IRONBOX"));
-			ironBox->setName(utl::strFormat("iron_box_{}", i));
-			ironBox->getMesh()->setProgram(m_programs.at("MPHONG"));
-			ironBox->getMesh()->setMaterial(m_materials.at("WHITE"));
-			ironBox->translate(glm::vec3(i, 10.0f + i * 10.0f, 0.0f));
-			ironBox->scale(glm::vec3(s, s, s));
-			ironBox->getPhysicsSolver()->makeStateInitial();
-			m_sceneObjects.push_back(ironBox);
-		}*/
 	} 
 	catch (const utl::except& error) {
 		throw error;
@@ -164,8 +159,12 @@ void SimulationScene::update(GLFWwindow* window) {
 
 		m_terrain->updateTerrainParameters();
 
-		m_simulationEventHandler.handleEvents(window, this);
-		CollisionHandler::handleCollisions(m_sceneObjects);
+		if (s_lockSimulation) {
+			advanceSimulation(Time::s_fixedDeltaTime);
+		}
+		else {
+			m_simulationEventHandler.handleEvents(window, this);
+		}
 
 		castShadowsOnTerrain();
 		m_sun->lightUpScene(m_sceneObjects, *m_resources->getBuffer("DEPTH"));

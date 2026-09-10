@@ -609,34 +609,40 @@ namespace lgl {
 			glm::vec3 velpb = B->vel + glm::cross(B->omega, rb);
 			glm::vec3 vrel = velpa - velpb;
 
-			DebugDrawer::setOverrideZ(1);
-			DebugDrawer::setMode(GL_LINES);
+			if (drawVectors) {
+				DebugDrawer::setOverrideZ(1);
+				DebugDrawer::setMode(GL_LINES);
 
-			float debugveclen = 1.0f;
+				float debugveclen = 1.0f;
 
-			DebugDrawer::setVertexData({ contactData.point, contactData.point + debugveclen * velpa });
-			DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 0.0f));
+				DebugDrawer::setVertexData({ contactData.point, contactData.point + debugveclen * velpa });
+				DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 0.0f));
 
-			DebugDrawer::setVertexData({ contactData.point, contactData.point + debugveclen * velpb });
-			DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 1.0f));
+				DebugDrawer::setVertexData({ contactData.point, contactData.point + debugveclen * velpb });
+				DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 1.0f));
 
-			DebugDrawer::setVertexData({ contactData.point, contactData.point + debugveclen * vrel });
-			DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 1.0f));
+				DebugDrawer::setVertexData({ contactData.point, contactData.point + debugveclen * vrel });
+				DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(1.0f, 0.0f, 1.0f));
 
-			if (drawNormals) {
 				DebugDrawer::setVertexData({ contactData.point, contactData.point + debugveclen * contactData.normal });
-				DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 1.0f, 0.0f));
+				DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.3f, 0.0f));
 			}
 
 			if (contactData.isVertexFace) {
 				glm::vec3 contactPoint1 = contactData.point;
 				glm::vec3 contactPoint2 = contactPoint1 + *contactData.depth;
+
+				DebugDrawer::setOverrideZ(1);
+				DebugDrawer::setMode(GL_LINES);
 				DebugDrawer::setVertexData({ contactPoint1, contactPoint2 });
 				DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 0.0f));
 			}
 			else {
 				glm::vec3 edgePoint1 = contactData.edgeA[0];
 				glm::vec3 edgePoint2 = contactData.edgeB[0];
+
+				DebugDrawer::setOverrideZ(1);
+				DebugDrawer::setMode(GL_LINES);
 				DebugDrawer::setVertexData({ edgePoint1, edgePoint2 });
 				DebugDrawer::draw(camera.getV(), camera.getP(), glm::vec3(0.0f, 0.0f, 0.0f));
 

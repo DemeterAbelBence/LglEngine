@@ -22,8 +22,8 @@ namespace lgl {
 		inline static bool pushApartOnce = false;
 		inline static bool enableContactLog = false;
         inline static bool enableBisectionLog = false;
-		inline static bool enablePhysicsLog = true;
-		inline static bool drawNormals = false;
+		inline static bool enablePhysicsLog = false;
+		inline static bool drawVectors = false;
         inline static bool logStatesOnce = false;
 
         inline static float elasticity = 0.3f;
