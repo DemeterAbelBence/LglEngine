@@ -1,6 +1,7 @@
 #pragma once
 
-import lglmodule;
+import utl;
+import std;
 
 #include <GLEW/glew.h>
 
@@ -14,11 +15,11 @@ import lglmodule;
 #endif
 
 namespace lgl {
-	utl::str debugSourceToString(GLenum source);
+	std::string debugSourceToString(GLenum source);
 
-	utl::str debugTypeToString(GLenum type);
+	std::string debugTypeToString(GLenum type);
 
-	utl::str debugSeverityToString(GLenum severity);
+	std::string debugSeverityToString(GLenum severity);
 
 	// Must use APIENTRY calling convention so it matches GLDEBUGPROC on Windows
 	void APIENTRY outputDebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity,

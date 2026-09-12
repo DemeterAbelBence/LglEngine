@@ -6,13 +6,13 @@ namespace lgl {
 		glBindBuffer(GL_ARRAY_BUFFER, m_id);
 	}
 
-	VertexBuffer::VertexBuffer(utl::cmemptr data, utl::uint size) {
+	VertexBuffer::VertexBuffer(const void* data, std::uint32_t size) {
 		glGenBuffers(1, &m_id);
 		glBindBuffer(GL_ARRAY_BUFFER, m_id);
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 	}
 
-	void VertexBuffer::setData(const void* data, utl::uint size) {
+	void VertexBuffer::setData(const void* data, std::uint32_t size) {
 		bind();
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 	}

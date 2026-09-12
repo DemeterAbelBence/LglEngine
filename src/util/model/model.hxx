@@ -1,7 +1,8 @@
 #pragma once
 
-import lglmodule;
-import asimmodule;
+import utl;
+import asim;
+import std;
 
 #include <GLEW/glew.h>
 
@@ -22,17 +23,17 @@ namespace lgl {
 
 		class AssimpMesh {
 		public:
-			utl::vec<Vertex> vertices;
-			utl::vec<utl::uint> indices;
-			utl::vec<Texture> textures;
+			std::vector<Vertex> vertices;
+			std::vector<std::uint32_t> indices;
+			std::vector<Texture> textures;
 
 		private:
-			utl::uint m_VAO, m_VBO, m_EBO;
+			std::uint32_t m_VAO, m_VBO, m_EBO;
 		private:
-			void centerToOrigin(utl::vec<Vertex>& vertices);
+			void centerToOrigin(std::vector<Vertex>& vertices);
 
 		public:
-			AssimpMesh(utl::vec<Vertex> vertices, utl::vec<utl::uint> indices, utl::vec<Texture> textures, bool centerMeshes);
+			AssimpMesh(std::vector<Vertex> vertices, std::vector<std::uint32_t> indices, std::vector<Texture> textures, bool centerMeshes);
 			void downScaleMeshBy(const glm::vec3& scaling);
 			void draw(const lgl::GpuProgram& program);
 			void setupMesh();
@@ -40,21 +41,21 @@ namespace lgl {
 
 		class AssimpModel {
 		private:
-			utl::vec<AssimpMesh> m_meshes;
-			utl::str m_directory;
-			utl::vec<Texture> m_texturesLoaded;
+			std::vector<AssimpMesh> m_meshes;
+			std::string m_directory;
+			std::vector<Texture> m_texturesLoaded;
 			asim::aiScene* m_scene;
 			bool m_centerMeshes = false;
 			bool m_loadTextures = true;
 
 		private:
-			void loadModel(const utl::str& filePath);
+			void loadModel(const std::string& filePath);
 			void processNode(asim::aiNode* node, const aiScene* scene);
 			AssimpMesh processMesh(asim::aiMesh* mesh, const aiScene* scene);
-			utl::vec<Texture> loadMaterialTextures(asim::aiMaterial* mat, asim::aiTextureType type, utl::str typeName);
+			std::vector<Texture> loadMaterialTextures(asim::aiMaterial* mat, asim::aiTextureType type, const std::string& typeName);
 
 		public:
-			AssimpModel(const utl::str& path, bool centerMeshes, bool loadTextures);
+			AssimpModel(const std::string& path, bool centerMeshes, bool loadTextures);
 			void downScaleMeshesBy(const glm::vec3& scaling);
 			void draw(const GpuProgram& program);
 		};

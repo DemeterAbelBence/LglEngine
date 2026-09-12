@@ -3,7 +3,7 @@
 #include "Debug.hxx"
 
 namespace lgl {
-	utl::str debugSourceToString(GLenum source) {
+	std::string debugSourceToString(GLenum source) {
 		switch (source) {
 		case GL_DEBUG_SOURCE_API: return "API";
 		case GL_DEBUG_SOURCE_WINDOW_SYSTEM: return "Window System";
@@ -15,7 +15,7 @@ namespace lgl {
 		}
 	}
 
-	utl::str debugTypeToString(GLenum type) {
+	std::string debugTypeToString(GLenum type) {
 		switch (type) {
 		case GL_DEBUG_TYPE_ERROR: return "Error";
 		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: return "Deprecated Behaviour";
@@ -30,7 +30,7 @@ namespace lgl {
 		}
 	}
 
-	utl::str debugSeverityToString(GLenum severity) {
+	std::string debugSeverityToString(GLenum severity) {
 		switch (severity) {
 		case GL_DEBUG_SEVERITY_HIGH: return "High";
 		case GL_DEBUG_SEVERITY_MEDIUM: return "Medium";
@@ -47,23 +47,23 @@ namespace lgl {
 		// Ignore notifications if they are disabled by the control, but be safe here
 		if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
 
-		Logger::LogLevel logLevel = Logger::LGL_INFO;
+		utl::LogLevel logLevel = utl::LGL_INFO;
 		switch (severity) {
-		case GL_DEBUG_SEVERITY_HIGH: logLevel = Logger::LGL_ERROR; break;
-		case GL_DEBUG_SEVERITY_MEDIUM: logLevel = Logger::LGL_WARN; break;
-		case GL_DEBUG_SEVERITY_LOW: logLevel = Logger::LGL_INFO; break;
-		default: logLevel = Logger::LGL_INFO; break;
+		case GL_DEBUG_SEVERITY_HIGH: logLevel = utl::LGL_ERROR; break;
+		case GL_DEBUG_SEVERITY_MEDIUM: logLevel = utl::LGL_WARN; break;
+		case GL_DEBUG_SEVERITY_LOW: logLevel = utl::LGL_INFO; break;
+		default: logLevel = utl::LGL_INFO; break;
 		}
 
-		utl::str src = debugSourceToString(source);
-		utl::str tp = debugTypeToString(type);
-		utl::str sev = debugSeverityToString(severity);
+		std::string src = debugSourceToString(source);
+		std::string tp = debugTypeToString(type);
+		std::string sev = debugSeverityToString(severity);
 
 		// Cast GL types to standard types digestible by Logger/std::format
 		unsigned long long msgId = static_cast<unsigned long long>(id);
-		utl::str msgText = message ? utl::str(message) : utl::str("(null)");
+		std::string msgText = message ? std::string(message) : std::string("(null)");
 
-		Logger::log(logLevel, "OpenGL Debug message (id={}): {}\nSource: {}\nType: {}\nSeverity: {}\n",
+		utl::log(logLevel, "OpenGL Debug message (id={}): {}\nSource: {}\nType: {}\nSeverity: {}\n",
 			msgId, msgText, src, tp, sev);
 	}
 
@@ -84,12 +84,12 @@ namespace lgl {
 		glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
 		glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
 
-		Logger::setLogMode(Logger::GENERAL_LOGS);
-		Logger::log(Logger::LGL_INFO, "GL Vendor    : {}\n", reinterpret_cast<utl::cstr>(glGetString(GL_VENDOR)));
-		Logger::log(Logger::LGL_INFO, "GL Renderer  : {}\n", reinterpret_cast<utl::cstr>(glGetString(GL_RENDERER)));
-		Logger::log(Logger::LGL_INFO, "GL Version (string)  : {}\n", reinterpret_cast<utl::cstr>(glGetString(GL_VERSION)));
-		Logger::log(Logger::LGL_INFO, "GL Version (integer) : {}.{}\n", majorVersion, minorVersion);
-		Logger::log(Logger::LGL_INFO, "GLSL Version : {}\n\n", reinterpret_cast<utl::cstr>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+		utl::setLogMode(utl::GENERAL_LOGS);
+		utl::log(utl::LGL_INFO, "GL Vendor    : {}\n", reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
+		utl::log(utl::LGL_INFO, "GL Renderer  : {}\n", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
+		utl::log(utl::LGL_INFO, "GL Version (string)  : {}\n", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+		utl::log(utl::LGL_INFO, "GL Version (integer) : {}.{}\n", majorVersion, minorVersion);
+		utl::log(utl::LGL_INFO, "GLSL Version : {}\n\n", reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
 	}
 }
 

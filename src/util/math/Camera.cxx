@@ -52,7 +52,7 @@ namespace lgl {
 
 		float dot = glm::dot(dir, m_up);
 		if (glm::abs(dot) > 0.9999f) {
-			Logger::log(Logger::LGL_WARN, "Camera direction and up vector are nearly parallel (dot = {})\n", dot);
+			utl::log(utl::LGL_WARN, "Camera direction and up vector are nearly parallel (dot = {})\n", dot);
 		}
 
 		glm::mat4 rotation;

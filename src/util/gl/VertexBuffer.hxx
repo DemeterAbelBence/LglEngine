@@ -1,18 +1,18 @@
 #pragma once
 
-import lglmodule;
+import std;
 
 #include <GLEW/glew.h>
 
 namespace lgl {
 	class VertexBuffer {
 	private:
-		utl::uint m_id;
+		std::uint32_t m_id;
 
 	public:
 		VertexBuffer();
-		VertexBuffer(utl::cmemptr data, utl::uint size);
-		void setData(utl::cmemptr data, utl::uint size);
+		VertexBuffer(const void* data, std::uint32_t size);
+		void setData(const void* data, std::uint32_t size);
 		void bind() const;
 		void unBind() const;
 		~VertexBuffer();

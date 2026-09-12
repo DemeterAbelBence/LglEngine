@@ -1,10 +1,10 @@
 #include "Texture.hxx"
 
 namespace lgl {
-	utl::uint tex::TextureFromFile(utl::cstr path) {
-		utl::uint textureID = 0;
+	std::uint32_t tex::TextureFromFile(const std::string& path) {
+		std::uint32_t textureID = 0;
 		int stbi_width, stbi_height, stbi_channels;
-		utl::byte* stbi_data = stbi_load(path, &stbi_width, &stbi_height, &stbi_channels, 0);
+		void* stbi_data = stbi_load(path.c_str(), &stbi_width, &stbi_height, &stbi_channels, 0);
 		if (stbi_data) {
 			GLenum format = GL_RED;
 			if (stbi_channels == 1) {
@@ -27,16 +27,16 @@ namespace lgl {
 			stbi_image_free(stbi_data);
 		}
 		else {
-			Logger::log(Logger::LGL_ERROR, "Failed to load texture from file at path: {}", path);
+			utl::log(utl::LGL_ERROR, "Failed to load texture from file at path: {}", path);
 			stbi_image_free(stbi_data);
 		}
 		return textureID;
 	}
 
-	utl::uint tex::TextureFromMemory(utl::byte* sourceData, int nBytes) {
-		utl::uint textureID = 0;
+	std::uint32_t tex::TextureFromMemory(const std::byte* sourceData, int nBytes) {
+		std::uint32_t textureID = 0;
 		int stbi_width, stbi_height, stbi_channels;
-		utl::byte* stbi_data = stbi_load_from_memory(sourceData, nBytes, &stbi_width, &stbi_height, &stbi_channels, 0);
+		void* stbi_data = stbi_load_from_memory(reinterpret_cast<const unsigned char*>(sourceData), nBytes, &stbi_width, &stbi_height, &stbi_channels, 0);
 		if (stbi_data) {
 			GLenum format = GL_RED;
 			if (stbi_channels == 1) {
@@ -62,19 +62,19 @@ namespace lgl {
 			stbi_image_free(stbi_data);
 		}
 		else {
-			utl::str errorMessage = "Assimp texture load from memory failed ";
+			std::string errorMessage = "Assimp texture load from memory failed ";
 			errorMessage += (nBytes == 0 ? "(zero byte texture data)" : "(non-zero byte texture data, but stbi_load_from_memory failed to decode it)");
-			Logger::log(Logger::LGL_ERROR, "{}", errorMessage);
+			utl::log(utl::LGL_ERROR, "{}", errorMessage);
 			stbi_image_free(stbi_data);
 		}
 		return textureID;
 	}
 
-	utl::uint tex::TextureFromAssimpTexels(utl::byte* data, utl::uint width, utl::uint height) {
-		utl::uint textureID = 0;
+	std::uint32_t tex::TextureFromAssimpTexels(const std::byte* data, std::uint32_t width, std::uint32_t height) {
+		std::uint32_t textureID = 0;
 		if (height != 0) {
 			int nBytes = width * height * 4;
-			utl::vec<tex::Texel> processedTexels;
+			std::vector<tex::Texel> processedTexels;
 			processedTexels.reserve(nBytes);
 			for (int i = 0; i < nBytes; i += 4) {
 				processedTexels[i / 4].r = data[i + 3]; // BGRA to RGBA data conversion
@@ -82,11 +82,11 @@ namespace lgl {
 				processedTexels[i / 4].b = data[i + 1];
 				processedTexels[i / 4].a = data[i + 0];
 			}
-			utl::byte* processedData = reinterpret_cast<utl::byte*>(processedTexels.data());
+			const std::byte* processedData = reinterpret_cast<const std::byte*>(processedTexels.data());
 			textureID = TextureFromMemory(processedData, nBytes);
 		}
 		else {
-			Logger::log(Logger::LGL_ERROR, "Assimp texture load from aiTexture failed: zero height indicates compressed texture, which is not supported. Texture data will be ignored.");
+			utl::log(utl::LGL_ERROR, "Assimp texture load from aiTexture failed: zero height indicates compressed texture, which is not supported. Texture data will be ignored.");
 		}
 
 		return textureID;

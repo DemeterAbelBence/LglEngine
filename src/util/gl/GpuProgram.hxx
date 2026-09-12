@@ -1,7 +1,8 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
+import std;
 
 #include <XXHASH/xxhash64.h>
 #include <GLEW/glew.h>
@@ -9,9 +10,9 @@ import glmmodule;
 namespace lgl {
 	struct Shader {
 	public:
-		utl::str m_source;
-		utl::str m_path;
-		utl::ull m_hash;
+		std::string m_source;
+		std::string m_path;
+		std::uint64_t m_hash;
 
 	public:
 		Shader() : m_source(""), m_path(""), m_hash(0) {}
@@ -23,34 +24,34 @@ namespace lgl {
 		
 
 	private:
-		utl::uint m_programId;
-		utl::str m_programName;
+		std::uint32_t m_programId;
+		std::string m_programName;
 		const XXHash64 m_hasher = XXHash64(0);
 
 	private:
-		utl::imap<Shader> m_shaders;
+		std::unordered_map<std::uint32_t, Shader> m_shaders;
 
-		utl::str shaderTypeToString(utl::uint type);
-		void displayShaderCompilationResult(utl::uint type, utl::uint id);
-		utl::uint compileShaderSource(utl::uint type, const utl::str& source);
-		void readShaderSource(utl::str& shaderSource, const utl::str& filePath);
+		std::string shaderTypeToString(std::uint32_t type);
+		void displayShaderCompilationResult(std::uint32_t type, std::uint32_t id);
+		std::uint32_t compileShaderSource(std::uint32_t type, const std::string& source);
+		void readShaderSource(std::string& shaderSource, const std::string& filePath);
 
 	public:
 		GpuProgram();
-		GpuProgram(const utl::str& programName);
-		utl::uint getProgramId() { return m_programId; }
-		utl::str getProgramName() { return m_programName; }
+		GpuProgram(const std::string& programName);
+		std::uint32_t getProgramId() { return m_programId; }
+		std::string getProgramName() { return m_programName; }
 
-		void addShader(utl::uint type, const utl::str& filePath);
+		void addShader(std::uint32_t type, const std::string& filePath);
 		void handleShaderSourceChange();
 		void bind() const;
 		void unBind() const;
 
-		void setVec3(const utl::str& name, glm::vec3 value) const;
-		void setVec3(const utl::str& name, float x, float y, float z) const;
-		void setMat4(const utl::str& name, glm::mat4 value) const;
-		void setFloat(const utl::str& name, float value) const;
-		void setInt(const utl::str& name, int value) const;
+		void setVec3(const std::string& name, glm::vec3 value) const;
+		void setVec3(const std::string& name, float x, float y, float z) const;
+		void setMat4(const std::string& name, glm::mat4 value) const;
+		void setFloat(const std::string& name, float value) const;
+		void setInt(const std::string& name, int value) const;
 		virtual void createProgram();
 	};
 }

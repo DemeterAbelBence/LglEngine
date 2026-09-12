@@ -9,8 +9,8 @@ set_target_properties(LglMod PROPERTIES
 
 target_sources(LglMod PRIVATE
  FILE_SET cxx_modules TYPE CXX_MODULES FILES
-    ${CMAKE_CURRENT_LIST_DIR}/lglmodule.ixx
-    ${CMAKE_CURRENT_LIST_DIR}/glmmodule.ixx
-    ${CMAKE_CURRENT_LIST_DIR}/asimmodule.ixx
-    ${CMAKE_CURRENT_LIST_DIR}/qpmodule.ixx
+    ${CMAKE_CURRENT_LIST_DIR}/utl.ixx
+    ${CMAKE_CURRENT_LIST_DIR}/glm.ixx
+    ${CMAKE_CURRENT_LIST_DIR}/asim.ixx
+    ${CMAKE_CURRENT_LIST_DIR}/qp.ixx
 )

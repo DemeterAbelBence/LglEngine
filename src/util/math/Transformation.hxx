@@ -1,7 +1,8 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import std;
+import utl;
+import glm;
 
 namespace lgl {
 	class Transformation {
@@ -26,7 +27,7 @@ namespace lgl {
 		Transformation(const Transformation&& other) = delete;
 		Transformation& operator=(const Transformation&& other) = delete;
 
-		utl::sptr<Transformation> clone();
+		std::shared_ptr<Transformation> clone();
 
 		void setT(const glm::mat4& value) { m_T = value; }
 		void setR(const glm::mat4& value) { m_R = value; }

@@ -1,6 +1,6 @@
 #pragma once
 
-import lglmodule;
+import std;
 
 #include <GLFW/glfw3.h>
 
@@ -8,7 +8,7 @@ namespace lgl {
     class Time {
 
     private:
-        inline static const utl::uint FPS = 100;
+        inline static const std::uint32_t FPS = 100;
 
     public:
         inline static float s_currentTime = 0.0f;

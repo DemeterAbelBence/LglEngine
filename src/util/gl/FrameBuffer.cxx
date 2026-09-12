@@ -3,7 +3,7 @@
 namespace lgl {
 	FrameBuffer::FrameBuffer() : m_FBO(0), m_RBO(0), m_textureId(0), m_width(0), m_height(0), m_name("") {}
 
-	FrameBuffer::FrameBuffer(utl::cstr name, utl::uint width, utl::uint height, GLint internalFormat, GLenum type, GLint format) {
+	FrameBuffer::FrameBuffer(const std::string& name, std::uint32_t width, std::uint32_t height, GLint internalFormat, GLenum type, GLint format) {
 		glGenFramebuffers(1, &m_FBO);
 		m_name = name;
 		m_width = width;
@@ -40,14 +40,14 @@ namespace lgl {
 		}
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-			Logger::log(Logger::LGL_ERROR, "Framebuffer {} is not complete!\n", name);
+			utl::log(utl::LGL_ERROR, "Framebuffer {} is not complete!\n", name);
 
 		}
 		else {
-			Logger::log(Logger::LGL_INFO, "Framebuffer {} is complete!\n\n", name);
+			utl::log(utl::LGL_INFO, "Framebuffer {} is complete!\n\n", name);
 			textureUnitId = textureUnitIdCount++;
 			if(textureUnitIdCount >= 16) {
-				Logger::log(Logger::LGL_WARN, "Texture unit ID count has reached the maximum limit!\n");
+				utl::log(utl::LGL_WARN, "Texture unit ID count has reached the maximum limit!\n");
 			}
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -67,7 +67,7 @@ namespace lgl {
 		return m_height;
 	}
 
-	utl::uint FrameBuffer::getTextureId() const {
+	std::uint32_t FrameBuffer::getTextureId() const {
 		return m_textureId;
 	}
 

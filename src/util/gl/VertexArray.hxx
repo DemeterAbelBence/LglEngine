@@ -1,6 +1,6 @@
 #pragma once
 
-import lglmodule;
+import std;
 
 #include <GLEW/glew.h>
 
@@ -10,7 +10,7 @@ import lglmodule;
 namespace lgl {
 	class VertexArray {
 	private:
-		utl::uint m_id;
+		std::uint32_t m_id;
 
 	public:
 		VertexArray();

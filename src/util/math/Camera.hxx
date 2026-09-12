@@ -1,6 +1,6 @@
 #pragma once
 
-import lglmodule;
+import utl;
 
 #include <gl/GpuProgram.hxx>
 #include <math/Quaternion.hxx>

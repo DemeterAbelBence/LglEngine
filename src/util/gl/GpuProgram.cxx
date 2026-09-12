@@ -1,45 +1,45 @@
 #include "GpuProgram.hxx"
 
 namespace lgl {
-	utl::str GpuProgram::shaderTypeToString(utl::uint type) {
+	std::string GpuProgram::shaderTypeToString(std::uint32_t type) {
 		switch (type) {
 		case GL_VERTEX_SHADER:
-			return utl::str("vertex shader");
+			return std::string("vertex shader");
 		case GL_FRAGMENT_SHADER:
-			return utl::str("fragment shader");
+			return std::string("fragment shader");
 		case GL_TESS_EVALUATION_SHADER:
-			return utl::str("tesselation evaluatioln shader");
+			return std::string("tesselation evaluation shader");
 		case GL_TESS_CONTROL_SHADER:
-			return utl::str("tesselation control shader");
+			return std::string("tesselation control shader");
 		case GL_GEOMETRY_SHADER:
-			return utl::str("geometry shader");
+			return std::string("geometry shader");
 		default:
-			return utl::str("NULL");
+			return std::string("NULL");
 		}
 	}
 
-	void GpuProgram::displayShaderCompilationResult(utl::uint type, utl::uint id) {
-		utl::int32 result;
+	void GpuProgram::displayShaderCompilationResult(std::uint32_t type, std::uint32_t id) {
+		std::int32_t result;
 		glGetShaderiv(id, GL_COMPILE_STATUS, &result);
 
 		if (result == GL_FALSE) {
-			utl::int32 length;
+			std::int32_t length;
 			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 			char* message = new char[length];
 			glGetShaderInfoLog(id, length, &length, message);
 
-			Logger::log(Logger::LGL_ERROR, "Failed to compile {} at path {}\n{}", shaderTypeToString(type), m_shaders[type].m_path, message);
+			utl::log(utl::LGL_ERROR, "Failed to compile {} at path {}\n{}", shaderTypeToString(type), m_shaders[type].m_path, message);
 
 			delete[] message;
 		}
 		else if (result == GL_TRUE) {
-			Logger::log(Logger::LGL_OK, "Successful {} compilation!\n", shaderTypeToString(type));
+			utl::log(utl::LGL_OK, "Successful {} compilation!\n", shaderTypeToString(type));
 		}
 	}
 
-	utl::uint GpuProgram::compileShaderSource(utl::uint type, const utl::str& source) {
-		utl::uint id = glCreateShader(type);
-		utl::cstr src = source.c_str();
+	std::uint32_t GpuProgram::compileShaderSource(std::uint32_t type, const std::string& source) {
+		std::uint32_t id = glCreateShader(type);
+		const char* src = source.c_str();
 		glShaderSource(id, 1, &src, nullptr);
 		glCompileShader(id);
 
@@ -48,11 +48,11 @@ namespace lgl {
 		return id;
 	}
 
-	void GpuProgram::readShaderSource(utl::str& shader, const utl::str& filePath) {
+	void GpuProgram::readShaderSource(std::string& shader, const std::string& filePath) {
 		try {
-			shader = readFileToString(filePath);
+			shader = utl::readFileToString(filePath);
 		}
-		catch (const utl::except& error) {
+		catch (const std::exception& error) {
 			throw error;
 		}
 	}
@@ -65,7 +65,7 @@ namespace lgl {
 		m_shaders[GL_GEOMETRY_SHADER] = Shader();
 	}
 
-	GpuProgram::GpuProgram(const utl::str& programName) : m_programId(0) {
+	GpuProgram::GpuProgram(const std::string& programName) : m_programId(0) {
 		m_programName = programName;
 		m_shaders[GL_VERTEX_SHADER] = Shader();
 		m_shaders[GL_FRAGMENT_SHADER] = Shader();
@@ -76,46 +76,46 @@ namespace lgl {
 
 	void GpuProgram::createProgram() {
 		glDeleteProgram(m_programId);
-		utl::uint id = glCreateProgram();
+		std::uint32_t id = glCreateProgram();
 
-		Logger::setLogMode(Logger::GENERAL_LOGS);
-		Logger::log(Logger::LGL_INFO, "Compilation result of {}:\n", m_programName);
-		utl::vec<utl::uint> shaderIds;
+		utl::setLogMode(utl::GENERAL_LOGS);
+		utl::log(utl::LGL_INFO, "Compilation result of {}:\n", m_programName);
+		std::vector<std::uint32_t> shaderIds;
 		for (const auto& shader : m_shaders) {
 			if (!shader.second.empty()) {
-				utl::uint shaderId = compileShaderSource(shader.first, shader.second.m_source);
+				std::uint32_t shaderId = compileShaderSource(shader.first, shader.second.m_source);
 				shaderIds.push_back(shaderId);
 			}
 		}
-		Logger::log(Logger::LGL_EMPTY, "\n");
+		utl::log(utl::LGL_EMPTY, "\n");
 
-		for (utl::uint shaderId : shaderIds) {
+		for (std::uint32_t shaderId : shaderIds) {
 			glAttachShader(id, shaderId);
 		}
 
 		glLinkProgram(id);
 		glValidateProgram(id);
 
-		for (utl::uint shaderId : shaderIds) {
+		for (std::uint32_t shaderId : shaderIds) {
 			glDeleteShader(shaderId);
 		}
 
 		m_programId = id;
 	}
 
-	void GpuProgram::addShader(utl::uint type, const utl::str& filePath) {
+	void GpuProgram::addShader(std::uint32_t type, const std::string& filePath) {
 		try {
 			if (m_shaders.find(type) == m_shaders.end()) {
-				throw utl::runtime(utl::strFormat("Not available shader type: {}", type));
+				throw std::runtime_error(std::format("Not available shader type: {}", type));
 			}
 
-			utl::str path = utl::strFormat("../../../res/{}", filePath);
-			utl::str& shaderSource = m_shaders[type].m_source;
-			shaderSource = readFileToString(path);
+			std::string path = std::format("../../../res/{}", filePath);
+			std::string& shaderSource = m_shaders[type].m_source;
+			shaderSource = utl::readFileToString(path);
 			m_shaders[type].m_hash = m_hasher.hash(shaderSource.c_str(), shaderSource.size(), 0);
 			m_shaders[type].m_path = filePath;
 		}
-		catch (const utl::except& error) {
+		catch (const std::exception& error) {
 			throw error;
 		}
 	}
@@ -124,15 +124,15 @@ namespace lgl {
 		bool recompile = false;
 		for (auto& shader : m_shaders) {
 			if (!shader.second.empty()) {
-				utl::str newSource;
+				std::string newSource;
 				try {
-					utl::str path = utl::strFormat("../../../res/{}", shader.second.m_path);
+					std::string path = std::format("../../../res/{}", shader.second.m_path);
 					readShaderSource(newSource, path);
 				}
-				catch (const utl::except& error) {
+				catch (const std::exception& error) {
 					return;
 				}
-				utl::ull newHash = m_hasher.hash(newSource.c_str(), newSource.size(), 0);
+				std::uint64_t newHash = m_hasher.hash(newSource.c_str(), newSource.size(), 0);
 				if (newHash != shader.second.m_hash) {
 					shader.second.m_source = newSource;
 					shader.second.m_hash = newHash;
@@ -153,23 +153,23 @@ namespace lgl {
 		glUseProgram(0);
 	}
 
-	void GpuProgram::setVec3(const utl::str& name, glm::vec3 value) const {
+	void GpuProgram::setVec3(const std::string& name, glm::vec3 value) const {
 		glUniform3fv(glGetUniformLocation(m_programId, name.c_str()), 1, &value[0]);
 	}
 
-	void GpuProgram::setVec3(const utl::str& name, float x, float y, float z) const {
+	void GpuProgram::setVec3(const std::string& name, float x, float y, float z) const {
 		glUniform3f(glGetUniformLocation(m_programId, name.c_str()), x, y, z);
 	}
 
-	void GpuProgram::setMat4(const utl::str& name, glm::mat4 mat) const {
+	void GpuProgram::setMat4(const std::string& name, glm::mat4 mat) const {
 		glUniformMatrix4fv(glGetUniformLocation(m_programId, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 	}
 
-	void GpuProgram::setFloat(const utl::str& name, float value) const {
+	void GpuProgram::setFloat(const std::string& name, float value) const {
 		glUniform1f(glGetUniformLocation(m_programId, name.c_str()), value);
 	}
 
-	void GpuProgram::setInt(const utl::str& name, int value) const {
+	void GpuProgram::setInt(const std::string& name, int value) const {
 		glUniform1i(glGetUniformLocation(m_programId, name.c_str()), value);
 	}
 }

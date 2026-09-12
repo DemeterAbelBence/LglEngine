@@ -27,12 +27,12 @@ namespace lgl {
         );
     }
 
-    void ribo::serializeBodyDataInto(utl::str filename, const BodyData& body) {
+    void ribo::serializeBodyDataInto(const std::string& filename, const BodyData& body) {
         try {
 			utl::createDirectories(filename);
-			utl::ofstream file(filename, utl::ios::binary | utl::ios::out);
+			std::ofstream file(filename, std::ios::binary | std::ios::out);
 			if (!file.is_open()) {
-				throw utl::runtime(utl::strFormat("Failed to open file for writing: {}", filename));
+				throw std::runtime_error("Failed to open file for writing: " + filename);
 			}
 
             auto writeFloat = [&](float v) { file.write(reinterpret_cast<const char*>(&v), sizeof(float)); };
@@ -54,16 +54,16 @@ namespace lgl {
 
             file.close();
         }
-        catch (const utl::except& error) {
+        catch (const std::exception& error) {
             throw error;
         }
     }
 
-    ribo::BodyData ribo::deserializeBodyDataFrom(utl::str filename) {
+    ribo::BodyData ribo::deserializeBodyDataFrom(const std::string& filename) {
         try {
-            utl::ifstream file(filename, utl::ios::binary);
+            std::ifstream file(filename, std::ios::binary);
             if (!file.is_open()) {
-                throw utl::runtime(utl::strFormat("Failed to open file for reading: {}", filename));
+                throw std::runtime_error("Failed to open file for reading: " + filename);
             }
 
             BodyData body;
@@ -88,7 +88,7 @@ namespace lgl {
             file.close();
             return body;
         }
-        catch (const utl::runtime& error) {
+        catch (const std::exception& error) {
             throw error;
         }
     }
@@ -107,7 +107,7 @@ namespace lgl {
     void ribo::PhysicsSolver::rollbackToPrevious() {
         if (!PreviousStates.empty()) {
             Body = PreviousStates.back();
-            PreviousStates.pop_back();
+            PreviousStates.pop();
         }
     }
 
@@ -131,9 +131,9 @@ namespace lgl {
     }
 
     void ribo::PhysicsSolver::updateState(float dt) {
-        PreviousStates.push_back(Body);
+        PreviousStates.push(Body);
         if (PreviousStates.size() > 10) {
-			PreviousStates.pop_front();
+			PreviousStates.pop();
         }
 
         // update momentums

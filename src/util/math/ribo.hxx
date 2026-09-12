@@ -1,7 +1,8 @@
 #pragma once
 
-import glmmodule;
-import lglmodule;
+import utl;
+import glm;
+import std;
 
 namespace lgl {
     namespace ribo {
@@ -27,17 +28,17 @@ namespace lgl {
 
         glm::mat3 orthonormalize(const glm::mat3& R);
 
-        void serializeBodyDataInto(utl::str filename, const BodyData& body);
+        void serializeBodyDataInto(const std::string& filename, const BodyData& body);
 
-		BodyData deserializeBodyDataFrom(utl::str filename);
+		BodyData deserializeBodyDataFrom(const std::string& filename);
 
-		static constexpr utl::cstr baseSerializationPath = "../../../res/physics";
+		static constexpr const char* baseSerializationPath = "../../../res/physics";
 
         class PhysicsSolver {
         public:
             BodyData Body;
             BodyData Initial;
-            utl::queue<BodyData> PreviousStates;
+            std::queue<BodyData> PreviousStates;
 
         public:
             PhysicsSolver(BodyData _Body) : Body(_Body) {}

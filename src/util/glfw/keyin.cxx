@@ -6,7 +6,7 @@ namespace lgl {
         m_pressed = false;
     }
 
-    keyin::Key::Key(utl::uint id) {
+    keyin::Key::Key(std::uint32_t id) {
         m_id = id;
         m_pressed = false;
     }
@@ -31,7 +31,7 @@ namespace lgl {
         }
     }
 
-    utl::uint keyin::Key::getState(GLFWwindow* window) {
+    std::uint32_t keyin::Key::getState(GLFWwindow* window) {
         return glfwGetKey(window, m_id);
     }
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-import lglmodule;
+import utl;
 
 #include <GLFW/glfw3.h>
 

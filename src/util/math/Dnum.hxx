@@ -1,7 +1,6 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import glm;
 
 namespace lgl {
 	struct Dnum {

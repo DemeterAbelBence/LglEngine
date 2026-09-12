@@ -4,7 +4,7 @@ module;
 #include <ASSIMP/scene.h>
 #include <ASSIMP/postprocess.h>
 
-export module asimmodule;
+export module asim;
 
 export namespace asim {
 	// Importer class

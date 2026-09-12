@@ -4,9 +4,9 @@ module;
 #include <Eigen/Sparse>
 #include <OsqpEigen/OsqpEigen.h>
 
-export module qpmodule;
+export module qp;
 
-import lglmodule;
+import utl;
 
 export namespace eig {
 	using matf = Eigen::MatrixXf;
@@ -31,16 +31,16 @@ export namespace eig {
         for (int i = 0; i < matrix.rows(); ++i) {
             for (int j = 0; j < matrix.cols(); ++j) {
                 auto element = matrix(i, j);
-                lgl::Logger::logIf(logSwtich, lgl::Logger::LGL_EMPTY, "{:.4f}  ", element);
+                utl::logIf(logSwtich, utl::LGL_EMPTY, "{:.4f}  ", element);
             }
-            lgl::Logger::logIf(logSwtich, lgl::Logger::LGL_EMPTY, "\n");
+            utl::logIf(logSwtich, utl::LGL_EMPTY, "\n");
         }
     }
 
     void logVector(const Eigen::VectorXd& vector, bool logSwtich) {
         for (int i = 0; i < vector.size(); ++i) {
             auto element = vector(i);
-            lgl::Logger::logIf(logSwtich, lgl::Logger::LGL_EMPTY, "{:.4f}\n", element);
+            utl::logIf(logSwtich, utl::LGL_EMPTY, "{:.4f}\n", element);
         }
     }
 
@@ -87,7 +87,7 @@ export namespace qp {
         const int n = static_cast<int>(contactB.size());
 
         if (contactA.rows() != n || contactA.cols() != n) {
-			lgl::Logger::log(lgl::Logger::LGL_WARN, "Invalid contact matrix size: expected {}x{}, got {}x{}.", n, n, contactA.rows(), contactA.cols());
+			utl::log(utl::LGL_WARN, "Invalid contact matrix size: expected {}x{}, got {}x{}.", n, n, contactA.rows(), contactA.cols());
             return false;
         }
 
@@ -120,38 +120,38 @@ export namespace qp {
         solver.data()->setNumberOfConstraints(n);
 
         if (!solver.data()->setHessianMatrix(P)) {
-            lgl::Logger::log(lgl::Logger::LGL_WARN, "Failed to set Hessian matrix.");
+            utl::log(utl::LGL_WARN, "Failed to set Hessian matrix.");
             return false;
         }
 
         if (!solver.data()->setGradient(q)) {
-            lgl::Logger::log(lgl::Logger::LGL_WARN, "Failed to set gradient vector.");
+            utl::log(utl::LGL_WARN, "Failed to set gradient vector.");
             return false;
         }
 
         if (!solver.data()->setLinearConstraintsMatrix(C)) {
-            lgl::Logger::log(lgl::Logger::LGL_WARN, "Failed to set constraint matrix.");
+            utl::log(utl::LGL_WARN, "Failed to set constraint matrix.");
             return false;
         }
 
         if (!solver.data()->setLowerBound(lowerBound)) {
-            lgl::Logger::log(lgl::Logger::LGL_WARN, "Failed to set lower bound.");
+            utl::log(utl::LGL_WARN, "Failed to set lower bound.");
             return false;
         }
 
         if (!solver.data()->setUpperBound(upperBound)) {
-            lgl::Logger::log(lgl::Logger::LGL_WARN, "Failed to set upper bound.");
+            utl::log(utl::LGL_WARN, "Failed to set upper bound.");
             return false;
         }
 
         if (!solver.initSolver()) {
-            lgl::Logger::log(lgl::Logger::LGL_WARN, "Failed to initialize OSQP solver.");
+            utl::log(utl::LGL_WARN, "Failed to initialize OSQP solver.");
             return false;
         }
 
         const OsqpEigen::ErrorExitFlag solveResult = solver.solveProblem();
         if (solveResult != OsqpEigen::ErrorExitFlag::NoError) {
-            lgl::Logger::log(lgl::Logger::LGL_WARN, "OSQP failed to solve problem (error flag: {}).", static_cast<int>(solveResult));
+            utl::log(utl::LGL_WARN, "OSQP failed to solve problem (error flag: {}).", static_cast<int>(solveResult));
             return false;
         }
 

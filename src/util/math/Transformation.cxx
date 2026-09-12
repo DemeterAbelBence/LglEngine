@@ -36,8 +36,8 @@ namespace lgl {
 		return *this;
 	}
 
-	utl::sptr<Transformation> Transformation::clone() {
-		auto other = utl::makeSptr<Transformation>();
+	std::shared_ptr<Transformation> Transformation::clone() {
+		auto other = std::make_shared<Transformation>();
 
 		other->setScaleMatrix(m_scaling);
 		other->setRotationMarix(m_rotationAxis, m_rotationAngle);
@@ -127,7 +127,7 @@ namespace lgl {
 			return glm::inverse(M);
 		}
 		else {
-			Logger::log(Logger::LGL_ERROR, "Model matrix has no inverse!");
+			utl::log(utl::LGL_ERROR, "Model matrix has no inverse!");
 			return glm::mat4(1.0f);
 		}
 	}

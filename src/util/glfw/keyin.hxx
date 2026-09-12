@@ -1,6 +1,7 @@
 #pragma once
 
-import lglmodule;
+import utl;
+import std;
 
 #include <GLFW/glfw3.h>
 
@@ -8,17 +9,17 @@ namespace lgl {
 	namespace keyin {
 		class Key {
 		private:
-			utl::uint m_id;
+			std::uint32_t m_id;
 			bool m_pressed;
 
 		public:
 			Key();
-			Key(utl::uint id);
+			Key(std::uint32_t id);
 			bool handlePress(GLFWwindow* window);
 			bool handleRelease(GLFWwindow* window);
 
 		private:
-			utl::uint getState(GLFWwindow* window);
+			std::uint32_t getState(GLFWwindow* window);
 		};
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - // 
@@ -110,14 +111,14 @@ namespace lgl {
 		template<typename C, typename A>
 		class KeyEventHandler {
 		private:
-			utl::vec<KeyEvent<C, A>> m_argEvents;
-			utl::vec<KeyEvent<C>> m_events;
+			std::vector<KeyEvent<C, A>> m_argEvents;
+			std::vector<KeyEvent<C>> m_events;
 
 		public:
 			KeyEventHandler() {}
 			void addEvent(KeyEvent<C, A> argEvent) { m_argEvents.push_back(argEvent); }
 			void addEvent(KeyEvent<C> event) { m_events.push_back(event); }
-			utl::vec<KeyEvent<C, A>>& getArgEvents() { return m_argEvents; }
+			std::vector<KeyEvent<C, A>>& getArgEvents() { return m_argEvents; }
 			void removeAllEvents();
 			bool handleEvents(GLFWwindow* window, C* c);
 		};

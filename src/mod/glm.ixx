@@ -4,7 +4,7 @@ module;
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtc/type_ptr.hpp>
 
-export module glmmodule;
+export module glm;
 
 export namespace glm {
 	// Vector types

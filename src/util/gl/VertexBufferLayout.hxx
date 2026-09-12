@@ -1,16 +1,16 @@
 #pragma once
 
-import lglmodule;
+import std;
 
 #include <GLEW/glew.h>
 
 namespace lgl {
 	struct VertexBufferElement {
-		utl::uint count;
-		utl::uint type;
-		utl::uint normalized;
+		std::uint32_t count;
+		std::uint32_t type;
+		std::uint32_t normalized;
 
-		static utl::uint getSizeOfType(utl::uint type) {
+		static std::uint32_t getSizeOfType(std::uint32_t type) {
 			switch (type) {
 			case GL_FLOAT: return 4;
 			}
@@ -20,13 +20,13 @@ namespace lgl {
 
 	class VertexBufferLayout {
 	private:
-		utl::vec<VertexBufferElement> m_elements;
-		utl::uint m_stride;
+		std::vector<VertexBufferElement> m_elements;
+		std::uint32_t m_stride;
 
 	public:
 		VertexBufferLayout();
-		utl::uint getStride() const { return m_stride; }
+		std::uint32_t getStride() const { return m_stride; }
 		const std::vector<VertexBufferElement>& getElements() const { return m_elements; }
-		void push(utl::uint type, utl::uint count);
+		void push(std::uint32_t type, std::uint32_t count);
 	};
 }

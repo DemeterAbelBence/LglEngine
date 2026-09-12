@@ -1,6 +1,7 @@
 #pragma once
 
-import lglmodule;
+import utl;
+import std;
 
 #include <gl/GpuProgram.hxx>
 
@@ -9,24 +10,24 @@ import lglmodule;
 namespace lgl {
 	class FrameBuffer {
 	private:
-		utl::uint m_FBO;
-		utl::uint m_RBO;
+		std::uint32_t m_FBO;
+		std::uint32_t m_RBO;
 
-		utl::uint m_textureId;
-		utl::uint m_width, m_height;
+		std::uint32_t m_textureId;
+		std::uint32_t m_width, m_height;
 
-		utl::cstr m_name;
+		std::string m_name;
 
-		inline static utl::uint textureUnitIdCount = 10;
-		utl::uint textureUnitId;
+		inline static std::uint32_t textureUnitIdCount = 10;
+		std::uint32_t textureUnitId;
 
 	public:
 		FrameBuffer();
-		FrameBuffer(utl::cstr name, utl::uint width, utl::uint height, GLint internalFormat, GLenum type, GLint format);
+		FrameBuffer(const std::string& name, std::uint32_t width, std::uint32_t height, GLint internalFormat, GLenum type, GLint format);
 		~FrameBuffer();
 		int getWidth() const;
 		int getHeight() const;
-		utl::uint getTextureId() const;
+		std::uint32_t getTextureId() const;
 
 		void bind();
 		void unBind();

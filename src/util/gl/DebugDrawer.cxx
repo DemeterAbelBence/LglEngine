@@ -2,13 +2,13 @@
 
 namespace lgl {
 	void DebugDrawer::initProgram() {
-		m_program = utl::makeSptr<GpuProgram>("DEBUG SHADER");
+		m_program = std::make_shared<GpuProgram>("DEBUG SHADER");
 		m_program->addShader(GL_FRAGMENT_SHADER, "shaders/basic/debug-frag.glsl");
 		m_program->addShader(GL_VERTEX_SHADER, "shaders/basic/debug-vert.glsl");
 		m_program->createProgram();
 	}
 
-	void DebugDrawer::setVertexData(const utl::vec<glm::vec3>& vertexData) {
+	void DebugDrawer::setVertexData(const std::vector<glm::vec3>& vertexData) {
 		m_vertexData.clear();
 		m_vertexData = vertexData;
 	}
@@ -24,11 +24,11 @@ namespace lgl {
 		m_program->setVec3("color", color);
 		m_program->setInt("overrideZ", m_overrideZ);
 
-		utl::uint vertexArrayId;
+		std::uint32_t vertexArrayId;
 		glGenVertexArrays(1, &vertexArrayId);
 		glBindVertexArray(vertexArrayId);
 
-		utl::uint vertexBufferId;
+		std::uint32_t vertexBufferId;
 		glGenBuffers(1, &vertexBufferId);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
 		glBufferData(GL_ARRAY_BUFFER, m_vertexData.size() * sizeof(glm::vec3), (const void*)&m_vertexData[0], GL_DYNAMIC_DRAW);
