@@ -1,7 +1,7 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
 
 #include <visual/mesh/Mesh.hxx>
 #include <model/model.hxx>
@@ -9,10 +9,10 @@ import glmmodule;
 namespace lgl {
 	class ModelMesh : public Mesh {
 	private:
-		utl::uptr<model::AssimpModel> m_assimpModel;
+		std::unique_ptr<model::AssimpModel> m_assimpModel;
 
 	public:
-		ModelMesh(const utl::str& filePath, bool centerMeshes, bool loadTextures);
+		ModelMesh(const std::string& filePath, bool centerMeshes, bool loadTextures);
 		void scaleModelBy(const glm::vec3& scaling);
 		void create() override;
 		void draw(const Camera& camera) const override;

@@ -6,18 +6,18 @@ namespace lgl {
         GLFWwindow* window;
         try {
             if (!glfwInit()) {
-                throw utl::except("Glfw initialization error!\n");
+                throw std::exception("Glfw initialization error!\n");
             }
 
             // glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
             window = glfwCreateWindow(m_mainWindowWidth, m_mainWindowHeight, m_mainWindowName, NULL, NULL);
             if (!window) {
                 glfwTerminate();
-                throw utl::except("Glfw window creation error!\n");
+                throw std::exception("Glfw window creation error!\n");
             }
             glfwMakeContextCurrent(window);
         }
-        catch (const utl::except& error) {
+        catch (const std::exception& error) {
             throw error;
         }
 
@@ -27,7 +27,7 @@ namespace lgl {
     void WindowManager::initOpenGl() {
         GLenum err = glewInit();
 
-        Logger::log(Logger::LGL_INFO, "Glew message: {}\n", (utl::cstr)glewGetErrorString(err));
+        utl::log(utl::LGL_INFO, "Glew message: {}\n", (const char*)glewGetErrorString(err));
 
         lgl::displayOpenGlInfo();
         lgl::initializeDebugContext();
@@ -49,11 +49,11 @@ namespace lgl {
         m_userInterface->renderUI();
     }
 
-    WindowManager::WindowManager(utl::cstr mainWindowName,
-        utl::uint mainWindowWidth,
-        utl::uint mainWindowHeight,
-        utl::uint sceneWidth,
-        utl::uint sceneHeight) {
+    WindowManager::WindowManager(const char* mainWindowName,
+        std::uint32_t mainWindowWidth,
+        std::uint32_t mainWindowHeight,
+        std::uint32_t sceneWidth,
+        std::uint32_t sceneHeight) {
 
         m_mainWindowName = mainWindowName;
         m_mainWindowWidth = mainWindowWidth;

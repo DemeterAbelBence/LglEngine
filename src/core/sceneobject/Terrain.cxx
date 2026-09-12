@@ -2,34 +2,34 @@
 
 namespace lgl {
 	void Terrain::readTerrainTexturesPBR() {
-		m_mesh->addTexture(utl::makeSptr<Texture>(Texture{
+		m_mesh->addTexture(std::make_shared<Texture>(Texture{
 			tex::TextureFromFile("assets/terrain/terr_base_color.jpg"),
 			"texture_base_color"
 			}));
 
-		m_mesh->addTexture(utl::makeSptr<Texture>(Texture{
+		m_mesh->addTexture(std::make_shared<Texture>(Texture{
 			tex::TextureFromFile("assets/terrain/terr_normal.jpg"),
 			"texture_normal"
 			}));
 
-		m_mesh->addTexture(utl::makeSptr<Texture>(Texture{
+		m_mesh->addTexture(std::make_shared<Texture>(Texture{
 			tex::TextureFromFile("assets/terrain/terr_roughness.jpg"),
 			"texture_roughness"
 			}));
 
-		m_mesh->addTexture(utl::makeSptr<Texture>(Texture{
+		m_mesh->addTexture(std::make_shared<Texture>(Texture{
 			tex::TextureFromFile("assets/terrain/terr_metalness.jpg"),
 			"texture_metalness"
 			}));
 
-		m_mesh->addTexture(utl::makeSptr<Texture>(Texture{
+		m_mesh->addTexture(std::make_shared<Texture>(Texture{
 			tex::TextureFromFile("assets/terrain/terr_ao.jpg"),
 			"texture_ambient_occlusion"
 			}));
 	}
 
-	Terrain::Terrain(float size, utl::uint rezolution) {
-		m_terrainData = utl::makeUptr<TerrainData>(TerrainData{
+	Terrain::Terrain(float size, std::uint32_t rezolution) {
+		m_terrainData = std::make_shared<TerrainData>(TerrainData{
 			0.05f,  // amplitude
 			0.1f,   // frequency
 			0.18f,  // phase
@@ -40,9 +40,9 @@ namespace lgl {
 			50.0f   // maximal_distance
 			});
 
-		m_mesh = utl::makeSptr<PatchSurface>(size, rezolution);
+		m_mesh = std::make_shared<PatchSurface>(size, rezolution);
 
-		m_collider = utl::makeSptr<TerrainCollider>(
+		m_collider = std::make_shared<TerrainCollider>(
 			m_terrainData->amplitude,
 			m_terrainData->frequency,
 			m_terrainData->phase,
@@ -66,9 +66,9 @@ namespace lgl {
 			glm::nullvec,        // force
 			glm::vec3(0.0f)                      // torque
 		};
-		m_physicsSolver = utl::makeSptr<ribo::PhysicsSolver>(bodyData);
+		m_physicsSolver = std::make_shared<ribo::PhysicsSolver>(bodyData);
 
-		m_transformation = utl::makeSptr<Transformation>();
+		m_transformation = std::make_shared<Transformation>();
 		m_mesh->setTransformation(m_transformation);
 		m_mesh->create();
 		m_collider->setTransformation(m_transformation);
@@ -83,7 +83,7 @@ namespace lgl {
 		m_terrainData->iterations = i;
 	}
 
-	void Terrain::setTesselationParameters(utl::uint min_t, utl::uint max_t, float min_d, float max_d) {
+	void Terrain::setTesselationParameters(std::uint32_t min_t, std::uint32_t max_t, float min_d, float max_d) {
 		m_terrainData->minimal_tesselation = min_t;
 		m_terrainData->maximal_tesselation = max_t;
 		m_terrainData->minimal_distance = min_d;
@@ -104,8 +104,8 @@ namespace lgl {
 		program->setInt("MIN_TESS", m_terrainData->minimal_tesselation);
 		program->setInt("MAX_TESS", m_terrainData->maximal_tesselation);
 
-		auto collider = utl::sptrCast<TerrainCollider>(m_collider);
-		collider->setTerrrainAmplitude(m_terrainData->amplitude);
+		auto collider = std::dynamic_pointer_cast<TerrainCollider>(m_collider);
+		collider->setTerrainAmplitude(m_terrainData->amplitude);
 		collider->setTerrainFrequency(m_terrainData->frequency);
 		collider->setTerrainPhase(m_terrainData->phase);
 		collider->setTerrainIterations(m_terrainData->iterations);

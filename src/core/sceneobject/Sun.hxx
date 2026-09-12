@@ -1,7 +1,7 @@
 #pragma once 
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
 
 #include <sceneobject/SceneObject.hxx>
 #include <visual/mesh/SphereMesh.hxx>
@@ -11,14 +11,14 @@ import glmmodule;
 namespace lgl {
 	class Sun : public SceneObject {
 	private:
-		utl::uptr<Light> m_light;
+		std::unique_ptr<Light> m_light;
 		glm::mat4 m_lightMatrix;
 
 	public:
 		Sun(float radius, glm::vec3 powerDensity);
-		const utl::uptr<Light>& getLight() const { return m_light; }
+		const std::unique_ptr<Light>& getLight() const { return m_light; }
 		void directPerspectiveOf(Camera& camera);
-		void lightUpScene(const utl::svec<SceneObject>& sceneObjects, const FrameBuffer& depthMap);
+		void lightUpScene(const std::vector<std::shared_ptr<SceneObject>>& sceneObjects, const FrameBuffer& depthMap);
 	};
 }
 

@@ -1,14 +1,14 @@
 #include "Box.hxx"
 
 namespace lgl {
-	utl::sptr<SceneObject> Box::clone() {
-		auto cuboidCollider = utl::sptrCast<CuboidCollider>(m_collider);
+	std::shared_ptr<SceneObject> Box::clone() {
+		auto cuboidCollider = std::dynamic_pointer_cast<CuboidCollider>(m_collider);
 
-		utl::sptr<Box> other = utl::makeSptr<Box>();
+		std::shared_ptr<Box> other = std::make_shared<Box>();
 		other->m_mesh = m_mesh;
-		other->m_transformation = utl::makeSptr<Transformation>(*m_transformation);
-		other->m_physicsSolver = utl::makeSptr<ribo::PhysicsSolver>(*m_physicsSolver);
-		other->m_collider = utl::makeSptr<CuboidCollider>(*cuboidCollider);
+		other->m_transformation = std::make_shared<Transformation>(*m_transformation);
+		other->m_physicsSolver = std::make_shared<ribo::PhysicsSolver>(*m_physicsSolver);
+		other->m_collider = std::make_shared<CuboidCollider>(*cuboidCollider);
 		other->m_isStationary = m_isStationary;
 
 		return other;
@@ -61,16 +61,16 @@ namespace lgl {
 
 	Box::Box() : SceneObject() {}
 
-	Box::Box(bool isStationary, utl::sptr<ModelMesh> modelMesh) {
+	Box::Box(bool isStationary, std::shared_ptr<ModelMesh> modelMesh) {
 		m_isStationary = isStationary;
 
 		auto bodyData = initializePhysics();
-		m_physicsSolver = utl::makeSptr<ribo::PhysicsSolver>(bodyData);
+		m_physicsSolver = std::make_shared<ribo::PhysicsSolver>(bodyData);
 
 		m_mesh = modelMesh;
-		m_collider = utl::makeSptr<CuboidCollider>();
+		m_collider = std::make_shared<CuboidCollider>();
 
-		m_transformation = utl::makeSptr<Transformation>();
+		m_transformation = std::make_shared<Transformation>();
 		m_mesh->setTransformation(m_transformation);
 		m_collider->setTransformation(m_transformation);
 	}
@@ -79,12 +79,12 @@ namespace lgl {
 		m_isStationary = isStationary;
 
 		auto bodyData = initializePhysics();
-		m_physicsSolver = utl::makeSptr<ribo::PhysicsSolver>(bodyData);
+		m_physicsSolver = std::make_shared<ribo::PhysicsSolver>(bodyData);
 
-		m_mesh = utl::makeSptr<CuboidMesh>();
-		m_collider = utl::makeSptr<CuboidCollider>();
+		m_mesh = std::make_shared<CuboidMesh>();
+		m_collider = std::make_shared<CuboidCollider>();
 
-		m_transformation = utl::makeSptr<Transformation>();
+		m_transformation = std::make_shared<Transformation>();
 		m_mesh->setTransformation(m_transformation);
 		m_collider->setTransformation(m_transformation);
 	}

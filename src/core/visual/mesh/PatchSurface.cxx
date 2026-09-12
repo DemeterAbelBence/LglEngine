@@ -1,7 +1,7 @@
 #include "PatchSurface.hxx"
 
 namespace lgl {
-	PatchSurface::PatchSurface(float size, utl::uint rezolution) {
+	PatchSurface::PatchSurface(float size, std::uint32_t rezolution) {
 		m_rezolution = rezolution;
 		m_size = size;
 	}
@@ -12,18 +12,18 @@ namespace lgl {
 	}
 
 	void PatchSurface::create() {
-		utl::uint r = m_rezolution;
+		std::uint32_t r = m_rezolution;
 		float s = m_size;
 
-		for (utl::uint i = 0; i < r; i++) {
-			for (utl::uint j = 0; j < r; j++) {
+		for (std::uint32_t i = 0; i < r; i++) {
+			for (std::uint32_t j = 0; j < r; j++) {
 				m_vertexData.push_back(generateVertexData(s * (float)i / r, s * (float)j / r));
 				m_vertexData.push_back(generateVertexData(s * (float)(i + 1) / r, s * (float)j / r));
 				m_vertexData.push_back(generateVertexData(s * (float)i / r, s * (float)(j + 1) / r));
 				m_vertexData.push_back(generateVertexData(s * (float)(i + 1) / r, s * (float)(j + 1) / r));
 			}
 		}
-		setBufferData((utl::cmemptr)&m_vertexData[0], m_vertexData.size() * sizeof(glm::vec3));
+		setBufferData((const void*)&m_vertexData[0], m_vertexData.size() * sizeof(glm::vec3));
 	}
 
 	void PatchSurface::draw(const Camera& camera) const {
@@ -42,7 +42,7 @@ namespace lgl {
 		glDrawArrays(GL_PATCHES, 0, 4 * m_rezolution * m_rezolution);
 	}
 
-	void PatchSurface::setBufferData(utl::cmemptr data, utl::uint size) {
+	void PatchSurface::setBufferData(const void* data, std::uint32_t size) {
 		m_vertexBuffer->setData(data, size);
 		m_vertexBufferLayout->push(GL_FLOAT, 3);
 		m_vertexArray->addBuffer(*m_vertexBuffer, *m_vertexBufferLayout);

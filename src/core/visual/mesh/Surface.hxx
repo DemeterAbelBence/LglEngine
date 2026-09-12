@@ -1,7 +1,7 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
 
 #include <visual/mesh/Mesh.hxx>
 
@@ -15,17 +15,17 @@ namespace lgl {
 		};
 
 	private:
-		utl::uint m_verticesPerStrip;
-		utl::uint m_strips;
+		std::uint32_t m_verticesPerStrip;
+		std::uint32_t m_strips;
 		float m_size;
 
-		utl::vec<VertexData> m_vertexData;
+		std::vector<VertexData> m_vertexData;
 
 	private:
-		void setBufferData(const void* data, utl::uint size);
+		void setBufferData(const void* data, std::uint32_t size);
 
 	public:
-		Surface(utl::uint N, utl::uint M);
+		Surface(std::uint32_t N, std::uint32_t M);
 		void setSize(float size) { m_size = size; }
 
 		VertexData generateVertexData(float x, float y);

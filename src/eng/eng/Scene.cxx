@@ -41,7 +41,7 @@ namespace lgl {
 		m_objectIndex = 0;
 		m_moveCamera = true;
 
-		m_camera = utl::makeUptr<Camera>();
+		m_camera = std::make_unique<Camera>();
 
 		initCameraEvents();
 		initObjectEvents();
@@ -53,7 +53,7 @@ namespace lgl {
 		}
 	}
 
-	void Scene::setPrimitiveType(utl::uint type) {
+	void Scene::setPrimitiveType(std::uint32_t type) {
 		for (const auto& s : m_sceneObjects) {
 			auto& mesh = s->getMesh();
 			if (mesh.get() != nullptr) {
@@ -79,26 +79,26 @@ namespace lgl {
 		}
 	}
 
-	void Scene::saveObjectStates(utl::str path) {
-		lgl::Logger::log(Logger::LGL_INFO, "Saving object states to path: {}\n", path);
+	void Scene::saveObjectStates(const std::string& path) {
+		utl::log(utl::LGL_INFO, "Saving object states to path: {}\n", path);
 		for (const auto& s : m_sceneObjects) {
-			utl::str filepath = utl::strFormat("{}/{}.bin", path, s->getName());
+			std::string filepath = std::format("{}/{}.bin", path, s->getName());
 			const ribo::BodyData& body = s->getPhysicsSolver()->Body;
 			ribo::serializeBodyDataInto(filepath, body);
 		}
 	}
 
-	void Scene::loadObjectStates(utl::str path) {
-		lgl::Logger::log(Logger::LGL_INFO, "Loading object states from path: {}\n", path);
+	void Scene::loadObjectStates(const std::string& path) {
+		utl::log(utl::LGL_INFO, "Loading object states from path: {}\n", path);
 		for (const auto& s : m_sceneObjects) {
 			try {
-				utl::str filepath = utl::strFormat("{}/{}.bin", path, s->getName());
+				std::string filepath = std::format("{}/{}.bin", path, s->getName());
 				ribo::BodyData body = ribo::deserializeBodyDataFrom(filepath);
 				s->getPhysicsSolver()->Body = body;
 				s->updateTransformations();
 			}
-			catch (const utl::runtime& error) {
-				Logger::log(Logger::LGL_ERROR, "{}\n", error.what());
+			catch (const std::runtime_error& error) {
+				utl::log(utl::LGL_ERROR, "{}\n", error.what());
 				continue;
 			}
 		}

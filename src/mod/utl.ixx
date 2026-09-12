@@ -43,6 +43,14 @@ export namespace utl {
 		}
 	}
 
+	template<typename T>
+	std::uint64_t makePointerPairHash(T* ptr1, T* ptr2) {
+		size_t h1 = std::hash<T*>{}(ptr1);
+		size_t h2 = std::hash<T*>{}(ptr2);
+
+		return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
+	}
+
 	enum LogLevel {
 		LGL_INFO,
 		LGL_WARN,

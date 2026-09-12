@@ -1,7 +1,7 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
 
 #include <sceneobject/SceneObject.hxx>
 #include <visual/mesh/PatchSurface.hxx>
@@ -11,16 +11,16 @@ import glmmodule;
 namespace lgl {
 	class Terrain : public SceneObject {
 	private:
-		utl::uptr<TerrainData> m_terrainData;
+		std::shared_ptr<TerrainData> m_terrainData;
 
 	private:
 		void readTerrainTexturesPBR();
 
 	public:
-		Terrain(float size, utl::uint rezolution);
+		Terrain(float size, std::uint32_t rezolution);
 
 		void setParameters(float a, float f, float p, float i);
-		void setTesselationParameters(utl::uint min_t, utl::uint max_t, float min_d, float max_d);
+		void setTesselationParameters(std::uint32_t min_t, std::uint32_t max_t, float min_d, float max_d);
 		void updateTerrainParameters();
 	};
 }

@@ -9,7 +9,7 @@ namespace lgl {
         geomType = C_TERRAIN;
     }
 
-    utl::tup<glm::vec3, glm::vec3> TerrainCollider::evaluateTerrainFormula(float x, float z) const {
+    std::tuple<glm::vec3, glm::vec3> TerrainCollider::evaluateTerrainFormula(float x, float z) const {
         int itr = m_terrainIterations;
         float fre = m_terrainFrequency;
 
@@ -33,34 +33,34 @@ namespace lgl {
         glm::vec3 p = glm::vec3(x, height, z);
         glm::vec3 n = glm::vec3(nx, 1.0f, nz);
 
-        return utl::tup<glm::vec3, glm::vec3>(p, n);
+        return std::make_tuple(p, n);
     }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-    utl::vec<Collider::ContactData> TerrainCollider::collidesWith(const CuboidCollider& collidee) const {
-        return utl::vec<ContactData>();
+    std::vector<Collider::ContactData> TerrainCollider::collidesWith(const CuboidCollider& collidee) const {
+        return std::vector<ContactData>();
     }
 
-    utl::vec<Collider::ContactData> TerrainCollider::collidesWith(const SphereCollider& collidee) const {
-        return utl::vec<ContactData>();
+    std::vector<Collider::ContactData> TerrainCollider::collidesWith(const SphereCollider& collidee) const {
+        return std::vector<ContactData>();
     }
 
-    utl::vec<Collider::ContactData> TerrainCollider::collidesWith(const TerrainCollider& collidee) const {
-        return utl::vec<ContactData>();
+    std::vector<Collider::ContactData> TerrainCollider::collidesWith(const TerrainCollider& collidee) const {
+        return std::vector<ContactData>();
     }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-    utl::opt<glm::vec3> TerrainCollider::calculateDepth(const CuboidCollider& collidee, const ContactData& contact) const {
+    std::optional<glm::vec3> TerrainCollider::calculateDepth(const CuboidCollider& collidee, const ContactData& contact) const {
         return {};
     }
 
-    utl::opt<glm::vec3> TerrainCollider::calculateDepth(const SphereCollider& collidee, const ContactData& contact) const {
+    std::optional<glm::vec3> TerrainCollider::calculateDepth(const SphereCollider& collidee, const ContactData& contact) const {
         return {};
     }
 
-    utl::opt<glm::vec3> TerrainCollider::calculateDepth(const TerrainCollider& collidee, const ContactData& contact) const {
+    std::optional<glm::vec3> TerrainCollider::calculateDepth(const TerrainCollider& collidee, const ContactData& contact) const {
         return {};
     }
 }

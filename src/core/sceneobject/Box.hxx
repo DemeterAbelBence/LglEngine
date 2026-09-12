@@ -1,7 +1,8 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
+import std;
 
 #include <sceneobject/SceneObject.hxx>
 #include <visual/mesh/CuboidMesh.hxx>
@@ -16,10 +17,10 @@ namespace lgl {
 
 	public:
 		Box();
-		Box(bool isStationary, utl::sptr<ModelMesh> modelMesh);
+		Box(bool isStationary, std::shared_ptr<ModelMesh> modelMesh);
 		Box(bool isStationary);
 
-		utl::sptr<SceneObject> clone() override;
+		std::shared_ptr<SceneObject> clone() override;
 		ribo::BodyData initializePhysics() override;
 		void updateRigidBody() override;
 		void draw(const Camera& camera) const override;

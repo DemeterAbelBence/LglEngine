@@ -1,7 +1,8 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
+import std;
 
 #include <gl/FrameBuffer.hxx>
 #include <math/ribo.hxx>
@@ -15,36 +16,36 @@ import glmmodule;
 namespace lgl {
 	class SceneObject {
 	protected:
-		utl::sptr<Mesh> m_mesh;
-		utl::sptr<Collider> m_collider;
-		utl::sptr<ribo::PhysicsSolver> m_physicsSolver;
-		utl::sptr<Transformation> m_transformation;
+		std::shared_ptr<Mesh> m_mesh;
+		std::shared_ptr<Collider> m_collider;
+		std::shared_ptr<ribo::PhysicsSolver> m_physicsSolver;
+		std::shared_ptr<Transformation> m_transformation;
 
 	private:
-		utl::str m_name;
+		std::string m_name;
 
 	public:
 		SceneObject();
-		SceneObject(float size, utl::sptr<ModelMesh> mesh);
+		SceneObject(float size, std::shared_ptr<ModelMesh> mesh);
 
-		const utl::sptr<Mesh>& getMesh() const { return m_mesh; }
-		const utl::sptr<Collider>& getCollider() const { return m_collider; }
-		const utl::sptr<ribo::PhysicsSolver>& getPhysicsSolver() const { return m_physicsSolver; }
-		const utl::sptr<Transformation>& getTransformation() const { return m_transformation; }
-		const utl::str getName() const { return m_name; }
+		const std::shared_ptr<Mesh>& getMesh() const { return m_mesh; }
+		const std::shared_ptr<Collider>& getCollider() const { return m_collider; }
+		const std::shared_ptr<ribo::PhysicsSolver>& getPhysicsSolver() const { return m_physicsSolver; }
+		const std::shared_ptr<Transformation>& getTransformation() const { return m_transformation; }
+		const std::string getName() const { return m_name; }
 
-		void setMesh(utl::sptr<Mesh> mesh) { m_mesh = mesh; }
-		void setProgram(utl::sptr<GpuProgram> program);
-		void setMaterial(utl::sptr<Material> material);
-		void setTextures(const utl::vec<utl::sptr<Texture>>& textures);
-		void setName(const utl::str& name) { m_name = name; }
+		void setMesh(std::shared_ptr<Mesh> mesh) { m_mesh = mesh; }
+		void setProgram(std::shared_ptr<GpuProgram> program);
+		void setMaterial(std::shared_ptr<Material> material);
+		void setTextures(const std::vector<std::shared_ptr<Texture>>& textures);
+		void setName(const std::string& name) { m_name = name; }
 
 		void translate(glm::vec3 transalte);
 		void scale(glm::vec3 scale);
 		void setRotation(glm::mat4 R);
 		void updateTransformations();
 
-		virtual utl::sptr<SceneObject> clone();
+		virtual std::shared_ptr<SceneObject> clone();
 		virtual ribo::BodyData initializePhysics();
 		virtual void updateRigidBody();
 		virtual void stepPhysicsBy(float dt);

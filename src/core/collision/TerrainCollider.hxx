@@ -1,7 +1,8 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
+import std;
 
 #include <collision/Collider.hxx>
 #include <collision/CuboidCollider.hxx>
@@ -36,7 +37,7 @@ namespace lgl {
 	public:
 		TerrainCollider(float amplitude, float frequency, float phase, float iterations);
 
-		void setTerrrainAmplitude(float value) { m_terrainAmplitude = value; }
+		void setTerrainAmplitude(float value) { m_terrainAmplitude = value; }
 		float getTerrainAmplitude() const { return m_terrainAmplitude; }
 
 		void setTerrainFrequency(float value) { m_terrainFrequency = value; }
@@ -48,14 +49,14 @@ namespace lgl {
 		void setTerrainIterations(int value) { m_terrainIterations = value; }
 		int getTerrainIterations() const { return m_terrainIterations; }
 
-		utl::tup<glm::vec3, glm::vec3> evaluateTerrainFormula(float x, float z) const;
+		std::tuple<glm::vec3, glm::vec3> evaluateTerrainFormula(float x, float z) const;
 
-		utl::vec<ContactData> collidesWith(const CuboidCollider& collidee) const override;
-		utl::vec<ContactData> collidesWith(const SphereCollider& collider) const override;
-		utl::vec<ContactData> collidesWith(const TerrainCollider& collidee) const override;
+		std::vector<ContactData> collidesWith(const CuboidCollider& collidee) const override;
+		std::vector<ContactData> collidesWith(const SphereCollider& collider) const override;
+		std::vector<ContactData> collidesWith(const TerrainCollider& collidee) const override;
 
-		utl::opt<glm::vec3> calculateDepth(const CuboidCollider& collidee, const ContactData& contact) const override;
-		utl::opt<glm::vec3> calculateDepth(const SphereCollider& collidee, const ContactData& contact) const override;
-		utl::opt<glm::vec3> calculateDepth(const TerrainCollider& collidee, const ContactData& contact) const override;
+		std::optional<glm::vec3> calculateDepth(const CuboidCollider& collidee, const ContactData& contact) const override;
+		std::optional<glm::vec3> calculateDepth(const SphereCollider& collidee, const ContactData& contact) const override;
+		std::optional<glm::vec3> calculateDepth(const TerrainCollider& collidee, const ContactData& contact) const override;
 	};
 }

@@ -3,9 +3,9 @@
 namespace lgl {
 	SceneObject::SceneObject() {}
 
-	SceneObject::SceneObject(float size, utl::sptr<ModelMesh> mesh) {
+	SceneObject::SceneObject(float size, std::shared_ptr<ModelMesh> mesh) {
 		m_mesh = mesh;
-		m_collider = utl::makeSptr<NullCollider>();
+		m_collider = std::make_shared<NullCollider>();
 
 		auto body = ribo::BodyData{
 			0.0f,			        // invMass
@@ -24,9 +24,9 @@ namespace lgl {
 			glm::vec3(0.0f),        // force
 			glm::vec3(0.0f)         // torque
 		};
-		m_physicsSolver = utl::makeSptr<ribo::PhysicsSolver>(body);
+		m_physicsSolver = std::make_shared<ribo::PhysicsSolver>(body);
 
-		m_transformation = utl::makeSptr<Transformation>();
+		m_transformation = std::make_shared<Transformation>();
 		glm::vec3 scaling = glm::vec3(size, size, size);
 		m_transformation->setScaleMatrix(scaling);
 		m_collider->setTransformation(m_transformation);
@@ -34,32 +34,32 @@ namespace lgl {
 		m_mesh->setTransformation(m_transformation);
 	}
 
-	void SceneObject::setProgram(utl::sptr<GpuProgram> program) {
+	void SceneObject::setProgram(std::shared_ptr<GpuProgram> program) {
 		if (m_mesh) {
 			m_mesh->setProgram(program);
 		}
 		else {
-			Logger::log(Logger::LGL_WARN, "No mesh to set program for SceneObject {}\n", m_name);
+			utl::log(utl::LGL_WARN, "No mesh to set program for SceneObject {}\n", m_name);
 		}
 	}
 
-	void SceneObject::setMaterial(utl::sptr<Material> material) {
+	void SceneObject::setMaterial(std::shared_ptr<Material> material) {
 		if (m_mesh) {
 			m_mesh->setMaterial(material);
 		}
 		else {
-			Logger::log(Logger::LGL_WARN, "No mesh to set material for SceneObject {}\n", m_name);
+			utl::log(utl::LGL_WARN, "No mesh to set material for SceneObject {}\n", m_name);
 		}
 	}
 
-	void SceneObject::setTextures(const utl::vec<utl::sptr<Texture>>& textures) {
+	void SceneObject::setTextures(const std::vector<std::shared_ptr<Texture>>& textures) {
 		if (m_mesh) {
 			for (const auto& texture : textures) {
 				m_mesh->addTexture(texture);
 			}
 		}
 		else {
-			Logger::log(Logger::LGL_WARN, "No mesh to set textures for SceneObject {}\n", m_name);
+			utl::log(utl::LGL_WARN, "No mesh to set textures for SceneObject {}\n", m_name);
 		}
 	}
 
@@ -92,8 +92,8 @@ namespace lgl {
 		m_collider->updateTransformations();
 	}
 
-	utl::sptr<SceneObject> SceneObject::clone() {
-		return utl::sptr<SceneObject>();
+	std::shared_ptr<SceneObject> SceneObject::clone() {
+		return std::shared_ptr<SceneObject>();
 	}
 
 	ribo::BodyData SceneObject::initializePhysics() {
@@ -113,7 +113,7 @@ namespace lgl {
 			m_mesh->draw(camera);
 		}
 		else {
-			Logger::log(Logger::LGL_WARN, "No mesh to draw for SceneObject {}\n", m_name);
+			utl::log(utl::LGL_WARN, "No mesh to draw for SceneObject {}\n", m_name);
 		}
 	}
 
@@ -127,7 +127,7 @@ namespace lgl {
 			depthMap.bindTexture(*program);
 		}
 		else {
-			Logger::log(Logger::LGL_WARN, "No program to handle lighting for SceneObject {}\n", m_name);
+			utl::log(utl::LGL_WARN, "No program to handle lighting for SceneObject {}\n", m_name);
 		}
 	}
 }

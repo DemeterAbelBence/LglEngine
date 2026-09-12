@@ -17,7 +17,7 @@ namespace lgl {
         }
 
         bool moveCamera = m_scene->getMoveCamera();
-        utl::cstr cameraText = moveCamera ? "Move objects" : "Move camera";
+        const char* cameraText = moveCamera ? "Move objects" : "Move camera";
         if (ImGui::Button(cameraText)) {
             m_scene->setMoveCamera(!moveCamera);
         }
@@ -42,7 +42,7 @@ namespace lgl {
     }
 
     void UserInterface::renderPrimitivePicker() {
-        static utl::cstr items[] = { "triangle", "line" };
+        static const char* items[] = { "triangle", "line" };
         static int currentItem;
 
         ImGui::Begin("Select primitive");
@@ -94,7 +94,7 @@ namespace lgl {
 
     void UserInterface::renderAdditionalUI() {}
 
-    UserInterface::UserInterface(GLFWwindow* window, utl::sptr<Scene> scene) {
+    UserInterface::UserInterface(GLFWwindow* window, std::shared_ptr<Scene> scene) {
         ImGui::CreateContext();
         io = &ImGui::GetIO(); (void)*io;
         io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;

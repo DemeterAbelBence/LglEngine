@@ -1,17 +1,17 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
 
 #include <visual/mesh/Surface.hxx>
 
 namespace lgl {
-	class SphereMesh : public Surface {
+	class SphereMesh final : public Surface {
 	private:
 		float m_radius;
 
 	public:
-		SphereMesh(utl::uint N, utl::uint M, float radius);
+		SphereMesh(std::uint32_t N, std::uint32_t M, float radius);
 		void eval(float u, float v, glm::vec3& pos, glm::vec3& norm) override;
 	};
 }

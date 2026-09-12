@@ -1,6 +1,6 @@
 #pragma once
 
-import glmmodule;
+import glm;
 
 namespace lgl {
 	struct Light {

@@ -4,8 +4,8 @@ namespace lgl {
 	Sphere::Sphere(float radius) : SceneObject() {
 		m_radius = radius;
 
-		m_mesh = utl::makeSptr<SphereMesh>(30, 30, radius);
-		m_collider = utl::makeSptr<SphereCollider>(radius);
+		m_mesh = std::make_shared<SphereMesh>(30, 30, radius);
+		m_collider = std::make_shared<SphereCollider>(radius);
 
 		float inverseMass = 0.01f;
 		float inertiaScalar = 2.0f / 5.0f * (1.0f / inverseMass) * radius * radius;
@@ -33,9 +33,9 @@ namespace lgl {
 			glm::vec3(0.0f, -1.0f, 0.0f),        // force
 			glm::vec3(0.0f)         // torque
 		};
-		m_physicsSolver = utl::makeSptr<ribo::PhysicsSolver>(body);
+		m_physicsSolver = std::make_shared<ribo::PhysicsSolver>(body);
 
-		m_transformation = utl::makeSptr<Transformation>();
+		m_transformation = std::make_shared<Transformation>();
 		m_mesh->setTransformation(m_transformation);
 		m_mesh->create();
 		m_collider->setTransformation(m_transformation);

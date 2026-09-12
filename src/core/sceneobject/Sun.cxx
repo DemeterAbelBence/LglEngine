@@ -2,9 +2,9 @@
 
 namespace lgl {
 	Sun::Sun(float radius, glm::vec3 powerDensity) : SceneObject() {
-		m_mesh = utl::makeSptr<SphereMesh>(30, 30, radius);
-		m_collider = utl::makeSptr<NullCollider>();
-		m_light = utl::makeUptr<Light>(Light{
+		m_mesh = std::make_shared<SphereMesh>(30, 30, radius);
+		m_collider = std::make_shared<NullCollider>();
+		m_light = std::make_unique<Light>(Light{
 			powerDensity,
 			glm::nullvec,
 			glm::normalize(glm::vec3(0.1f, -1.0f, 0.0f)),
@@ -28,9 +28,9 @@ namespace lgl {
 			glm::vec3(0.0f),        // force
 			glm::vec3(0.0f)         // torque
 		};
-		m_physicsSolver = utl::makeSptr<ribo::PhysicsSolver>(body);
+		m_physicsSolver = std::make_shared<ribo::PhysicsSolver>(body);
 
-		m_transformation = utl::makeSptr<Transformation>();
+		m_transformation = std::make_shared<Transformation>();
 		m_mesh->setTransformation(m_transformation);
 		m_mesh->create();
 		m_collider->setTransformation(m_transformation);
@@ -45,7 +45,7 @@ namespace lgl {
 		m_lightMatrix = lightView * lightProj;
 	}
 
-	void Sun::lightUpScene(const utl::svec<SceneObject>& sceneObjects, const FrameBuffer& depthMap) {
+	void Sun::lightUpScene(const std::vector<std::shared_ptr<SceneObject>>& sceneObjects, const FrameBuffer& depthMap) {
 		m_light->position = m_physicsSolver->Body.X;
 		for (const auto& s : sceneObjects) {
 			s->handleLighting(*m_light, depthMap, m_lightMatrix);

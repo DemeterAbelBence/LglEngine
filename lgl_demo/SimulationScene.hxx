@@ -1,16 +1,16 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
 
 #include <eng/Scene.hxx>
 #include <sceneobject/Sun.hxx>
 #include <sceneobject/Terrain.hxx>
 
-class SimulationScene : public lgl::Scene {
+class SimulationScene final : public lgl::Scene {
 private:
-	lgl::utl::sptr<lgl::Sun> m_sun;
-	lgl::utl::sptr<lgl::Terrain> m_terrain;
+	std::shared_ptr<lgl::Sun> m_sun;
+	std::shared_ptr<lgl::Terrain> m_terrain;
 
 	lgl::keyin::KeyEventHandler<SimulationScene, float> m_simulationEventHandler;
 
@@ -26,12 +26,12 @@ private:
 public:
 	SimulationScene() : lgl::Scene() {}
 
-	const lgl::utl::sptr<lgl::Terrain>& getTerrain() const { return m_terrain; }
-	const lgl::utl::sptr<lgl::Sun>& getSun() const { return m_sun; }
+	const std::shared_ptr<lgl::Terrain>& getTerrain() const { return m_terrain; }
+	const std::shared_ptr<lgl::Sun>& getSun() const { return m_sun; }
 	const auto& getSimulationEventHandler() { return m_simulationEventHandler; }
 	void handleCollisions() { lgl::CollisionHandler::handleCollisions(m_sceneObjects); }
 
-	void loadFromFile(const lgl::utl::str& path);
+	void loadFromFile(const std::string& path);
 	void rollbackToinitial();
 	void rollbackToPrevious();
 	void advanceSimulation(float deltaTime);

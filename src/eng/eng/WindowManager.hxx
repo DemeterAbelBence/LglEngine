@@ -1,7 +1,7 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
 
 #include <GLEW/glew.h>
 
@@ -14,14 +14,14 @@ namespace lgl {
 	private:
 		GLFWwindow* m_mainWindow;
 
-		utl::cstr m_mainWindowName;
-		utl::uint m_mainWindowWidth;
-		utl::uint m_mainWindowHeight;
-		utl::uint m_sceneWidth;
-		utl::uint m_sceneHeight;
+		const char* m_mainWindowName;
+		std::uint32_t m_mainWindowWidth;
+		std::uint32_t m_mainWindowHeight;
+		std::uint32_t m_sceneWidth;
+		std::uint32_t m_sceneHeight;
 
-		utl::sptr<Scene> m_scene;
-		utl::sptr<UserInterface> m_userInterface;
+		std::shared_ptr<Scene> m_scene;
+		std::shared_ptr<UserInterface> m_userInterface;
 
 	private:
 		void initMainWindow();
@@ -29,19 +29,19 @@ namespace lgl {
 		void renderUserInterface();
 
 	public:
-		WindowManager(utl::cstr mainWindowName, utl::uint mainWindowWidth,
-			utl::uint mainWindowHeight, utl::uint sceneWidth, utl::uint sceneHeight);
+		WindowManager(const char* mainWindowName, std::uint32_t mainWindowWidth,
+			std::uint32_t mainWindowHeight, std::uint32_t sceneWidth, std::uint32_t sceneHeight);
 
 		~WindowManager();
 
 		template<typename U, typename V>
 		void defineLayout() {
 			try {
-				m_scene = utl::makeSptr<U>();
+				m_scene = std::make_shared<U>();
 				m_scene->create();
-				m_userInterface = utl::makeSptr<V>(m_mainWindow, m_scene);
+				m_userInterface = std::make_shared<V>(m_mainWindow, m_scene);
 			}
-			catch (const utl::except& error) {
+			catch (const std::exception& error) {
 				throw error;
 			}
 		}

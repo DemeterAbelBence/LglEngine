@@ -1,7 +1,7 @@
 #include "SphereMesh.hxx"
 
 namespace lgl {
-	SphereMesh::SphereMesh(utl::uint N, utl::uint M, float radius) : Surface(N, M) {
+	SphereMesh::SphereMesh(std::uint32_t N, std::uint32_t M, float radius) : Surface(N, M) {
 		m_radius = radius;
 	}
 

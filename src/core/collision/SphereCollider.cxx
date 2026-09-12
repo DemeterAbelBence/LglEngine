@@ -1,14 +1,14 @@
 #include "SphereCollider.hxx"
 
 namespace lgl {
-	SphereCollider::SphereCollider(float radius, utl::uint n) {
+	SphereCollider::SphereCollider(float radius, std::uint32_t n) {
 		geomType = C_SPHERE;
 		m_radius = radius;
 
 		m_baseCenter = glm::nullvec;
 		m_transCenter = glm::nullvec;;
 
-		utl::vec<glm::vec3> points;
+		std::vector<glm::vec3> points;
 		points.reserve(n);
 
 		const float phi = 3.14159f * (3.0 - glm::sqrt(5.0));
@@ -40,12 +40,12 @@ namespace lgl {
 		}
 	}
 
-	utl::vec<Collider::ContactData> SphereCollider::collidesWith(const CuboidCollider& collidee) const
+	std::vector<Collider::ContactData> SphereCollider::collidesWith(const CuboidCollider& collidee) const
 	{
-		return utl::vec<ContactData>();
+		return std::vector<ContactData>();
 	}
 
-	utl::vec<Collider::ContactData> SphereCollider::collidesWith(const SphereCollider& collidee) const {
+	std::vector<Collider::ContactData> SphereCollider::collidesWith(const SphereCollider& collidee) const {
 		glm::vec3 v = collidee.m_transCenter - m_transCenter;
 		if (glm::length(v) < m_radius + collidee.m_radius) {
 			v = glm::normalize(v);
@@ -55,16 +55,16 @@ namespace lgl {
 		return {};
 	}
 
-	utl::vec<Collider::ContactData> SphereCollider::collidesWith(const TerrainCollider& collidee) const {
-		utl::vec<ContactData> result;
+	std::vector<Collider::ContactData> SphereCollider::collidesWith(const TerrainCollider& collidee) const {
+		std::vector<Collider::ContactData> result;
 		auto MI = collidee.getTransformation()->makeModelInverseMatrix();
 		auto M = collidee.getTransformation()->makeModelMatrix();
 		for (const auto& p : m_transPoints) {
 			glm::vec3 tp = glm::vec3(glm::vec4(p, 1.0f) * MI);
 			auto e = collidee.evaluateTerrainFormula(tp.x, tp.z);
 
-			glm::vec3 ep = e.get<0>();
-			glm::vec3 en = e.get<1>();
+			glm::vec3 ep = std::get<0>(e);
+			glm::vec3 en = std::get<1>(e);
 			glm::vec3 tep = glm::vec3(glm::vec4(ep, 1.0f) * M);
 			glm::vec3 ten = glm::vec3(MI * glm::vec4(en, 0.0f));
 
@@ -77,12 +77,12 @@ namespace lgl {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-	utl::opt<glm::vec3> SphereCollider::calculateDepth(const CuboidCollider& collidee, const ContactData& contact) const
+	std::optional<glm::vec3> SphereCollider::calculateDepth(const CuboidCollider& collidee, const ContactData& contact) const
 	{
 		return {};
 	}
 
-	utl::opt<glm::vec3> SphereCollider::calculateDepth(const SphereCollider& collidee, const ContactData& contact) const {
+	std::optional<glm::vec3> SphereCollider::calculateDepth(const SphereCollider& collidee, const ContactData& contact) const {
 		glm::vec3 v = collidee.m_transCenter - m_transCenter;
 		float dist = glm::length(v);
 		float max_dist = m_radius + collidee.m_radius;
@@ -97,14 +97,14 @@ namespace lgl {
 
 	}
 
-	utl::opt<glm::vec3> SphereCollider::calculateDepth(const TerrainCollider& collidee, const ContactData& contact) const {
+	std::optional<glm::vec3> SphereCollider::calculateDepth(const TerrainCollider& collidee, const ContactData& contact) const {
 		auto MI = collidee.getTransformation()->makeModelInverseMatrix();
 		auto M = collidee.getTransformation()->makeModelMatrix();
 
 		glm::vec3 tp = glm::vec3(glm::vec4(contact.point, 1.0f) * MI);
 		auto e = collidee.evaluateTerrainFormula(tp.x, tp.z);
 
-		glm::vec3 ep = e.get<0>();
+		glm::vec3 ep = std::get<0>(e);
 		glm::vec3 tep = glm::vec3(glm::vec4(ep, 1.0f) * M);
 
 		if (tep.y < contact.point.y) {

@@ -1,8 +1,8 @@
 #include "ModelMesh.hxx"
 
 namespace lgl {
-	ModelMesh::ModelMesh(const utl::str& filePath, bool centerMeshes, bool loadTextures) : Mesh() {
-		m_assimpModel = utl::makeUptr<model::AssimpModel>(filePath, centerMeshes, loadTextures);
+	ModelMesh::ModelMesh(const std::string& filePath, bool centerMeshes, bool loadTextures) : Mesh() {
+		m_assimpModel = std::make_unique<model::AssimpModel>(filePath, centerMeshes, loadTextures);
 	}
 
 	void ModelMesh::scaleModelBy(const glm::vec3& scaling) {
@@ -28,7 +28,7 @@ namespace lgl {
 		}
 
 		if (!m_textures.empty()) {
-			for (utl::uint i = 0; i < m_textures.size(); i++) {
+			for (std::uint32_t i = 0; i < m_textures.size(); i++) {
 				glActiveTexture(GL_TEXTURE0 + i);
 				m_program->setInt(m_textures[i]->name.c_str(), i);
 				glBindTexture(GL_TEXTURE_2D, m_textures[i]->id);

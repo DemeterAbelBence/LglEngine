@@ -14,14 +14,14 @@ void SimulationInterface::renderLightingPicker() {
 
 void SimulationInterface::renderSimulationSettings() {
     static float simulationSpeed = 0.005f;
-    static utl::cstr precision = "%.3f";
+    static const char* precision = "%.3f";
 
     ImGui::Begin("Simulation settings");
 
     // onToggle is a plain function pointer (no new std symbols)
-    auto toggleButton = [&](bool& flag, utl::cstr onText, utl::cstr offText, void (*onToggle)(bool) = nullptr) {
+    auto toggleButton = [&](bool& flag, const char* onText, const char* offText, void (*onToggle)(bool) = nullptr) {
         bool current = flag;
-        utl::cstr text = current ? onText : offText;
+        const char* text = current ? onText : offText;
         // Switch mapping: true -> red, false -> green
         const ImVec4& col = current ? m_redBtn : m_greenBtn;
         const ImVec4& colHov = current ? m_redBtnHov : m_greenBtnHov;
@@ -83,9 +83,9 @@ void SimulationInterface::renderSimulationSettings() {
     // File logging toggle (use toggleButton to get color + optional onToggle)
     // Use a plain function pointer initialized from a captureless lambda
     void (*fileLogToggleFunc)(bool) = [](bool enabled) {
-        if (enabled) lgl::Logger::setLogMode(lgl::Logger::GENERAL_LOGS);
+        if (enabled) utl::setLogMode(utl::GENERAL_LOGS);
     };
-    toggleButton(Logger::logToFile, "Disable file logging", "Enable file logging", fileLogToggleFunc);
+    toggleButton(utl::logToFile, "Disable file logging", "Enable file logging", fileLogToggleFunc);
 
     // Contact log toggle
     toggleButton(CollisionHandler::enableContactLog, "Disable contact log", "Enable contact log", nullptr);
@@ -115,7 +115,7 @@ void SimulationInterface::renderSimulationSettings() {
     ImGui::SliderFloat("Bisection Bias", &CollisionHandler::bisectionBias, 0.0f, 0.01f, "%.5f", 0);
     ImGui::SliderFloat("Contact Bias", &CollisionHandler::contactBias, 0.0f, 0.01f, "%.5f", 0);
 	ImGui::SliderFloat("PSD Tolerance", &CollisionHandler::PSDTolerance, 0.0f, 0.001f, "%.7f", 0);
-    ImGui::SliderInt("logFrequency", reinterpret_cast<int*>(&Logger::logFrequency), 1, 32);
+    ImGui::SliderInt("logFrequency", reinterpret_cast<int*>(&utl::logFrequency), 1, 32);
 
     ImGui::Separator();
 
@@ -126,12 +126,12 @@ void SimulationInterface::renderSimulationSettings() {
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, m_blueBtnHov);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, m_blueBtnAct);
     if (ImGui::Button("Save Scene", ImVec2(m_buttonWidth, 0))) {
-        utl::str savePath = utl::strFormat("{}/{}", ribo::baseSerializationPath, sceneSaveName);
+        std::string savePath = std::format("{}/{}", ribo::baseSerializationPath, sceneSaveName);
         m_simulationScene->saveObjectStates(savePath);
     }
 
     if (ImGui::Button("Load Scene", ImVec2(m_buttonWidth, 0))) {
-        utl::str savePath = utl::strFormat("{}/{}", ribo::baseSerializationPath, sceneSaveName);
+        std::string savePath = std::format("{}/{}", ribo::baseSerializationPath, sceneSaveName);
         m_simulationScene->loadObjectStates(savePath);
     }
     ImGui::PopStyleColor(3);
@@ -144,7 +144,7 @@ void SimulationInterface::renderTerrainSettings() {
     static float frequency = 0.0f;
     static float phase = 0.0f;
     static int iterations = 0;
-    static utl::cstr precision = "%.2f";
+    static const char* precision = "%.2f";
 
     if (m_simulationScene->getTerrain().get() == nullptr) {
         return;
@@ -175,12 +175,12 @@ void SimulationInterface::renderAdditionalUI() {
 	renderTerrainSettings();
 }
 
-SimulationInterface::SimulationInterface(GLFWwindow* window, utl::sptr<Scene> scene) 
+SimulationInterface::SimulationInterface(GLFWwindow* window, std::shared_ptr<Scene> scene) 
 	: UserInterface(window, scene) {
     
-	m_simulationScene = utl::sptrCast<SimulationScene>(scene);
+	m_simulationScene = std::dynamic_pointer_cast<SimulationScene>(scene);
     if (!m_simulationScene) {
-		throw utl::except("'SimulationInterface' can only by initialized with 'SimulationScene' instance");
+		throw std::runtime_error("'SimulationInterface' can only by initialized with 'SimulationScene' instance");
     }
 }
 

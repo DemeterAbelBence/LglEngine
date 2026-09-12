@@ -1,8 +1,8 @@
 #include "Surface.hxx"
 
 namespace lgl {
-	Surface::Surface(utl::uint N, utl::uint M) : Mesh() {
-		m_vertexData = utl::vec<VertexData>();
+	Surface::Surface(std::uint32_t N, std::uint32_t M) : Mesh() {
+		m_vertexData = std::vector<VertexData>();
 
 		m_verticesPerStrip = (M + 1) * 2;
 		m_strips = N;
@@ -18,15 +18,15 @@ namespace lgl {
 	}
 
 	void Surface::create() {
-		utl::uint N = m_strips;
-		utl::uint M = m_verticesPerStrip / 2 - 1;
-		for (int i = 0; i < N; i++) {
-			for (int j = 0; j <= M; j++) {
+		std::uint32_t N = m_strips;
+		std::uint32_t M = m_verticesPerStrip / 2 - 1;
+		for (std::uint32_t i = 0; i < N; i++) {
+			for (std::uint32_t j = 0; j <= M; j++) {
 				m_vertexData.push_back(generateVertexData(m_size * (float)j / M, m_size * (float)i / N));
 				m_vertexData.push_back(generateVertexData(m_size * (float)j / M, m_size * (float)(i + 1) / N));
 			}
 		}
-		setBufferData((utl::cmemptr)&m_vertexData[0], m_vertexData.size() * sizeof(VertexData));
+		setBufferData((const void*)&m_vertexData[0], m_vertexData.size() * sizeof(VertexData));
 	}
 
 	void Surface::draw(const Camera& camera) const {
@@ -42,11 +42,11 @@ namespace lgl {
 
 		glPolygonMode(GL_FRONT_AND_BACK, m_primitiveType);
 
-		for (utl::uint i = 0; i < 4 * m_strips; i++)
+		for (std::uint32_t i = 0; i < 4 * m_strips; i++)
 			glDrawArrays(GL_TRIANGLE_STRIP, i * m_verticesPerStrip, m_verticesPerStrip);
 	}
 
-	void Surface::setBufferData(utl::cmemptr data, utl::uint size) {
+	void Surface::setBufferData(const void* data, std::uint32_t size) {
 		m_vertexBuffer->setData(data, size);
 		m_vertexBufferLayout->push(GL_FLOAT, 3);
 		m_vertexBufferLayout->push(GL_FLOAT, 3);

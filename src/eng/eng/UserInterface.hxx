@@ -1,7 +1,7 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
 
 #include <GLEW/glew.h>
 #include <IMGUI/imgui.h>
@@ -15,7 +15,7 @@ import glmmodule;
 namespace lgl {
 	class UserInterface {
 	protected:
-		utl::sptr<Scene> m_scene;
+		std::shared_ptr<Scene> m_scene;
 		ImGuiIO* io;
 
 	protected:
@@ -27,7 +27,7 @@ namespace lgl {
 		virtual void renderAdditionalUI();
 
 	public:
-		UserInterface(GLFWwindow* window, utl::sptr<Scene> scene);
+		UserInterface(GLFWwindow* window, std::shared_ptr<Scene> scene);
 
 		UserInterface(const UserInterface& other) = delete;
 		UserInterface& operator=(const UserInterface& other) = delete;

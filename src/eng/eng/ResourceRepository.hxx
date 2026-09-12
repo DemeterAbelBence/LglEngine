@@ -1,9 +1,9 @@
 #pragma once
 
-import lglmodule;
+import utl;
 
-#include <gl/GpuProgram.hxx>
 #include <gl/FrameBuffer.hxx>
+#include <gl/GpuProgram.hxx>
 #include <model/model.hxx>
 
 #include <visual/common/Material.hxx>
@@ -11,34 +11,34 @@ import lglmodule;
 #include <visual/mesh/ModelMesh.hxx>
 
 namespace lgl {
-	class ResourceRepository {
-	protected:
-		utl::smap<GpuProgram>  m_programs;
-		utl::smap<Material>    m_materials;
-		utl::smap<Texture>     m_textures;
-		utl::smap<Mesh>        m_meshes;
-		utl::smap<ModelMesh>   m_modelMeshes;
-		utl::smap<FrameBuffer> m_buffers;
+class ResourceRepository {
+protected:
+  std::unordered_map<std::string, std::shared_ptr<GpuProgram>> m_programs;
+  std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
+  std::unordered_map<std::string, std::shared_ptr<Texture>> m_textures;
+  std::unordered_map<std::string, std::shared_ptr<Mesh>> m_meshes;
+  std::unordered_map<std::string, std::shared_ptr<ModelMesh>> m_modelMeshes;
+  std::unordered_map<std::string, std::shared_ptr<FrameBuffer>> m_buffers;
 
-	public:
-		ResourceRepository() = default;
+public:
+  ResourceRepository() = default;
 
-		ResourceRepository(const ResourceRepository& other) = delete;
-		ResourceRepository& operator=(const ResourceRepository& other) = delete;
+  ResourceRepository(const ResourceRepository &other) = delete;
+  ResourceRepository &operator=(const ResourceRepository &other) = delete;
 
-		ResourceRepository(const ResourceRepository&& other) = delete;
-		ResourceRepository& operator=(const ResourceRepository&& other) = delete;
+  ResourceRepository(const ResourceRepository &&other) = delete;
+  ResourceRepository &operator=(const ResourceRepository &&other) = delete;
 
-		utl::sptr<GpuProgram> getProgram(utl::cstr name) const { return m_programs.at(name); }
-		utl::sptr<Material> getMaterial(utl::cstr name) const { return m_materials.at(name); }
-		utl::sptr<Texture> getTexture(utl::cstr name) const { return m_textures.at(name); }
-		utl::sptr<Mesh> getMesh(utl::cstr name) const { return m_meshes.at(name); }
-		utl::sptr<ModelMesh> getModelMesh(utl::cstr name) const { return m_modelMeshes.at(name); }
-		utl::sptr<FrameBuffer> getBuffer(utl::cstr name) const { return m_buffers.at(name); }
+  std::shared_ptr<GpuProgram> getProgram(const char *name);
+  std::shared_ptr<Material> getMaterial(const char *name);
+  std::shared_ptr<Texture> getTexture(const char *name);
+  std::shared_ptr<Mesh> getMesh(const char *name);
+  std::shared_ptr<ModelMesh> getModelMesh(const char *name);
+  std::shared_ptr<FrameBuffer> getBuffer(const char *name);
 
-		void handleShaderChanges();
+  void handleShaderChanges();
 
-	protected:
-		virtual void initializeResources() = 0;
-	};
-}
+protected:
+  virtual void initializeResources() = 0;
+};
+} // namespace lgl

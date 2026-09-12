@@ -38,7 +38,7 @@ void SimulationScene::castShadowsOnTerrain() {
 	m_camera->resetView();
 }
 
-void SimulationScene::loadFromFile(const utl::str& path) {
+void SimulationScene::loadFromFile(const std::string& path) {
 
 }
 
@@ -50,11 +50,11 @@ void SimulationScene::rollbackToinitial() {
 	}
 
 	if (s_randomizeRollback) {
-		utl::rdev rd;
-		utl::rng gen(rd());
-		utl::udist<float> momentumDist(-10.0f, 10.0f);
-		utl::udist<float> angleDist(0.0f, 2.0f * 3.14159f);
-		utl::udist<float> axisDist(-1.0f, 1.0f);
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_real_distribution<float> momentumDist(-10.0f, 10.0f);
+		std::uniform_real_distribution<float> angleDist(0.0f, 2.0f * 3.14159f);
+		std::uniform_real_distribution<float> axisDist(-1.0f, 1.0f);
 
 		for (int i = 2; i < m_sceneObjects.size(); ++i) {
 			auto s = m_sceneObjects[i];
@@ -94,16 +94,16 @@ void SimulationScene::create() {
 		setObjectMoveSpeed(0.05f);
 		setSimulationSpeed(0.005f);
 
-		m_resources = utl::makeUptr<SimulationResourceRepository>();
+		m_resources = std::make_unique<SimulationResourceRepository>();
 
-		m_sun = utl::makeSptr<Sun>(2.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+		m_sun = std::make_shared<Sun>(2.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 		m_sun->setName("sun");
 		m_sun->setProgram(m_resources->getProgram("TEX"));
 		m_sun->setTextures({ m_resources->getTexture("SUN") });
 		m_sun->translate(glm::vec3(15.0f, 50.0f, -15.0f));
 		m_sceneObjects.push_back(m_sun);
 
-		m_terrain = utl::makeSptr<Terrain>(1.0f, 4);
+		m_terrain = std::make_shared<Terrain>(1.0f, 4);
 		m_terrain->setName("terrain");
 		m_terrain->getTransformation()->setScaleMatrix(glm::vec3(400.0f, 50.0f, 400.0f));
 		m_terrain->translate(glm::vec3(-200.0f, -20.0f, -200.0f));
@@ -113,8 +113,8 @@ void SimulationScene::create() {
 
 		for (int i = 0; i < 2; i++) {
 			float s = 10.0f / (i + 1);
-			auto woodBox = utl::makeSptr<Box>(false);
-			woodBox->setName(utl::strFormat("wood_box_{}", i));
+			auto woodBox = std::make_shared<Box>(false);
+			woodBox->setName(std::format("wood_box_{}", i));
 			woodBox->getMesh()->setProgram(m_resources->getProgram("PHONG"));
 			woodBox->getMesh()->setMaterial(m_resources->getMaterial("WHITE"));
 			woodBox->getMesh()->addTexture(m_resources->getTexture("WOOD"));
@@ -124,7 +124,7 @@ void SimulationScene::create() {
 			m_sceneObjects.push_back(woodBox);
 		}
 	} 
-	catch (const utl::except& error) {
+	catch (const std::exception& error) {
 		throw error;
 	}
 }
@@ -169,10 +169,10 @@ void SimulationScene::update(GLFWwindow* window) {
 		castShadowsOnTerrain();
 		m_sun->lightUpScene(m_sceneObjects, *m_resources->getBuffer("DEPTH"));
 	}
-	catch (const utl::except& error) {
-		Logger::log(Logger::LGL_ERROR, "Simulation scene update exception: {}\n", error.what());
+	catch (const std::exception& error) {
+		utl::log(utl::LGL_ERROR, "Simulation scene update exception: {}\n", error.what());
 	}
 	catch (...) {
-		Logger::log(Logger::LGL_ERROR, "Simulation scene update exception\n");
+		utl::log(utl::LGL_ERROR, "Simulation scene update exception\n");
 	}
 }

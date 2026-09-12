@@ -15,8 +15,8 @@ namespace lgl {
         transData = baseData;
     }
 
-    CuboidCollider::Side CuboidCollider::createSide(const utl::arr<utl::uint, 4>& indices) const {
-        utl::arr<glm::vec3, 4> points;
+    CuboidCollider::Side CuboidCollider::createSide(const std::array<std::uint32_t, 4>& indices) const {
+        std::array<glm::vec3, 4> points;
         glm::vec3 center = glm::nullvec;
         for (int i = 0; i < indices.size(); ++i) {
             points[i] = baseData.points[indices[i]];
@@ -28,7 +28,7 @@ namespace lgl {
     }
 
     void CuboidCollider::createSides() {
-        utl::arr<utl::uint, 4> sideIndices[6] =
+        std::array<std::uint32_t, 4> sideIndices[6] =
         {
             {0, 1, 2, 3},
             {4, 5, 6, 7},
@@ -48,9 +48,9 @@ namespace lgl {
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-    utl::vec<glm::vec3> CuboidCollider::getEdgesOf(const CuboidCollider& collider) const {
+    std::vector<glm::vec3> CuboidCollider::getEdgesOf(const CuboidCollider& collider) const {
         auto p = collider.transData.points;
-        utl::vec<glm::vec3> edges;
+        std::vector<glm::vec3> edges;
 
         edges.push_back(p[0]); edges.push_back(p[1]);
         edges.push_back(p[1]); edges.push_back(p[2]);
@@ -70,13 +70,12 @@ namespace lgl {
         return edges;
     }
 
-    utl::opt<Collider::ContactData> CuboidCollider::calculateEdgeIntersection(
+    std::optional<Collider::ContactData> CuboidCollider::calculateEdgeIntersection(
         glm::vec3 pa, glm::vec3 va, float a,
         glm::vec3 pb, glm::vec3 vb, float b) const {
 
         if (va == glm::nullvec || vb == glm::nullvec) {
-            constexpr utl::cstr logText = "Edge direction vector is zero : va = ({:.2f}, {:.2f}, {:.2f}), vb = ({:.2f}, {:.2f}, {:.2f})\n";
-            Logger::logIf(false, Logger::LGL_ERROR, logText, va.x, va.y, va.z, vb.x, vb.y, vb.z);
+            utl::logIf(false, utl::LGL_ERROR, "Edge direction vector is zero : va = ({:.2f}, {:.2f}, {:.2f}), vb = ({:.2f}, {:.2f}, {:.2f})\n", va.x, va.y, va.z, vb.x, vb.y, vb.z);
             return {};
         }
 
@@ -120,10 +119,10 @@ namespace lgl {
         }
     }
 
-    utl::vec<Collider::ContactData> CuboidCollider::edgeEdgeCollision(const CuboidCollider& collidee) const {
-        utl::vec<Collider::ContactData> result;
-        utl::vec<glm::vec3> edgesA = getEdgesOf(*this);
-        utl::vec<glm::vec3> edgesB = getEdgesOf(collidee);
+    std::vector<Collider::ContactData> CuboidCollider::edgeEdgeCollision(const CuboidCollider& collidee) const {
+        std::vector<Collider::ContactData> result;
+        std::vector<glm::vec3> edgesA = getEdgesOf(*this);
+        std::vector<glm::vec3> edgesB = getEdgesOf(collidee);
 
         for (int i = 0; i < edgesA.size(); i += 2) {
             glm::vec3 vecA = edgesA[i + 1] - edgesA[i];
@@ -157,7 +156,7 @@ namespace lgl {
             return false;
         }
         else {
-            utl::vec<Edge> edges;
+            std::vector<Edge> edges;
             edges.push_back({ side.points[0], side.points[1] - side.points[0] });
             edges.push_back({ side.points[1], side.points[2] - side.points[1] });
             edges.push_back({ side.points[2], side.points[3] - side.points[2] });
@@ -175,8 +174,8 @@ namespace lgl {
         }
     }
 
-    utl::vec<Collider::ContactData> CuboidCollider::vertexFaceCollision(const CuboidCollider& collidee) const {
-        utl::vec<Collider::ContactData> result;
+    std::vector<Collider::ContactData> CuboidCollider::vertexFaceCollision(const CuboidCollider& collidee) const {
+        std::vector<Collider::ContactData> result;
 
         for (const Side& side : collidee.getTransData().sides) {
             for (const glm::vec3& point : transData.points) {
@@ -219,8 +218,8 @@ namespace lgl {
         transformation = c.transformation->clone();
     }
 
-    utl::vec<glm::vec3> CuboidCollider::getSideDrawData(utl::uint sideIndex) {
-        utl::vec<glm::vec3> result;
+    std::vector<glm::vec3> CuboidCollider::getSideDrawData(std::uint32_t sideIndex) {
+        std::vector<glm::vec3> result;
 
         auto side = transData.sides[sideIndex];
         auto points = side.points;
@@ -269,27 +268,27 @@ namespace lgl {
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-    utl::vec<Collider::ContactData> CuboidCollider::collidesWith(const CuboidCollider& collidee) const {
+    std::vector<Collider::ContactData> CuboidCollider::collidesWith(const CuboidCollider& collidee) const {
         auto edgeEdge = edgeEdgeCollision(collidee);
         auto vertexFace = vertexFaceCollision(collidee);
         edgeEdge.insert(edgeEdge.end(), vertexFace.begin(), vertexFace.end());
         return edgeEdge;
     }
 
-    utl::vec<Collider::ContactData> CuboidCollider::collidesWith(const SphereCollider& collidee) const {
-        return utl::vec<ContactData>();
+    std::vector<Collider::ContactData> CuboidCollider::collidesWith(const SphereCollider& collidee) const {
+        return std::vector<ContactData>();
     }
 
-    utl::vec<Collider::ContactData> CuboidCollider::collidesWith(const TerrainCollider& collidee) const {
-        utl::vec<ContactData> result;
+    std::vector<Collider::ContactData> CuboidCollider::collidesWith(const TerrainCollider& collidee) const {
+        std::vector<Collider::ContactData> result;
         glm::mat4 MI = collidee.getTransformation()->makeModelInverseMatrix();
         glm::mat4 M = collidee.getTransformation()->makeModelMatrix();
         for (const auto& p : transData.points) {
             glm::vec3 tp = glm::vec3(glm::vec4(p, 1.0f) * MI);
             auto e = collidee.evaluateTerrainFormula(tp.x, tp.z);
 
-            glm::vec3 ep = e.get<0>();
-            glm::vec3 en = e.get<1>();
+            glm::vec3 ep = std::get<0>(e);
+            glm::vec3 en = std::get<1>(e);
             glm::vec3 tep = glm::vec3(glm::vec4(ep, 1.0f) * M);
             glm::vec3 ten = glm::vec3(MI * glm::vec4(en, 0.0f));
 
@@ -312,7 +311,7 @@ namespace lgl {
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-    utl::opt<glm::vec3> CuboidCollider::calculateDepth(const CuboidCollider& collidee, const ContactData& contact) const {
+    std::optional<glm::vec3> CuboidCollider::calculateDepth(const CuboidCollider& collidee, const ContactData& contact) const {
         if (contact.isVertexFace) {
             float faceDot = glm::dot(contact.point - contact.facePoint, contact.normal);
             if (faceDot >= 0.0f) {
@@ -359,18 +358,18 @@ namespace lgl {
         }
     }
 
-    utl::opt<glm::vec3> CuboidCollider::calculateDepth(const SphereCollider& collidee, const ContactData& contact) const {
+    std::optional<glm::vec3> CuboidCollider::calculateDepth(const SphereCollider& collidee, const ContactData& contact) const {
         return {};
     }
 
-    utl::opt<glm::vec3> CuboidCollider::calculateDepth(const TerrainCollider& collidee, const ContactData& contact) const {
+    std::optional<glm::vec3> CuboidCollider::calculateDepth(const TerrainCollider& collidee, const ContactData& contact) const {
         glm::mat4 MI = collidee.getTransformation()->makeModelInverseMatrix();
         glm::mat4 M = collidee.getTransformation()->makeModelMatrix();
 
         glm::vec3 tp = glm::vec3(glm::vec4(contact.point, 1.0f) * MI);
         auto e = collidee.evaluateTerrainFormula(tp.x, tp.z);
 
-        glm::vec3 ep = e.get<0>();
+        glm::vec3 ep = std::get<0>(e);
         glm::vec3 tep = glm::vec3(glm::vec4(ep, 1.0f) * M);
 
         if (tep.y < contact.point.y) {

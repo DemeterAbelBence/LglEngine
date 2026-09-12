@@ -1,7 +1,7 @@
 #pragma
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
 
 #include <eng/UserInterface.hxx>
 #include <eng/Scene.hxx>
@@ -10,7 +10,7 @@ import glmmodule;
 
 class SimulationInterface : public lgl::UserInterface {
 private:
-	lgl::utl::sptr<SimulationScene> m_simulationScene;
+	std::shared_ptr<SimulationScene> m_simulationScene;
 
     inline static const ImVec4 m_blueBtn = ImVec4(0.00f, 0.45f, 0.70f, 1.00f);
     inline static const ImVec4 m_blueBtnHov = ImVec4(0.00f, 0.60f, 0.90f, 1.00f);
@@ -33,5 +33,5 @@ protected:
 	void renderAdditionalUI() override;
 
 public:
-	SimulationInterface(GLFWwindow* window, lgl::utl::sptr<lgl::Scene> scene);
+	SimulationInterface(GLFWwindow* window, std::shared_ptr<lgl::Scene> scene);
 };

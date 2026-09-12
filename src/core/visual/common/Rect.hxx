@@ -1,7 +1,7 @@
 #pragma once
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
 
 #include <gl/GpuProgram.hxx>
 #include <gl/VertexArray.hxx>
@@ -10,11 +10,11 @@ namespace lgl {
 	class Rect {
 
 	private:
-		utl::uptr<VertexArray> m_vertexArray;
-		utl::uptr<VertexBuffer> m_vertexBuffer;
-		utl::uptr<VertexBufferLayout> m_bufferLayout;
+		std::unique_ptr<VertexArray> m_vertexArray;
+		std::unique_ptr<VertexBuffer> m_vertexBuffer;
+		std::unique_ptr<VertexBufferLayout> m_bufferLayout;
 
-		utl::uptr<GpuProgram> m_shader;
+		std::unique_ptr<GpuProgram> m_shader;
 
 		glm::vec3 m_color;
 

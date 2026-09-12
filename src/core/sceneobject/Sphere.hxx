@@ -1,7 +1,7 @@
 #pragma once 
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
 
 #include <sceneobject/SceneObject.hxx>
 #include <visual/mesh/SphereMesh.hxx>

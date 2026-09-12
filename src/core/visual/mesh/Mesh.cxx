@@ -13,9 +13,9 @@ namespace lgl {
 	}
 
 	Mesh::Mesh() {
-		m_vertexArray = utl::makeUptr<VertexArray>();
-		m_vertexBuffer = utl::makeUptr<VertexBuffer>();
-		m_vertexBufferLayout = utl::makeUptr<VertexBufferLayout>();
+		m_vertexArray = std::make_unique<VertexArray>();
+		m_vertexBuffer = std::make_unique<VertexBuffer>();
+		m_vertexBufferLayout = std::make_unique<VertexBufferLayout>();
 
 		m_meshFrame = 0;
 		m_primitiveType = GL_TRIANGLES;
@@ -31,7 +31,7 @@ namespace lgl {
 				m_program->setFloat("material.shininess", m_material->shininess);
 			}
 			if (!m_textures.empty()) {
-				for (utl::uint i = 0; i < m_textures.size(); i++) {
+				for (std::uint32_t i = 0; i < m_textures.size(); i++) {
 					glActiveTexture(GL_TEXTURE0 + i);
 					m_program->setInt(m_textures[i]->name.c_str(), i);
 					glBindTexture(GL_TEXTURE_2D, m_textures[i]->id);

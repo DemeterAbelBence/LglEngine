@@ -1,7 +1,8 @@
 #pragma once 
 
-import lglmodule;
-import glmmodule;
+import utl;
+import glm;
+import std;
 
 #include <visual/mesh/Mesh.hxx>
 
@@ -14,20 +15,20 @@ namespace lgl {
 			glm::vec3 normal;
 			glm::vec2 textureCoordinate;
 		};
-		utl::vec<VertexData> m_vertexData;
+		std::vector<VertexData> m_vertexData;
 
 	private:
-		utl::arr<glm::vec3, 8> m_points;
+		std::array<glm::vec3, 8> m_points;
 
 	private:
 		void createPoints();
-		void createSide(const utl::arr<utl::uint, 4>& indices);
-		void setBufferData(utl::cmemptr data, utl::uint size);
+		void createSide(const std::array<std::uint32_t, 4>& indices);
+		void setBufferData(const void* data, std::uint32_t size);
 
 	public:
 		CuboidMesh();
 		glm::vec3 calculateCenter() const;
-		void setResources(utl::sptr<GpuProgram> program, utl::sptr<Material> material, const utl::vec<utl::sptr<Texture>>& textures);
+		void setResources(std::shared_ptr<GpuProgram> program, std::shared_ptr<Material> material, const std::vector<std::shared_ptr<Texture>>& textures);
 
 		void create() override;
 		void draw(const Camera& camera) const override;

@@ -13,9 +13,9 @@ namespace lgl {
         m_points[7] = glm::vec3(-0.5f, 0.5f, -0.5f);
     }
 
-    void CuboidMesh::createSide(const utl::arr<utl::uint, 4>& indices) {
+    void CuboidMesh::createSide(const std::array<std::uint32_t, 4>& indices) {
         glm::vec3 sideCenter = glm::vec3(0.0f);
-        for (utl::uint i : indices) {
+        for (std::uint32_t i : indices) {
             sideCenter += m_points[i];
         }
         sideCenter /= static_cast<float>(indices.size());
@@ -31,7 +31,7 @@ namespace lgl {
         m_vertexData.push_back({ m_points[indices[0]], normal, glm::vec2(0.0f, 0.0f) });
     }
 
-    void CuboidMesh::setBufferData(const void* data, utl::uint size) {
+    void CuboidMesh::setBufferData(const void* data, std::uint32_t size) {
         m_vertexBuffer->setData(data, size);
         m_vertexBufferLayout->push(GL_FLOAT, 3);
         m_vertexBufferLayout->push(GL_FLOAT, 3);
@@ -40,7 +40,7 @@ namespace lgl {
         m_vertexArray->addBuffer(*m_vertexBuffer, *m_vertexBufferLayout);
     }
 
-    void CuboidMesh::setResources(utl::sptr<GpuProgram> program, utl::sptr<Material> material, const std::vector<utl::sptr<Texture>>& textures) {
+    void CuboidMesh::setResources(std::shared_ptr<GpuProgram> program, std::shared_ptr<Material> material, const std::vector<std::shared_ptr<Texture>>& textures) {
         m_program = program;
         m_material = material;
         for (auto texture : textures) {
