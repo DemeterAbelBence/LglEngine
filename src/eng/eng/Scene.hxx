@@ -24,7 +24,7 @@ import glm;
 
 namespace lgl {
 class Scene {
-protected:
+ protected:
   std::unique_ptr<Camera> m_camera;
   std::vector<std::shared_ptr<SceneObject>> m_sceneObjects;
   std::unique_ptr<ResourceRepository> m_resources;
@@ -35,26 +35,26 @@ protected:
   std::uint32_t m_objectIndex;
   bool m_moveCamera;
 
-protected:
+ protected:
   void initObjectEvents();
   void initCameraEvents();
 
-public:
+ public:
   Scene();
 
-  Scene(const Scene &other) = delete;
-  Scene &operator=(const Scene &other) = delete;
+  Scene(const Scene& other) = delete;
+  Scene& operator=(const Scene& other) = delete;
 
-  Scene(const Scene &&other) = delete;
-  Scene &operator=(const Scene &&other) = delete;
+  Scene(const Scene&& other) = delete;
+  Scene& operator=(const Scene&& other) = delete;
 
-  const std::unique_ptr<Camera> &getCamera() const { return m_camera; }
+  const std::unique_ptr<Camera>& getCamera() const { return m_camera; }
   void setMoveCamera(bool value) { m_moveCamera = value; }
   bool getMoveCamera() const { return m_moveCamera; }
-  const std::vector<std::shared_ptr<SceneObject>> &getSceneObjects() const {
+  const std::vector<std::shared_ptr<SceneObject>>& getSceneObjects() const {
     return m_sceneObjects;
   }
-  const std::shared_ptr<SceneObject> &getCurrentSceneObject() const {
+  const std::shared_ptr<SceneObject>& getCurrentSceneObject() const {
     return m_sceneObjects[m_objectIndex];
   }
 
@@ -62,11 +62,11 @@ public:
   void setPrimitiveType(std::uint32_t type);
   void setCameraMoveSpeed(float speed);
   void setObjectMoveSpeed(float speed);
-  void saveObjectStates(const std::string &path);
-  void loadObjectStates(const std::string &path);
+  void saveObjectStates(const std::string& path);
+  void loadObjectStates(const std::string& path);
 
   virtual void create() = 0;
   virtual void draw() const = 0;
-  virtual void update(GLFWwindow *window) = 0;
+  virtual void update(GLFWwindow* window) = 0;
 };
-} // namespace lgl
+}  // namespace lgl

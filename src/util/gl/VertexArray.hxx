@@ -8,15 +8,16 @@ import std;
 #include <gl/VertexBufferLayout.hxx>
 
 namespace lgl {
-	class VertexArray {
-	private:
-		std::uint32_t m_id;
+class VertexArray {
+ private:
+  std::uint32_t m_id;
 
-	public:
-		VertexArray();
-		void addBuffer(const VertexBuffer& vertexBuffer, const VertexBufferLayout& layout) const;
-		void bind() const;
-		void unBind() const;
-		~VertexArray();
-	};
-}
+ public:
+  VertexArray();
+  void addBuffer(const VertexBuffer& vertexBuffer,
+                 const VertexBufferLayout& layout) const;
+  void bind() const;
+  void unBind() const;
+  ~VertexArray();
+};
+}  // namespace lgl

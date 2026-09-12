@@ -7,53 +7,53 @@ module;
 export module glm;
 
 export namespace glm {
-	// Vector types
-	using vec2 = glm::vec2;
-	using vec3 = glm::vec3;
-	using vec4 = glm::vec4;
+// Vector types
+using vec2 = glm::vec2;
+using vec3 = glm::vec3;
+using vec4 = glm::vec4;
 
-	// Matrix types
-	using mat3 = glm::mat3;
-	using mat4 = glm::mat4;
+// Matrix types
+using mat3 = glm::mat3;
+using mat4 = glm::mat4;
 
-	// Common vector functions
-	using glm::length;
-	using glm::normalize;
-	using glm::cross;
-	using glm::dot;
-	using glm::clamp;
+// Common vector functions
+using glm::clamp;
+using glm::cross;
+using glm::dot;
+using glm::length;
+using glm::normalize;
 
-	// Trigonometric functions
-	using glm::tan;
-	using glm::cos;
-	using glm::sin;
-	using glm::radians;
+// Trigonometric functions
+using glm::cos;
+using glm::radians;
+using glm::sin;
+using glm::tan;
 
-	// Matrix functions
-	using glm::determinant;
-	using glm::inverse;
-	using glm::transpose;
-	using glm::ortho;
-	using glm::perspective;
+// Matrix functions
+using glm::determinant;
+using glm::inverse;
+using glm::ortho;
+using glm::perspective;
+using glm::transpose;
 
-	// Other functions
-	using glm::max;
-	using glm::min;
-	using glm::sqrt;
-	using glm::abs;
-	using glm::pow;
-	using glm::exp;
-	using glm::log;
+// Other functions
+using glm::abs;
+using glm::exp;
+using glm::log;
+using glm::max;
+using glm::min;
+using glm::pow;
+using glm::sqrt;
 
-	// Arithmetic operators
-	using glm::operator*;
-	using glm::operator/;
-	using glm::operator+;
-	using glm::operator-;
+// Arithmetic operators
+using glm::operator*;
+using glm::operator/;
+using glm::operator+;
+using glm::operator-;
 
-	// Comparison operators
-	using glm::operator==;
-	using glm::operator!=;
+// Comparison operators
+using glm::operator==;
+using glm::operator!=;
 
-	vec3 nullvec = vec3(0.0f, 0.0f, 0.0f);
-}
+vec3 nullvec = vec3(0.0f, 0.0f, 0.0f);
+}  // namespace glm

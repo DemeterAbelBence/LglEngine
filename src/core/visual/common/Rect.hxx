@@ -7,19 +7,18 @@ import glm;
 #include <gl/VertexArray.hxx>
 
 namespace lgl {
-	class Rect {
+class Rect {
+ private:
+  std::unique_ptr<VertexArray> m_vertexArray;
+  std::unique_ptr<VertexBuffer> m_vertexBuffer;
+  std::unique_ptr<VertexBufferLayout> m_bufferLayout;
 
-	private:
-		std::unique_ptr<VertexArray> m_vertexArray;
-		std::unique_ptr<VertexBuffer> m_vertexBuffer;
-		std::unique_ptr<VertexBufferLayout> m_bufferLayout;
+  std::unique_ptr<GpuProgram> m_shader;
 
-		std::unique_ptr<GpuProgram> m_shader;
+  glm::vec3 m_color;
 
-		glm::vec3 m_color;
-
-	public:
-		Rect(glm::vec2 corner1, glm::vec2 corner2, glm::vec3 color);
-		void draw() const;
-	};
-}
+ public:
+  Rect(glm::vec2 corner1, glm::vec2 corner2, glm::vec3 color);
+  void draw() const;
+};
+}  // namespace lgl

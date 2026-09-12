@@ -8,35 +8,35 @@ import glm;
 #include <IMGUI/imgui_impl_glfw.h>
 #include <IMGUI/imgui_impl_opengl3.h>
 
+#include <eng/Scene.hxx>
 #include <gl/Debug.hxx>
 #include <visual/common/Rect.hxx>
-#include <eng/Scene.hxx>
 
 namespace lgl {
-	class UserInterface {
-	protected:
-		std::shared_ptr<Scene> m_scene;
-		ImGuiIO* io;
+class UserInterface {
+ protected:
+  std::shared_ptr<Scene> m_scene;
+  ImGuiIO* io;
 
-	protected:
-		void renderObjectPicker();
-		void renderPrimitivePicker();
-		void renderFrameRateBox();
-		void renderSceneObjectLabels();
+ protected:
+  void renderObjectPicker();
+  void renderPrimitivePicker();
+  void renderFrameRateBox();
+  void renderSceneObjectLabels();
 
-		virtual void renderAdditionalUI();
+  virtual void renderAdditionalUI();
 
-	public:
-		UserInterface(GLFWwindow* window, std::shared_ptr<Scene> scene);
+ public:
+  UserInterface(GLFWwindow* window, std::shared_ptr<Scene> scene);
 
-		UserInterface(const UserInterface& other) = delete;
-		UserInterface& operator=(const UserInterface& other) = delete;
+  UserInterface(const UserInterface& other) = delete;
+  UserInterface& operator=(const UserInterface& other) = delete;
 
-		UserInterface(const UserInterface&& other) = delete;
-		UserInterface& operator=(const UserInterface&& other) = delete;
+  UserInterface(const UserInterface&& other) = delete;
+  UserInterface& operator=(const UserInterface&& other) = delete;
 
-		~UserInterface();
+  ~UserInterface();
 
-		void renderUI();
-	};
-}
+  void renderUI();
+};
+}  // namespace lgl

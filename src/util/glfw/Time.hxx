@@ -5,20 +5,20 @@ import std;
 #include <GLFW/glfw3.h>
 
 namespace lgl {
-    class Time {
+class Time {
+ private:
+  inline static const std::uint32_t FPS = 100;
 
-    private:
-        inline static const std::uint32_t FPS = 100;
+ public:
+  inline static float s_currentTime = 0.0f;
+  inline static float s_previousTime = 0.0f;
+  inline static float s_deltaTime = 1.0f;
+  inline static float s_fixedDeltaTime = 0.005f;
+  inline static float s_frameTime = 1.0f / FPS;
+  inline static float s_timePassed = 0.0f;
 
-    public:
-        inline static float s_currentTime = 0.0f;
-        inline static float s_previousTime = 0.0f;
-        inline static float s_deltaTime = 1.0f;
-		inline static float s_fixedDeltaTime = 0.005f;
-        inline static float s_frameTime = 1.0f / FPS;
-        inline static float s_timePassed = 0.0f;
-    public:
-        static void calculateCurrentTime();
-        static void calculateDeltaTime();
-    };
-}
+ public:
+  static void calculateCurrentTime();
+  static void calculateDeltaTime();
+};
+}  // namespace lgl

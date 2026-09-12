@@ -666,7 +666,7 @@ void CollisionHandler::resolveInterpenetrations(
   }
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - - - - - - - - - - - - - - - - - - - - - //
+// //
 
 // Debug and draw
 void CollisionHandler::debugContacts(const Camera& camera) {
