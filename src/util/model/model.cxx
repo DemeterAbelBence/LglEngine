@@ -16,10 +16,8 @@ void lgl::model::AssimpMesh::centerToOrigin(std::vector<Vertex>& vertices) {
   }
 }
 
-lgl::model::AssimpMesh::AssimpMesh(std::vector<Vertex> vertices,
-                                   std::vector<std::uint32_t> indices,
-                                   std::vector<Texture> textures,
-                                   bool centerMeshes) {
+lgl::model::AssimpMesh::AssimpMesh(std::vector<Vertex> vertices, std::vector<std::uint32_t> indices,
+                                   std::vector<Texture> textures, bool centerMeshes) {
   if (centerMeshes) {
     centerToOrigin(vertices);
   }
@@ -37,8 +35,7 @@ void lgl::model::AssimpMesh::downScaleMeshBy(const glm::vec3& scaling) {
   }
   glBindVertexArray(m_VAO);
   glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0],
-               GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 }
 
 void lgl::model::AssimpMesh::draw(const lgl::GpuProgram& program) {
@@ -63,44 +60,35 @@ void lgl::model::AssimpMesh::setupMesh() {
   glBindVertexArray(m_VAO);
   glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
-  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0],
-               GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(std::uint32_t),
-               &indices[0], GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(std::uint32_t), &indices[0], GL_STATIC_DRAW);
 
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void*)offsetof(Vertex, Normal));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
 
   glEnableVertexAttribArray(2);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void*)offsetof(Vertex, Tangent));
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
 
   glEnableVertexAttribArray(3);
-  glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void*)offsetof(Vertex, BiTangent));
+  glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, BiTangent));
 
   glEnableVertexAttribArray(4);
-  glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        (void*)offsetof(Vertex, TexCoords));
+  glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
   glBindVertexArray(0);
 }
 
 void lgl::model::AssimpModel::loadModel(const std::string& filePath) {
   asim::Importer modelimport;
-  m_scene = (asim::aiScene*)modelimport.ReadFile(
-      filePath, asim::PROCESS_TRIANGULATE | asim::PROCESS_FLIP_UVS);
+  m_scene = (asim::aiScene*)modelimport.ReadFile(filePath, asim::PROCESS_TRIANGULATE | asim::PROCESS_FLIP_UVS);
 
-  if (!m_scene || m_scene->mFlags & asim::SCENE_FLAGS_INCOMPLETE ||
-      !m_scene->mRootNode) {
-    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "Assimp load error: {}\n",
-             modelimport.GetErrorString());
+  if (!m_scene || m_scene->mFlags & asim::SCENE_FLAGS_INCOMPLETE || !m_scene->mRootNode) {
+    utl::log(utl::CONSOLE_LOGS, utl::LGL_ERROR, "Assimp load error: {}\n", modelimport.GetErrorString());
     return;
   }
   m_directory = filePath.substr(0, filePath.find_last_of('/'));
@@ -118,8 +106,7 @@ void lgl::model::AssimpModel::processNode(aiNode* node, const aiScene* scene) {
   }
 }
 
-lgl::model::AssimpMesh lgl::model::AssimpModel::processMesh(
-    asim::aiMesh* mesh, const aiScene* scene) {
+lgl::model::AssimpMesh lgl::model::AssimpModel::processMesh(asim::aiMesh* mesh, const aiScene* scene) {
   std::vector<Vertex> vertices;
   std::vector<std::uint32_t> indices;
   std::vector<Texture> textures;
@@ -221,8 +208,7 @@ lgl::model::AssimpMesh lgl::model::AssimpModel::processMesh(
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
     auto addTexture = [&](aiTextureType type, const std::string& name) {
-      std::vector<Texture> typeTextures =
-          loadMaterialTextures(material, type, name);
+      std::vector<Texture> typeTextures = loadMaterialTextures(material, type, name);
       textures.insert(textures.end(), typeTextures.begin(), typeTextures.end());
     };
 
@@ -239,15 +225,14 @@ lgl::model::AssimpMesh lgl::model::AssimpModel::processMesh(
     addTexture(asim::TEX_TYPE_DIFFUSE_ROUGHNESS, "texture_diffuse_roughness");
     addTexture(asim::TEX_TYPE_AMBIENT_OCCLUSION, "texture_ambient_occlusion");
     addTexture(asim::TEX_TYPE_EMISSION_COLOR, "texture_emissive_color");
-    addTexture(asim::TEX_TYPE_GLTF_METALLIC_ROUGHNESS,
-               "texture_gltf_metallic_roughness");
+    addTexture(asim::TEX_TYPE_GLTF_METALLIC_ROUGHNESS, "texture_gltf_metallic_roughness");
   }
 
   return AssimpMesh(vertices, indices, textures, m_centerMeshes);
 }
 
-std::vector<lgl::Texture> lgl::model::AssimpModel::loadMaterialTextures(
-    asim::aiMaterial* mat, asim::aiTextureType type, const std::string& name) {
+std::vector<lgl::Texture> lgl::model::AssimpModel::loadMaterialTextures(asim::aiMaterial* mat, asim::aiTextureType type,
+                                                                        const std::string& name) {
   std::vector<Texture> textures;
   for (std::uint32_t i = 0; i < mat->GetTextureCount(type); i++) {
     asim::aiString str;
@@ -276,8 +261,7 @@ std::vector<lgl::Texture> lgl::model::AssimpModel::loadMaterialTextures(
         int index = std::atoi(&aiName[1]);
         asim::aiTexture* embeddedTexture = m_scene->mTextures[index];
         auto data = reinterpret_cast<std::byte*>(embeddedTexture->pcData);
-        texture.id = tex::TextureFromAssimpTexels(data, embeddedTexture->mWidth,
-                                                  embeddedTexture->mHeight);
+        texture.id = tex::TextureFromAssimpTexels(data, embeddedTexture->mWidth, embeddedTexture->mHeight);
       } else {
         texture.id = tex::TextureFromFile(path.c_str());
       }
@@ -289,8 +273,7 @@ std::vector<lgl::Texture> lgl::model::AssimpModel::loadMaterialTextures(
   return textures;
 }
 
-lgl::model::AssimpModel::AssimpModel(const std::string& path, bool centerMeshes,
-                                     bool loadTextures) {
+lgl::model::AssimpModel::AssimpModel(const std::string& path, bool centerMeshes, bool loadTextures) {
   m_centerMeshes = centerMeshes;
   m_loadTextures = loadTextures;
   loadModel(path);

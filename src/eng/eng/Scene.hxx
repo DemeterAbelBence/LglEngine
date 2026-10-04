@@ -53,12 +53,8 @@ class Scene {
   const std::unique_ptr<Camera>& getCamera() const { return m_camera; }
   void setMoveCamera(bool value) { m_moveCamera = value; }
   bool getMoveCamera() const { return m_moveCamera; }
-  const std::vector<std::shared_ptr<SceneObject>>& getSceneObjects() const {
-    return m_sceneObjects;
-  }
-  const std::shared_ptr<SceneObject>& getCurrentSceneObject() const {
-    return m_sceneObjects[m_objectIndex];
-  }
+  const std::vector<std::shared_ptr<SceneObject>>& getSceneObjects() const { return m_sceneObjects; }
+  const std::shared_ptr<SceneObject>& getCurrentSceneObject() const { return m_sceneObjects[m_objectIndex]; }
 
   void getNextObject();
   void setPrimitiveType(std::uint32_t type);
@@ -68,7 +64,6 @@ class Scene {
   void loadObjectStates(const std::string& path);
 
   virtual void readConfig(const utl::LglConf& lglConf) = 0;
-  virtual void create() = 0;
   virtual void draw() const = 0;
   virtual void update(GLFWwindow* window) = 0;
 };

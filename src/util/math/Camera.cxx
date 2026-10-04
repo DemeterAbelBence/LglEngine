@@ -51,9 +51,7 @@ glm::mat4 Camera::createViewMatrix() {
 
   float dot = glm::dot(dir, m_up);
   if (glm::abs(dot) > 0.9999f) {
-    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN,
-             "Camera direction and up vector are nearly parallel (dot = {})\n",
-             dot);
+    utl::log(utl::CONSOLE_LOGS, utl::LGL_WARN, "Camera direction and up vector are nearly parallel (dot = {})\n", dot);
   }
 
   glm::mat4 rotation;
@@ -125,9 +123,7 @@ void Camera::mouseUpdate() {
   Mouse::resetOffsets();
 }
 
-void Camera::moveForward(int sign) {
-  m_eye += m_direction * (Time::s_deltaTime * m_moveSpeed * sign);
-}
+void Camera::moveForward(int sign) { m_eye += m_direction * (Time::s_deltaTime * m_moveSpeed * sign); }
 
 void Camera::moveRight(int sign) {
   glm::vec3 dir = glm::normalize(m_direction);

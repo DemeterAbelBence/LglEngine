@@ -43,8 +43,7 @@ class Transformation {
 
   static glm::mat4 makeTranslationMatrix(glm::vec3 translation);
   static glm::mat4 makeScaleMatrix(glm::vec3 scaling);
-  static glm::mat4 makeRotationMatrix(glm::vec3 rotationAxis,
-                                      float rotationAngle);
+  static glm::mat4 makeRotationMatrix(glm::vec3 rotationAxis, float rotationAngle);
 
   void setTranslationMarix(glm::vec3 translation);
   void setRotationMarix(glm::vec3 rotationAxis, float rotationAngle);

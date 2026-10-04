@@ -1,6 +1,13 @@
 #include "CuboidCollider.hxx"
 
 namespace lgl {
+
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
 void CuboidCollider::createCorners() {
   baseData.points[0] = glm::vec3(-0.5f, -0.5f, 0.5f);
   baseData.points[1] = glm::vec3(0.5f, -0.5f, 0.5f);
@@ -15,8 +22,13 @@ void CuboidCollider::createCorners() {
   transData = baseData;
 }
 
-CuboidCollider::Side CuboidCollider::createSide(
-    const std::array<std::uint32_t, 4>& indices) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+CuboidCollider::Side CuboidCollider::createSide(const std::array<std::uint32_t, 4>& indices) const {
   std::array<glm::vec3, 4> points;
   glm::vec3 center = glm::nullvec;
   for (int i = 0; i < indices.size(); ++i) {
@@ -28,6 +40,12 @@ CuboidCollider::Side CuboidCollider::createSide(
   return {points, glm::normalize(center)};
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
 void CuboidCollider::createSides() {
   std::array<std::uint32_t, 4> sideIndices[6] = {{0, 1, 2, 3}, {4, 5, 6, 7},
 
@@ -41,10 +59,13 @@ void CuboidCollider::createSides() {
   }
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
-
-std::vector<glm::vec3> CuboidCollider::getEdgesOf(
-    const CuboidCollider& collider) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::vector<glm::vec3> CuboidCollider::getEdgesOf(const CuboidCollider& collider) const {
   auto p = collider.transData.points;
   std::vector<glm::vec3> edges;
 
@@ -78,9 +99,15 @@ std::vector<glm::vec3> CuboidCollider::getEdgesOf(
   return edges;
 }
 
-std::optional<Collider::ContactData> CuboidCollider::calculateEdgeIntersection(
-    glm::vec3 pa, glm::vec3 va, float a, glm::vec3 pb, glm::vec3 vb,
-    float b) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::optional<Collider::ContactData> CuboidCollider::calculateEdgeIntersection(glm::vec3 pa, glm::vec3 va, float a,
+                                                                               glm::vec3 pb, glm::vec3 vb,
+                                                                               float b) const {
   if (va == glm::nullvec || vb == glm::nullvec) {
     utl::logIf(false, utl::CONTACT_LOGS, utl::LGL_ERROR,
                "Edge direction vector is zero : va = ({:.2f}, {:.2f}, {:.2f}), "
@@ -91,7 +118,7 @@ std::optional<Collider::ContactData> CuboidCollider::calculateEdgeIntersection(
 
   glm::vec3 c = glm::cross(va, vb);
   float dist = glm::length(glm::dot(pb - pa, c)) / glm::length(c);
-  if (dist > edgeEdgeThreshold) {
+  if (dist > s_edgeEdgeThreshold) {
     return {};
   } else {
     float PA = glm::dot(pb, va) - glm::dot(pa, va);
@@ -126,8 +153,13 @@ std::optional<Collider::ContactData> CuboidCollider::calculateEdgeIntersection(
   }
 }
 
-std::vector<Collider::ContactData> CuboidCollider::edgeEdgeCollision(
-    const CuboidCollider& collidee) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::vector<Collider::ContactData> CuboidCollider::edgeEdgeCollision(const CuboidCollider& collidee) const {
   std::vector<Collider::ContactData> result;
   std::vector<glm::vec3> edgesA = getEdgesOf(*this);
   std::vector<glm::vec3> edgesB = getEdgesOf(collidee);
@@ -143,8 +175,7 @@ std::vector<Collider::ContactData> CuboidCollider::edgeEdgeCollision(
       vecA = glm::normalize(vecA);
       vecB = glm::normalize(vecB);
 
-      auto contact =
-          calculateEdgeIntersection(edgesA[i], vecA, a, edgesB[j], vecB, b);
+      auto contact = calculateEdgeIntersection(edgesA[i], vecA, a, edgesB[j], vecB, b);
       if (contact.has_value()) {
         contact->depth = calculateDepth(collidee, *contact);
         if (contact->depth.has_value()) {
@@ -157,12 +188,15 @@ std::vector<Collider::ContactData> CuboidCollider::edgeEdgeCollision(
   return result;
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
-
-bool CuboidCollider::calculateSideIntersection(glm::vec3 point,
-                                               const Side& side) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+bool CuboidCollider::calculateSideIntersection(glm::vec3 point, const Side& side) const {
   float arePerpendicular = glm::dot(side.normal, point - side.points[0]);
-  if (glm::abs(arePerpendicular) > vertexFaceThreshold) {
+  if (glm::abs(arePerpendicular) > s_vertexFaceThreshold) {
     return false;
   } else {
     std::vector<Edge> edges;
@@ -183,21 +217,25 @@ bool CuboidCollider::calculateSideIntersection(glm::vec3 point,
   }
 }
 
-std::vector<Collider::ContactData> CuboidCollider::vertexFaceCollision(
-    const CuboidCollider& collidee) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::vector<Collider::ContactData> CuboidCollider::vertexFaceCollision(const CuboidCollider& collidee) const {
   std::vector<Collider::ContactData> result;
 
   for (const Side& side : collidee.getTransData().sides) {
     for (const glm::vec3& point : transData.points) {
       if (calculateSideIntersection(point, side)) {
-        Collider::ContactData contact = {
-            .point = point,
-            .normal = side.normal,
-            .depth = {},
-            .isVertexFace = true,
-            .edgeA = {},
-            .edgeB = {},
-            .facePoint = calculateSideCenter(side)};
+        Collider::ContactData contact = {.point = point,
+                                         .normal = side.normal,
+                                         .depth = {},
+                                         .isVertexFace = true,
+                                         .edgeA = {},
+                                         .edgeB = {},
+                                         .facePoint = calculateSideCenter(side)};
         contact.depth = calculateDepth(collidee, contact);
         if (contact.depth.has_value()) {
           result.push_back(contact);
@@ -209,8 +247,12 @@ std::vector<Collider::ContactData> CuboidCollider::vertexFaceCollision(
   return result;
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
-
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
 CuboidCollider::CuboidCollider() {
   geomType = GeomType::C_CUBOID;
 
@@ -218,6 +260,12 @@ CuboidCollider::CuboidCollider() {
   createSides();
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
 CuboidCollider::CuboidCollider(const CuboidCollider& c) {
   geomType = c.geomType;
 
@@ -227,8 +275,13 @@ CuboidCollider::CuboidCollider(const CuboidCollider& c) {
   transformation = c.transformation->clone();
 }
 
-std::vector<glm::vec3> CuboidCollider::getSideDrawData(
-    std::uint32_t sideIndex) {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::vector<glm::vec3> CuboidCollider::getSideDrawData(std::uint32_t sideIndex) {
   std::vector<glm::vec3> result;
 
   auto side = transData.sides[sideIndex];
@@ -254,6 +307,12 @@ std::vector<glm::vec3> CuboidCollider::getSideDrawData(
   return result;
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
 glm::vec3 CuboidCollider::calculateSideCenter(const Side& side) const {
   glm::vec3 center = glm::nullvec;
   for (const auto& p : side.points) {
@@ -263,6 +322,12 @@ glm::vec3 CuboidCollider::calculateSideCenter(const Side& side) const {
   return center;
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
 void CuboidCollider::updateTransformations() {
   glm::mat4 M = transformation->makeModelMatrix();
   glm::mat4 MI = transformation->makeModelInverseMatrix();
@@ -273,34 +338,44 @@ void CuboidCollider::updateTransformations() {
 
   for (int i = 0; i < transData.sides.size(); ++i) {
     for (int j = 0; j < transData.sides[i].points.size(); ++j) {
-      glm::vec3 newPoint =
-          glm::vec3(glm::vec4(baseData.sides[i].points[j], 1.0f) * M);
+      glm::vec3 newPoint = glm::vec3(glm::vec4(baseData.sides[i].points[j], 1.0f) * M);
       transData.sides[i].points[j] = newPoint;
     }
-    transData.sides[i].normal =
-        glm::vec3(MI * glm::vec4(baseData.sides[i].normal, 0.0f));
+    transData.sides[i].normal = glm::vec3(MI * glm::vec4(baseData.sides[i].normal, 0.0f));
     transData.sides[i].normal = glm::normalize(transData.sides[i].normal);
   }
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - - - - - - - - - - - - - - //
-
-std::vector<Collider::ContactData> CuboidCollider::collidesWith(
-    const CuboidCollider& collidee) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::vector<Collider::ContactData> CuboidCollider::collidesWith(const CuboidCollider& collidee) const {
   auto edgeEdge = edgeEdgeCollision(collidee);
   auto vertexFace = vertexFaceCollision(collidee);
   edgeEdge.insert(edgeEdge.end(), vertexFace.begin(), vertexFace.end());
   return edgeEdge;
 }
 
-std::vector<Collider::ContactData> CuboidCollider::collidesWith(
-    const SphereCollider& collidee) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::vector<Collider::ContactData> CuboidCollider::collidesWith(const SphereCollider& collidee) const {
   return std::vector<ContactData>();
 }
 
-std::vector<Collider::ContactData> CuboidCollider::collidesWith(
-    const TerrainCollider& collidee) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::vector<Collider::ContactData> CuboidCollider::collidesWith(const TerrainCollider& collidee) const {
   std::vector<Collider::ContactData> result;
   glm::mat4 MI = collidee.getTransformation()->makeModelInverseMatrix();
   glm::mat4 M = collidee.getTransformation()->makeModelMatrix();
@@ -314,12 +389,8 @@ std::vector<Collider::ContactData> CuboidCollider::collidesWith(
     glm::vec3 ten = glm::vec3(MI * glm::vec4(en, 0.0f));
 
     if (tep.y > p.y) {
-      ContactData contact = {.point = p,
-                             .normal = glm::normalize(ten),
-                             .depth = {},
-                             .isVertexFace = true,
-                             .edgeA{},
-                             .edgeB{}};
+      ContactData contact = {
+          .point = p, .normal = glm::normalize(ten), .depth = {}, .isVertexFace = true, .edgeA{}, .edgeB{}};
 
       contact.depth = calculateDepth(collidee, contact);
       result.push_back(contact);
@@ -328,11 +399,14 @@ std::vector<Collider::ContactData> CuboidCollider::collidesWith(
   return result;
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - - - - - - - - - - - - - - //
-
-std::optional<glm::vec3> CuboidCollider::calculateDepth(
-    const CuboidCollider& collidee, const ContactData& contact) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::optional<glm::vec3> CuboidCollider::calculateDepth(const CuboidCollider& collidee,
+                                                        const ContactData& contact) const {
   if (contact.isVertexFace) {
     float faceDot = glm::dot(contact.point - contact.facePoint, contact.normal);
     if (faceDot >= 0.0f) {
@@ -343,28 +417,24 @@ std::optional<glm::vec3> CuboidCollider::calculateDepth(
   } else {
     // IS EDGE POINT A INSIDE COLLIDEE CUBOID
     bool isInsideCollidee = false;
-    glm::mat4 RT1 = collidee.getTransformation()->getR() *
-                    collidee.getTransformation()->getT();
+    glm::mat4 RT1 = collidee.getTransformation()->getR() * collidee.getTransformation()->getT();
     glm::mat4 RTI1 = glm::inverse(RT1);
     glm::vec3 edgePointA = contact.edgeA[0];
     edgePointA = glm::vec3(glm::vec4(edgePointA, 1.0f) * RTI1);
     glm::vec3 scaling1 = collidee.getTransformation()->getScaling();
-    if (glm::abs(edgePointA.x) < scaling1.x / 2.0f &&
-        glm::abs(edgePointA.y) < scaling1.y / 2.0f &&
+    if (glm::abs(edgePointA.x) < scaling1.x / 2.0f && glm::abs(edgePointA.y) < scaling1.y / 2.0f &&
         glm::abs(edgePointA.z) < scaling1.z / 2.0f) {
       isInsideCollidee = true;
     }
 
     // IS EDGE POINT B INSIDE COLLIDER CUBOID
     bool isInsideCollider = false;
-    glm::mat4 RT2 =
-        this->getTransformation()->getR() * this->getTransformation()->getT();
+    glm::mat4 RT2 = this->getTransformation()->getR() * this->getTransformation()->getT();
     glm::mat4 RTI2 = glm::inverse(RT2);
     glm::vec3 edgePointB = contact.edgeB[0];
     edgePointB = glm::vec3(glm::vec4(edgePointB, 1.0f) * RTI2);
     glm::vec3 scaling2 = this->getTransformation()->getScaling();
-    if (glm::abs(edgePointB.x) < scaling2.x / 2.0f &&
-        glm::abs(edgePointB.y) < scaling2.y / 2.0f &&
+    if (glm::abs(edgePointB.x) < scaling2.x / 2.0f && glm::abs(edgePointB.y) < scaling2.y / 2.0f &&
         glm::abs(edgePointB.z) < scaling2.z / 2.0f) {
       isInsideCollider = true;
     }
@@ -378,13 +448,25 @@ std::optional<glm::vec3> CuboidCollider::calculateDepth(
   }
 }
 
-std::optional<glm::vec3> CuboidCollider::calculateDepth(
-    const SphereCollider& collidee, const ContactData& contact) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::optional<glm::vec3> CuboidCollider::calculateDepth(const SphereCollider& collidee,
+                                                        const ContactData& contact) const {
   return {};
 }
 
-std::optional<glm::vec3> CuboidCollider::calculateDepth(
-    const TerrainCollider& collidee, const ContactData& contact) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::optional<glm::vec3> CuboidCollider::calculateDepth(const TerrainCollider& collidee,
+                                                        const ContactData& contact) const {
   glm::mat4 MI = collidee.getTransformation()->makeModelInverseMatrix();
   glm::mat4 M = collidee.getTransformation()->makeModelMatrix();
 

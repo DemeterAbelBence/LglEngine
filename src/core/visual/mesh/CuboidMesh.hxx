@@ -27,8 +27,7 @@ class CuboidMesh final : public Mesh {
  public:
   CuboidMesh();
   glm::vec3 calculateCenter() const;
-  void setResources(std::shared_ptr<GpuProgram> program,
-                    std::shared_ptr<Material> material,
+  void setResources(std::shared_ptr<GpuProgram> program, std::shared_ptr<Material> material,
                     const std::vector<std::shared_ptr<Texture>>& textures);
 
   void create() override;

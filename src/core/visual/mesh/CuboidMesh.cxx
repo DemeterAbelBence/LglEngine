@@ -40,9 +40,8 @@ void CuboidMesh::setBufferData(const void* data, std::uint32_t size) {
   m_vertexArray->addBuffer(*m_vertexBuffer, *m_vertexBufferLayout);
 }
 
-void CuboidMesh::setResources(
-    std::shared_ptr<GpuProgram> program, std::shared_ptr<Material> material,
-    const std::vector<std::shared_ptr<Texture>>& textures) {
+void CuboidMesh::setResources(std::shared_ptr<GpuProgram> program, std::shared_ptr<Material> material,
+                              const std::vector<std::shared_ptr<Texture>>& textures) {
   m_program = program;
   m_material = material;
   for (auto texture : textures) {
@@ -72,8 +71,7 @@ void CuboidMesh::create() {
   createSide({0, 1, 5, 4});
   createSide({3, 2, 6, 7});
 
-  setBufferData((const void*)&m_vertexData[0],
-                m_vertexData.size() * sizeof(VertexData));
+  setBufferData((const void*)&m_vertexData[0], m_vertexData.size() * sizeof(VertexData));
 }
 
 void CuboidMesh::draw(const Camera& camera) const {

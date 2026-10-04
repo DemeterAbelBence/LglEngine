@@ -18,8 +18,7 @@ std::string GpuProgram::shaderTypeToString(std::uint32_t type) {
   }
 }
 
-void GpuProgram::displayShaderCompilationResult(std::uint32_t type,
-                                                std::uint32_t id) {
+void GpuProgram::displayShaderCompilationResult(std::uint32_t type, std::uint32_t id) {
   std::int32_t result;
   glGetShaderiv(id, GL_COMPILE_STATUS, &result);
 
@@ -29,18 +28,17 @@ void GpuProgram::displayShaderCompilationResult(std::uint32_t type,
     char* message = new char[length];
     glGetShaderInfoLog(id, length, &length, message);
 
-    utl::logIf(m_logShaderCompilation, utl::GENERAL_LOGS, utl::LGL_ERROR, "Failed to compile {} at path {}\n{}",
-             shaderTypeToString(type), m_shaders[type].m_path, message);
+    utl::logIf(m_logShaderCompilation, utl::CONSOLE_LOGS, utl::LGL_ERROR, "Failed to compile {} at path {}\n{}",
+               shaderTypeToString(type), m_shaders[type].m_path, message);
 
     delete[] message;
   } else if (result == GL_TRUE) {
-    utl::logIf(m_logShaderCompilation, utl::GENERAL_LOGS, utl::LGL_OK, "Successful {} compilation!\n",
-             shaderTypeToString(type));
+    utl::logIf(m_logShaderCompilation, utl::CONSOLE_LOGS, utl::LGL_OK, "Successful {} compilation!\n",
+               shaderTypeToString(type));
   }
 }
 
-std::uint32_t GpuProgram::compileShaderSource(std::uint32_t type,
-                                              const std::string& source) {
+std::uint32_t GpuProgram::compileShaderSource(std::uint32_t type, const std::string& source) {
   std::uint32_t id = glCreateShader(type);
   const char* src = source.c_str();
   glShaderSource(id, 1, &src, nullptr);
@@ -51,8 +49,7 @@ std::uint32_t GpuProgram::compileShaderSource(std::uint32_t type,
   return id;
 }
 
-void GpuProgram::readShaderSource(std::string& shader,
-                                  const std::string& filePath) {
+void GpuProgram::readShaderSource(std::string& shader, const std::string& filePath) {
   try {
     shader = utl::readFileToString(filePath);
   } catch (const std::exception& error) {
@@ -83,16 +80,15 @@ void GpuProgram::createProgram(bool logShaderCompilation) {
   glDeleteProgram(m_programId);
   std::uint32_t id = glCreateProgram();
 
-  utl::logIf(m_logShaderCompilation, utl::GENERAL_LOGS, utl::LGL_INFO, "Compilation result of {}:\n", m_programName);
+  utl::logIf(m_logShaderCompilation, utl::CONSOLE_LOGS, utl::LGL_INFO, "Compilation result of {}:\n", m_programName);
   std::vector<std::uint32_t> shaderIds;
   for (const auto& shader : m_shaders) {
     if (!shader.second.empty()) {
-      std::uint32_t shaderId =
-          compileShaderSource(shader.first, shader.second.m_source);
+      std::uint32_t shaderId = compileShaderSource(shader.first, shader.second.m_source);
       shaderIds.push_back(shaderId);
     }
   }
-  utl::logIf(m_logShaderCompilation, utl::GENERAL_LOGS, utl::LGL_EMPTY, "\n");
+  utl::logIf(m_logShaderCompilation, utl::CONSOLE_LOGS, utl::LGL_EMPTY, "\n");
 
   for (std::uint32_t shaderId : shaderIds) {
     glAttachShader(id, shaderId);
@@ -111,14 +107,12 @@ void GpuProgram::createProgram(bool logShaderCompilation) {
 void GpuProgram::addShader(std::uint32_t type, const std::string& filePath) {
   try {
     if (m_shaders.find(type) == m_shaders.end()) {
-      throw std::runtime_error(
-          std::format("Not available shader type: {}", type));
+      throw std::runtime_error(std::format("Not available shader type: {}", type));
     }
 
     std::string& shaderSource = m_shaders[type].m_source;
     shaderSource = utl::readFileToString(filePath);
-    m_shaders[type].m_hash =
-        m_hasher.hash(shaderSource.c_str(), shaderSource.size(), 0);
+    m_shaders[type].m_hash = m_hasher.hash(shaderSource.c_str(), shaderSource.size(), 0);
     m_shaders[type].m_path = filePath;
   } catch (const std::exception& error) {
     throw error;
@@ -136,8 +130,7 @@ void GpuProgram::handleShaderSourceChange() {
       } catch (const std::exception& error) {
         return;
       }
-      std::uint64_t newHash =
-          m_hasher.hash(newSource.c_str(), newSource.size(), 0);
+      std::uint64_t newHash = m_hasher.hash(newSource.c_str(), newSource.size(), 0);
       if (newHash != shader.second.m_hash) {
         shader.second.m_source = newSource;
         shader.second.m_hash = newHash;
@@ -158,14 +151,12 @@ void GpuProgram::setVec3(const std::string& name, glm::vec3 value) const {
   glUniform3fv(glGetUniformLocation(m_programId, name.c_str()), 1, &value[0]);
 }
 
-void GpuProgram::setVec3(const std::string& name, float x, float y,
-                         float z) const {
+void GpuProgram::setVec3(const std::string& name, float x, float y, float z) const {
   glUniform3f(glGetUniformLocation(m_programId, name.c_str()), x, y, z);
 }
 
 void GpuProgram::setMat4(const std::string& name, glm::mat4 mat) const {
-  glUniformMatrix4fv(glGetUniformLocation(m_programId, name.c_str()), 1,
-                     GL_FALSE, &mat[0][0]);
+  glUniformMatrix4fv(glGetUniformLocation(m_programId, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
 void GpuProgram::setFloat(const std::string& name, float value) const {

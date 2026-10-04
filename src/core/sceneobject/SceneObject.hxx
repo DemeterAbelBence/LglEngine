@@ -12,16 +12,22 @@ import std;
 #include <visual/mesh/Mesh.hxx>
 #include <visual/mesh/ModelMesh.hxx>
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
 namespace lgl {
 class SceneObject {
  protected:
-  std::shared_ptr<Mesh> m_mesh;
-  std::shared_ptr<Collider> m_collider;
-  std::shared_ptr<ribo::PhysicsSolver> m_physicsSolver;
-  std::shared_ptr<Transformation> m_transformation;
+  std::shared_ptr<Mesh> m_mesh;                          ///< lorem ipsum
+  std::shared_ptr<Collider> m_collider;                  ///< lorem ipsum
+  std::shared_ptr<ribo::PhysicsSolver> m_physicsSolver;  ///< lorem ipsum
+  std::shared_ptr<Transformation> m_transformation;      ///< lorem ipsum
 
  private:
-  std::string m_name;
+  std::string m_name;  ///< lorem ipsum
 
  public:
   SceneObject();
@@ -29,12 +35,8 @@ class SceneObject {
 
   const std::shared_ptr<Mesh>& getMesh() const { return m_mesh; }
   const std::shared_ptr<Collider>& getCollider() const { return m_collider; }
-  const std::shared_ptr<ribo::PhysicsSolver>& getPhysicsSolver() const {
-    return m_physicsSolver;
-  }
-  const std::shared_ptr<Transformation>& getTransformation() const {
-    return m_transformation;
-  }
+  const std::shared_ptr<ribo::PhysicsSolver>& getPhysicsSolver() const { return m_physicsSolver; }
+  const std::shared_ptr<Transformation>& getTransformation() const { return m_transformation; }
   const std::string getName() const { return m_name; }
 
   void setMesh(std::shared_ptr<Mesh> mesh) { m_mesh = mesh; }
@@ -48,12 +50,11 @@ class SceneObject {
   void setRotation(glm::mat4 R);
   void updateTransformations();
 
-  virtual std::shared_ptr<SceneObject> clone();
-  virtual ribo::BodyData initializePhysics();
-  virtual void updateRigidBody();
+  virtual std::shared_ptr<SceneObject> clone() { return std::shared_ptr<SceneObject>(); }
+  virtual ribo::BodyData initializePhysics() { return ribo::BodyData{}; }
+  virtual void updateRigidBody() {}
   virtual void stepPhysicsBy(float dt);
   virtual void draw(const Camera& camera) const;
-  virtual void handleLighting(const Light& light, const FrameBuffer& depthMap,
-                              const glm::mat4& L);
+  virtual void handleLighting(const Light& light, const FrameBuffer& depthMap, const glm::mat4& L);
 };
 }  // namespace lgl

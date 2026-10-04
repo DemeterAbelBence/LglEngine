@@ -63,8 +63,7 @@ std::string debugSeverityToString(GLenum severity) {
 }
 
 // Use APIENTRY to match GLDEBUGPROC on Windows
-void APIENTRY outputDebugMessage(GLenum source, GLenum type, GLuint id,
-                                 GLenum severity, GLsizei length,
+void APIENTRY outputDebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                  const GLchar* message, const void* userParam) {
   // Ignore notifications if they are disabled by the control, but be safe here
   if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
@@ -93,9 +92,8 @@ void APIENTRY outputDebugMessage(GLenum source, GLenum type, GLuint id,
   unsigned long long msgId = static_cast<unsigned long long>(id);
   std::string msgText = message ? std::string(message) : std::string("(null)");
 
-  utl::log(utl::GENERAL_LOGS, logLevel,
-      "OpenGL Debug message (id={}): {}\nSource: {}\nType: {}\nSeverity: {}\n",
-      msgId, msgText, src, tp, sev);
+  utl::log(utl::CONSOLE_LOGS, logLevel, "OpenGL Debug message (id={}): {}\nSource: {}\nType: {}\nSeverity: {}\n", msgId,
+           msgText, src, tp, sev);
 }
 
 void initializeDebugContext() {
@@ -105,8 +103,7 @@ void initializeDebugContext() {
   if (context_flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE,
-                          GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
     glDebugMessageCallback(lgl::outputDebugMessage, nullptr);
   }
 }
@@ -116,16 +113,14 @@ void displayOpenGlInfo() {
   glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
   glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
 
-  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO, "GL Vendor    : {}\n",
+  utl::log(utl::CONSOLE_LOGS, utl::LGL_INFO, "GL Vendor    : {}\n",
            reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
-  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO, "GL Renderer  : {}\n",
+  utl::log(utl::CONSOLE_LOGS, utl::LGL_INFO, "GL Renderer  : {}\n",
            reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
-  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO, "GL Version (string)  : {}\n",
+  utl::log(utl::CONSOLE_LOGS, utl::LGL_INFO, "GL Version (string)  : {}\n",
            reinterpret_cast<const char*>(glGetString(GL_VERSION)));
-  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO, "GL Version (integer) : {}.{}\n", majorVersion,
-           minorVersion);
-  utl::log(
-      utl::GENERAL_LOGS, utl::LGL_INFO, "GLSL Version : {}\n\n",
-      reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+  utl::log(utl::CONSOLE_LOGS, utl::LGL_INFO, "GL Version (integer) : {}.{}\n", majorVersion, minorVersion);
+  utl::log(utl::CONSOLE_LOGS, utl::LGL_INFO, "GLSL Version : {}\n\n",
+           reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
 }
 }  // namespace lgl

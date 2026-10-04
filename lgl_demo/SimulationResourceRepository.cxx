@@ -85,8 +85,8 @@ void lgl::SimulationResourceRepository::initializeResources() {
     m_buffers["DEPTH"] =
         std::make_shared<FrameBuffer>("DEPTH_MAP", 800, 800, GL_DEPTH_COMPONENT24, GL_FLOAT, GL_DEPTH_COMPONENT);
   } catch (const std::exception& error) {
-    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "Simulation resource exception: {}\n", error.what());
+    utl::log(utl::CONSOLE_LOGS, utl::LGL_ERROR, "Simulation resource exception: {}\n", error.what());
   } catch (...) {
-    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "Simulation resource exception\n");
+    utl::log(utl::CONSOLE_LOGS, utl::LGL_ERROR, "Simulation resource exception\n");
   }
 }

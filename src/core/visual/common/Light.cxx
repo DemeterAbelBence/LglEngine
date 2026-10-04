@@ -8,8 +8,7 @@ glm::mat4 makeLightProjection(float nearPlane, float farPlane) {
 
 glm::mat4 makeLightView(const glm::vec3& lightPos, const glm::vec3& lightDir) {
   glm::vec3 dir = glm::normalize(lightDir);
-  glm::vec3 right =
-      glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), dir));
+  glm::vec3 right = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), dir));
   glm::vec3 up = glm::normalize(glm::cross(dir, right));
 
   glm::mat4 rotation;

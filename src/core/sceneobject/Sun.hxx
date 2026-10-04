@@ -18,8 +18,6 @@ class Sun : public SceneObject {
   Sun(float radius, glm::vec3 powerDensity);
   const std::unique_ptr<Light>& getLight() const { return m_light; }
   void directPerspectiveOf(Camera& camera);
-  void lightUpScene(
-      const std::vector<std::shared_ptr<SceneObject>>& sceneObjects,
-      const FrameBuffer& depthMap);
+  void lightUpScene(const std::vector<std::shared_ptr<SceneObject>>& sceneObjects, const FrameBuffer& depthMap);
 };
 }  // namespace lgl

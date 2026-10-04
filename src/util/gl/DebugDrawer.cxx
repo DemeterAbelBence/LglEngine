@@ -2,27 +2,27 @@
 
 namespace lgl {
 void DebugDrawer::initProgram() {
-  m_program = std::make_shared<GpuProgram>("DEBUG SHADER");
-  m_program->addShader(GL_FRAGMENT_SHADER, std::format("{}/shaders/basic/debug-frag.glsl", utl::lglResourceFolder));
-  m_program->addShader(GL_VERTEX_SHADER, std::format("{}/shaders/basic/debug-vert.glsl", utl::lglResourceFolder));
-  m_program->createProgram();
+  s_program = std::make_shared<GpuProgram>("DEBUG SHADER");
+  s_program->addShader(GL_FRAGMENT_SHADER, std::format("{}/shaders/basic/debug-frag.glsl", utl::lglResourceFolder));
+  s_program->addShader(GL_VERTEX_SHADER, std::format("{}/shaders/basic/debug-vert.glsl", utl::lglResourceFolder));
+  s_program->createProgram();
 }
 
 void DebugDrawer::setVertexData(const std::vector<glm::vec3>& vertexData) {
-  m_vertexData.clear();
-  m_vertexData = vertexData;
+  s_vertexData.clear();
+  s_vertexData = vertexData;
 }
 
 void DebugDrawer::draw(glm::mat4 V, glm::mat4 P, glm::vec3 color) {
-  if (m_vertexData.size() == 0) {
+  if (s_vertexData.size() == 0) {
     return;
   }
 
-  m_program->bind();
-  m_program->setMat4("V", V);
-  m_program->setMat4("P", P);
-  m_program->setVec3("color", color);
-  m_program->setInt("overrideZ", m_overrideZ);
+  s_program->bind();
+  s_program->setMat4("V", V);
+  s_program->setMat4("P", P);
+  s_program->setVec3("color", color);
+  s_program->setInt("overrideZ", s_overrideZ);
 
   std::uint32_t vertexArrayId;
   glGenVertexArrays(1, &vertexArrayId);
@@ -31,20 +31,20 @@ void DebugDrawer::draw(glm::mat4 V, glm::mat4 P, glm::vec3 color) {
   std::uint32_t vertexBufferId;
   glGenBuffers(1, &vertexBufferId);
   glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-  glBufferData(GL_ARRAY_BUFFER, m_vertexData.size() * sizeof(glm::vec3),
-               (const void*)&m_vertexData[0], GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, s_vertexData.size() * sizeof(glm::vec3), (const void*)&s_vertexData[0],
+               GL_DYNAMIC_DRAW);
 
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, false, 12, 0);
 
-  if (m_mode == GL_POINTS) {
+  if (s_mode == GL_POINTS) {
     glPointSize(10.0f);
   }
-  if (m_mode == GL_LINES) {
+  if (s_mode == GL_LINES) {
     glLineWidth(2.0f);
   }
 
-  glDrawArrays(m_mode, 0, m_vertexData.size());
+  glDrawArrays(s_mode, 0, s_vertexData.size());
 
   glDeleteBuffers(1, &vertexBufferId);
   glDeleteVertexArrays(1, &vertexArrayId);

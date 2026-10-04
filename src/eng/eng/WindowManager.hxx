@@ -14,7 +14,7 @@ class WindowManager {
  private:
   GLFWwindow* m_mainWindow;
 
-  const char* m_mainWindowName;
+  std::string m_mainWindowName;
   std::uint32_t m_mainWindowWidth;
   std::uint32_t m_mainWindowHeight;
   std::uint32_t m_sceneWidth;
@@ -29,7 +29,7 @@ class WindowManager {
   void renderUserInterface();
 
  public:
-  WindowManager(const char* mainWindowName, std::uint32_t mainWindowWidth,
+  WindowManager(const std::string& mainWindowName, std::uint32_t mainWindowWidth,
                 std::uint32_t mainWindowHeight, std::uint32_t sceneWidth,
                 std::uint32_t sceneHeight);
 
@@ -37,15 +37,13 @@ class WindowManager {
 
   template <typename U, typename V>
   void defineLayout(const std::string& configName) {
-    try {
-      m_scene = std::make_shared<U>();
-      m_scene->create();
+    m_scene = std::make_shared<U>();
+    m_userInterface = std::make_shared<V>(m_mainWindow, m_scene);
 
-      m_userInterface = std::make_shared<V>(m_mainWindow, m_scene);
-
-      readConfig(configName);
-    } catch (const std::exception& error) {
-      throw error;
+    if (!configName.empty()) {
+      std::string configPath = std::format("{}\\config\\{}", utl::lglResourceFolder, configName);
+      utl::currentLglConf = utl::readLglConfFromFile(configPath);
+      m_scene->readConfig(utl::currentLglConf);
     }
   }
 

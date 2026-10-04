@@ -27,9 +27,7 @@ class VertexBufferLayout {
  public:
   VertexBufferLayout();
   std::uint32_t getStride() const { return m_stride; }
-  const std::vector<VertexBufferElement>& getElements() const {
-    return m_elements;
-  }
+  const std::vector<VertexBufferElement>& getElements() const { return m_elements; }
   void push(std::uint32_t type, std::uint32_t count);
 };
 }  // namespace lgl

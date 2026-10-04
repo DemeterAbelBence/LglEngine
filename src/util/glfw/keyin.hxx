@@ -47,8 +47,7 @@ class KeyEvent {
 };
 
 template <typename C, typename A>
-inline KeyEvent<C, A>::KeyEvent(Key key, void (C::*operation)(A), A arg,
-                                bool onRelease) {
+inline KeyEvent<C, A>::KeyEvent(Key key, void (C::*operation)(A), A arg, bool onRelease) {
   m_key = key;
   m_argOperation = operation;
   m_operation = nullptr;
@@ -57,8 +56,7 @@ inline KeyEvent<C, A>::KeyEvent(Key key, void (C::*operation)(A), A arg,
 }
 
 template <typename C, typename A>
-inline KeyEvent<C, A>::KeyEvent(Key key, void (C::*operation)(void),
-                                bool onRelease) {
+inline KeyEvent<C, A>::KeyEvent(Key key, void (C::*operation)(void), bool onRelease) {
   m_key = key;
   m_argOperation = nullptr;
   m_operation = operation;

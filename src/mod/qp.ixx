@@ -47,22 +47,15 @@ void setFromFloatAt(Eigen::MatrixXd& matrix, int row, int col, float value) {
   matrix(row, col) = static_cast<double>(value);
 }
 
-float getAsFloatAt(const Eigen::MatrixXd& matrix, int row, int col) {
-  return static_cast<float>(matrix(row, col));
-}
+float getAsFloatAt(const Eigen::MatrixXd& matrix, int row, int col) { return static_cast<float>(matrix(row, col)); }
 
-void setFromFloatAt(Eigen::VectorXd& vector, int index, float value) {
-  vector(index) = static_cast<double>(value);
-}
+void setFromFloatAt(Eigen::VectorXd& vector, int index, float value) { vector(index) = static_cast<double>(value); }
 
-float getAsFloatAt(const Eigen::VectorXd& vector, int index) {
-  return static_cast<float>(vector(index));
-}
+float getAsFloatAt(const Eigen::VectorXd& vector, int index) { return static_cast<float>(vector(index)); }
 }  // namespace eig
 
 export namespace qp {
-Eigen::SparseMatrix<double> denseToSparseUpperSymmetric(
-    const Eigen::MatrixXd& dense) {
+Eigen::SparseMatrix<double> denseToSparseUpperSymmetric(const Eigen::MatrixXd& dense) {
   const int n = static_cast<int>(dense.rows());
 
   std::vector<Eigen::Triplet<double>> triplets;
@@ -83,14 +76,12 @@ Eigen::SparseMatrix<double> denseToSparseUpperSymmetric(
   return sparse;
 }
 
-bool solveBaraffContactForces(const Eigen::MatrixXd& contactA,
-                              const Eigen::VectorXd& contactB,
+bool solveBaraffContactForces(const Eigen::MatrixXd& contactA, const Eigen::VectorXd& contactB,
                               Eigen::VectorXd& outForces) {
   const int n = static_cast<int>(contactB.size());
 
   if (contactA.rows() != n || contactA.cols() != n) {
-    utl::log(utl::CONTACT_LOGS, utl::LGL_WARN,
-             "Invalid contact matrix size: expected {}x{}, got {}x{}.", n, n,
+    utl::log(utl::CONTACT_LOGS, utl::LGL_WARN, "Invalid contact matrix size: expected {}x{}, got {}x{}.", n, n,
              contactA.rows(), contactA.cols());
     return false;
   }

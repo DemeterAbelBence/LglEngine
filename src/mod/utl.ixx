@@ -35,64 +35,60 @@ std::string readFileToString(const std::string& filePath) {
   return result;
 }
 
-struct LglConf {
-  std::unordered_map<std::string, std::string> stringConfigs;
-  std::unordered_map<std::string, bool> booleanConfigs;
-  std::unordered_map<std::string, float> floatConfigs;
-  std::unordered_map<std::string, int> intConfigs;
+class LglConf {
+ public:
+  std::unordered_map<std::string, std::string> m_stringConfigs;
+  std::unordered_map<std::string, bool> m_booleanConfigs;
+  std::unordered_map<std::string, float> m_floatConfigs;
+  std::unordered_map<std::string, int> m_intConfigs;
+
+  public:
+  bool getBooleanConfig(const std::string& key) const {
+    auto it = m_booleanConfigs.find(key);
+    if (it != m_booleanConfigs.end()) {
+      return it->second;
+    }
+    throw std::out_of_range(std::string("Boolean config key not found: ") + key);
+  }
+
+  std::string getStringConfig(const std::string& key) const {
+    auto it = m_stringConfigs.find(key);
+    if (it != m_stringConfigs.end()) {
+      return it->second;
+    }
+    throw std::out_of_range(std::string("String config key not found: ") + key);
+  }
+
+  float getFloatConfig(const std::string& key) const {
+    auto it = m_floatConfigs.find(key);
+    if (it != m_floatConfigs.end()) {
+      return it->second;
+    }
+    throw std::out_of_range(std::string("Float config key not found: ") + key);
+  }
+
+  int getIntConfig(const std::string& key) const {
+    auto it = m_intConfigs.find(key);
+    if (it != m_intConfigs.end()) {
+      return it->second;
+    }
+    throw std::out_of_range(std::string("Int config key not found: ") + key);
+  }
 };
 
 LglConf currentLglConf;
-
-bool getCurrentBooleanConfig(const std::string& key) {
-  auto it = currentLglConf.booleanConfigs.find(key);
-  if (it != currentLglConf.booleanConfigs.end()) {
-    return it->second;
-  }
-  throw std::out_of_range(std::string("Boolean config key not found: ") + key);
-}
-
-std::string getCurrentStringConfig(const std::string& key) {
-  auto it = currentLglConf.stringConfigs.find(key);
-  if (it != currentLglConf.stringConfigs.end()) {
-    return it->second;
-  }
-  throw std::out_of_range(std::string("String config key not found: ") + key);
-}
-
-float getCurrentFloatConfig(const std::string& key) {
-  auto it = currentLglConf.floatConfigs.find(key);
-  if (it != currentLglConf.floatConfigs.end()) {
-    return it->second;
-  }
-  throw std::out_of_range(std::string("Float config key not found: ") + key);
-}
-
-int getCurrentIntConfig(const std::string& key) {
-  auto it = currentLglConf.intConfigs.find(key);
-  if (it != currentLglConf.intConfigs.end()) {
-    return it->second;
-  }
-  throw std::out_of_range(std::string("Int config key not found: ") + key);
-}
 
 LglConf readLglConfFromFile(const std::string& filePath) {
   LglConf conf;
 
   std::ifstream stream(filePath);
   if (!stream.is_open()) {
-    throw std::runtime_error(std::string("Failed to open config file: ") +
-                             filePath);
+    throw std::runtime_error(std::string("Failed to open config file: ") + filePath);
   }
 
   auto trim = [](std::string& s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
-              return !std::isspace(ch);
-            }));
-    s.erase(std::find_if(s.rbegin(), s.rend(),
-                         [](unsigned char ch) { return !std::isspace(ch); })
-                .base(),
-            s.end());
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
   };
 
   std::string line;
@@ -118,21 +114,18 @@ LglConf readLglConfFromFile(const std::string& filePath) {
 
     try {
       if (type == "string") {
-        conf.stringConfigs.emplace(key, value);
+        conf.m_stringConfigs.emplace(key, value);
       } else if (type == "bool") {
         bool v = false;
-        if (value == "1" || value == "true" || value == "True" ||
-            value == "TRUE")
-          v = true;
-        conf.booleanConfigs.emplace(key, v);
+        if (value == "1" || value == "true" || value == "True" || value == "TRUE") v = true;
+        conf.m_booleanConfigs.emplace(key, v);
       } else if (type == "float") {
-        if (!value.empty() && (value.back() == 'f' || value.back() == 'F'))
-          value.pop_back();
+        if (!value.empty() && (value.back() == 'f' || value.back() == 'F')) value.pop_back();
         float f = std::stof(value);
-        conf.floatConfigs.emplace(key, f);
+        conf.m_floatConfigs.emplace(key, f);
       } else if (type == "int") {
         int i = std::stoi(value);
-        conf.intConfigs.emplace(key, i);
+        conf.m_intConfigs.emplace(key, i);
       }
     } catch (const std::exception&) {
       continue;
@@ -167,8 +160,7 @@ std::string findFolder(const std::string& folderName) {
 
   for (std::filesystem::path dir = exeDir;;) {
     std::filesystem::path candidate = dir / folderName;
-    if (std::filesystem::exists(candidate) &&
-        std::filesystem::is_directory(candidate)) {
+    if (std::filesystem::exists(candidate) && std::filesystem::is_directory(candidate)) {
       return std::filesystem::absolute(candidate).string();
     }
 
@@ -195,15 +187,9 @@ std::uint64_t makePointerPairHash(T* ptr1, T* ptr2) {
 
 enum LogLevel { LGL_INFO, LGL_WARN, LGL_ERROR, LGL_OK, LGL_EMPTY };
 
-enum LogColor {
-  LC_DEFAULT = 7,
-  LC_RED = 12,
-  LC_YELLOW = 14,
-  LC_GREEN = 10,
-  LC_CYAN = 11
-};
+enum LogColor { LC_DEFAULT = 7, LC_RED = 12, LC_YELLOW = 14, LC_GREEN = 10, LC_CYAN = 11 };
 
-enum LogMode { BISECTION_LOGS, CONTACT_LOGS, PHYSICS_LOGS, GENERAL_LOGS };
+enum LogMode { BISECTION_LOGS, CONTACT_LOGS, PHYSICS_LOGS, CONSOLE_LOGS };
 
 inline bool consoleInitialized = false;
 #ifdef _WIN32
@@ -212,7 +198,7 @@ inline HANDLE hConsole = INVALID_HANDLE_VALUE;
 
 inline bool enableSimulationLogging = false;
 inline std::string simLogFileName;
-inline LogMode currentLogMode = GENERAL_LOGS;
+inline LogMode currentLogMode = CONSOLE_LOGS;
 inline const std::string lglStartTime = []() {
   std::time_t t = std::time(nullptr);
   std::tm tm{};
@@ -236,8 +222,7 @@ inline void enableAnsiColors() {
     }
     consoleInitialized = true;
   } else {
-    throw std::runtime_error(
-        "Failed to get console handle for ANSI color support.");
+    throw std::runtime_error("Failed to get console handle for ANSI color support.");
   }
 #endif
 }
@@ -260,7 +245,7 @@ inline std::string ansiColorCode(LogColor color) {
 inline void setLogMode(LogMode logMode) {
   currentLogMode = logMode;
 
-  if (logMode == GENERAL_LOGS) {
+  if (logMode == CONSOLE_LOGS) {
     return;
   }
 
@@ -282,20 +267,16 @@ inline void setLogMode(LogMode logMode) {
   }
 
   CreateDirectoryA(std::format("{}/logs", lglOutFolder).c_str(), nullptr);
-  CreateDirectoryA(std::format("{}/logs/{}", lglOutFolder, folderName).c_str(),
-                   nullptr);
+  CreateDirectoryA(std::format("{}/logs/{}", lglOutFolder, folderName).c_str(), nullptr);
 
-  simLogFileName = std::format("{}/logs/{}/{}{}", lglOutFolder, folderName,
-                               fileName, lglStartTime);
+  simLogFileName = std::format("{}/logs/{}/{}{}", lglOutFolder, folderName, fileName, lglStartTime);
 }
 
 template <typename... Args>
-inline void log(LogMode logMode, LogLevel level,
-                std::format_string<Args...> formatString, Args&&... args) {
+inline void log(LogMode logMode, LogLevel level, std::format_string<Args...> formatString, Args&&... args) {
   setLogMode(logMode);
 
-  std::string formattedMsg =
-      std::format(formatString, std::forward<Args>(args)...);
+  std::string formattedMsg = std::format(formatString, std::forward<Args>(args)...);
 
   std::string levelStr;
   LogColor color = LC_DEFAULT;
@@ -321,16 +302,7 @@ inline void log(LogMode logMode, LogLevel level,
       break;
   }
 
-  if (currentLogMode != GENERAL_LOGS && enableSimulationLogging) {
-    FILE* file = nullptr;
-    fopen_s(&file, simLogFileName.c_str(), "a");
-    if (file) {
-      fputs(levelStr.c_str(), file);
-      fputs(formattedMsg.c_str(), file);
-      fclose(file);
-    }
-    return;
-  } else {
+  if (currentLogMode == CONSOLE_LOGS) {
     enableAnsiColors();
 #ifdef _WIN32
     SetConsoleTextAttribute(hConsole, color);
@@ -339,12 +311,21 @@ inline void log(LogMode logMode, LogLevel level,
 #ifdef _WIN32
     SetConsoleTextAttribute(hConsole, LC_DEFAULT);
 #endif
+  } else {
+    if (enableSimulationLogging) {
+      FILE* file = nullptr;
+      fopen_s(&file, simLogFileName.c_str(), "a");
+      if (file) {
+        fputs(levelStr.c_str(), file);
+        fputs(formattedMsg.c_str(), file);
+        fclose(file);
+      }
+    }
   }
 }
 
 template <typename... Args>
-inline void logIf(bool enable, LogMode mode, LogLevel level,
-                  std::format_string<Args...> formatString, Args&&... args) {
+inline void logIf(bool enable, LogMode mode, LogLevel level, std::format_string<Args...> formatString, Args&&... args) {
   if (enable) {
     log(mode, level, formatString, std::forward<Args>(args)...);
   }

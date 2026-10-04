@@ -47,21 +47,16 @@ std::shared_ptr<Transformation> Transformation::clone() {
 }
 
 glm::mat4 Transformation::makeTranslationMatrix(glm::vec3 translation) {
-  return glm::mat4(glm::vec4(1.0f, 0.0f, 0.0f, translation.x),
-                   glm::vec4(0.0f, 1.0f, 0.0f, translation.y),
-                   glm::vec4(0.0f, 0.0f, 1.0f, translation.z),
-                   glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+  return glm::mat4(glm::vec4(1.0f, 0.0f, 0.0f, translation.x), glm::vec4(0.0f, 1.0f, 0.0f, translation.y),
+                   glm::vec4(0.0f, 0.0f, 1.0f, translation.z), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 glm::mat4 Transformation::makeScaleMatrix(glm::vec3 scaling) {
-  return glm::mat4(glm::vec4(scaling.x, 0.0f, 0.0f, 0.0f),
-                   glm::vec4(0.0f, scaling.y, 0.0f, 0.0f),
-                   glm::vec4(0.0f, 0.0f, scaling.z, 0.0f),
-                   glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+  return glm::mat4(glm::vec4(scaling.x, 0.0f, 0.0f, 0.0f), glm::vec4(0.0f, scaling.y, 0.0f, 0.0f),
+                   glm::vec4(0.0f, 0.0f, scaling.z, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
-glm::mat4 Transformation::makeRotationMatrix(glm::vec3 rotationAxis,
-                                             float rotationAngle) {
+glm::mat4 Transformation::makeRotationMatrix(glm::vec3 rotationAxis, float rotationAngle) {
   glm::mat4 r(1.0f);
 
   if (rotationAxis == glm::vec3(0.0f)) return r;
@@ -100,8 +95,7 @@ void Transformation::setTranslationMarix(glm::vec3 translation) {
   m_T = makeTranslationMatrix(translation);
 }
 
-void Transformation::setRotationMarix(glm::vec3 rotationAxis,
-                                      float rotationAngle) {
+void Transformation::setRotationMarix(glm::vec3 rotationAxis, float rotationAngle) {
   m_rotationAxis = rotationAxis;
   m_rotationAngle = rotationAngle;
   m_R = makeRotationMatrix(rotationAxis, rotationAngle);
@@ -121,7 +115,7 @@ glm::mat4 Transformation::makeModelInverseMatrix() const {
   if (D != 0.0f) {
     return glm::inverse(M);
   } else {
-    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "Model matrix has no inverse!");
+    utl::log(utl::CONSOLE_LOGS, utl::LGL_ERROR, "Model matrix has no inverse!");
     return glm::mat4(1.0f);
   }
 }

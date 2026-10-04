@@ -1,14 +1,14 @@
-sceneSave:string:demo_2
+sceneSave:string:demo_1
 
 saveObjectStates:bool:false
-lockSimulation:bool:false
+lockSimulation:bool:true
 simulationSpeed:float:0.005f
 enableRandomRollback:bool:false
-simulationDelay:int:0
+simulationDelay:int:50
 
 enableRestingForces:bool:true
 enableImpulses:bool:true
-enableBisection:bool:true
+enableBisection:bool:false
 
 enableBisectionLog:bool:false
 enableContactLog:bool:false

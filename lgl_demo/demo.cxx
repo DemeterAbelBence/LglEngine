@@ -6,13 +6,11 @@
 int main(int argc, char** argv) {
   try {
     lgl::WindowManager windowManager("Simulation App", 1200, 800, 800, 800);
-    windowManager.defineLayout<SimulationScene, SimulationInterface>(
-        argc > 1 ? argv[1] : "");
+    windowManager.defineLayout<SimulationScene, SimulationInterface>(argc > 1 ? argv[1] : "");
     windowManager.renderWindowLoop();
 
   } catch (const std::exception& error) {
-    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "Exception: {}\n",
-             error.what());
+    utl::log(utl::CONSOLE_LOGS, utl::LGL_ERROR, "Exception: {}\n", error.what());
   }
 
   return 0;

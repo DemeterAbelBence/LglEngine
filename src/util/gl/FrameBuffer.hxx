@@ -18,13 +18,12 @@ class FrameBuffer {
 
   std::string m_name;
 
-  inline static std::uint32_t textureUnitIdCount = 10;
-  std::uint32_t textureUnitId;
+  inline static std::uint32_t s_textureUnitIdCount = 10;
+  std::uint32_t m_textureUnitId;
 
  public:
   FrameBuffer();
-  FrameBuffer(const std::string& name, std::uint32_t width,
-              std::uint32_t height, GLint internalFormat, GLenum type,
+  FrameBuffer(const std::string& name, std::uint32_t width, std::uint32_t height, GLint internalFormat, GLenum type,
               GLint format);
   ~FrameBuffer();
   int getWidth() const;

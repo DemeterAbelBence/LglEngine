@@ -1,12 +1,12 @@
 # Copilot Instructions — LightGraphicsLibraryEngine (LGL)
 
-Always apply the context from the following files when answering questions or making
-changes in this repository. They are the authoritative reference for conventions,
-architecture, and known design constraints.
+A C++23 OpenGL graphics and rigid-body physics engine built with CMake and MSVC.
+Target platform: Windows x64, MSVC (Visual Studio 2022 / vc143).
 
-## Context Files
+## Layout and conventions
 
-- [Codebase Overview](.github/context/codebase-context.md)
-  Project layout, build targets, third-party dependencies, C++23 module wrappers,
-  `lgl::utl` type aliases, naming & file conventions, architecture layer breakdown,
-  and key design patterns.
+- See [layout-and-conventions.md](../docs/context/layout-and-conventions.md) for basic project structure, repository layout and coding conventions.
+
+- See [physics-and-collision.md](../docs/context/physics-and-collision.md): for theoretical background and implementation details on rigid body physics and dynamics.
+
+- See [simulation-scene.md](../docs/context/simulation-scene.md): for the layout and simulation objective of the scene in the Demo project.

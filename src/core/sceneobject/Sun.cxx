@@ -4,9 +4,8 @@ namespace lgl {
 Sun::Sun(float radius, glm::vec3 powerDensity) : SceneObject() {
   m_mesh = std::make_shared<SphereMesh>(30, 30, radius);
   m_collider = std::make_shared<NullCollider>();
-  m_light = std::make_unique<Light>(
-      Light{powerDensity, glm::nullvec,
-            glm::normalize(glm::vec3(0.1f, -1.0f, 0.0f)), true});
+  m_light =
+      std::make_unique<Light>(Light{powerDensity, glm::nullvec, glm::normalize(glm::vec3(0.1f, -1.0f, 0.0f)), true});
 
   auto body = ribo::BodyData{
       0.0f,             // invMass
@@ -34,7 +33,7 @@ Sun::Sun(float radius, glm::vec3 powerDensity) : SceneObject() {
 }
 
 void Sun::directPerspectiveOf(Camera& camera) {
-  m_light->position = m_physicsSolver->Body.X;
+  m_light->position = m_physicsSolver->m_body.X;
   glm::mat4 lightProj = makeLightProjection(0.001f, 100.0f);
   glm::mat4 lightView = makeLightView(m_light->position, -m_light->direction);
   camera.setProjection(lightProj);
@@ -42,10 +41,8 @@ void Sun::directPerspectiveOf(Camera& camera) {
   m_lightMatrix = lightView * lightProj;
 }
 
-void Sun::lightUpScene(
-    const std::vector<std::shared_ptr<SceneObject>>& sceneObjects,
-    const FrameBuffer& depthMap) {
-  m_light->position = m_physicsSolver->Body.X;
+void Sun::lightUpScene(const std::vector<std::shared_ptr<SceneObject>>& sceneObjects, const FrameBuffer& depthMap) {
+  m_light->position = m_physicsSolver->m_body.X;
   for (const auto& s : sceneObjects) {
     s->handleLighting(*m_light, depthMap, m_lightMatrix);
   }

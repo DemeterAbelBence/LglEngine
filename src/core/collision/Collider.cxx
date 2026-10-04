@@ -4,23 +4,43 @@
 #include <collision/TerrainCollider.hxx>
 
 namespace lgl {
-std::optional<glm::vec3> Collider::calculateDepth(
-    const CuboidCollider& collidee, const ContactData& contact) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::optional<glm::vec3> Collider::calculateDepth(const CuboidCollider& collidee, const ContactData& contact) const {
   return {};
 }
 
-std::optional<glm::vec3> Collider::calculateDepth(
-    const SphereCollider& collidee, const ContactData& contact) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::optional<glm::vec3> Collider::calculateDepth(const SphereCollider& collidee, const ContactData& contact) const {
   return {};
 }
 
-std::optional<glm::vec3> Collider::calculateDepth(
-    const TerrainCollider& collidee, const ContactData& contact) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::optional<glm::vec3> Collider::calculateDepth(const TerrainCollider& collidee, const ContactData& contact) const {
   return {};
 }
 
-std::vector<Collider::ContactData> Collider::collidesWith(
-    const Collider& collidee) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::vector<Collider::ContactData> Collider::collidesWith(const Collider& collidee) const {
   if (collidee.geomType == GeomType::C_CUBOID) {
     auto c = dynamic_cast<const CuboidCollider&>(collidee);
     return collidesWith(c);
@@ -36,8 +56,13 @@ std::vector<Collider::ContactData> Collider::collidesWith(
   return std::vector<Collider::ContactData>();
 }
 
-std::optional<glm::vec3> Collider::calculateContactDepthWith(
-    const Collider& collidee, const ContactData& contact) {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::optional<glm::vec3> Collider::calculateContactDepthWith(const Collider& collidee, const ContactData& contact) {
   if (collidee.geomType == C_CUBOID) {
     auto c = dynamic_cast<const CuboidCollider&>(collidee);
     return calculateDepth(c, contact);
@@ -52,6 +77,4 @@ std::optional<glm::vec3> Collider::calculateContactDepthWith(
   }
   return {};
 }
-
-void Collider::updateTransformations() {}
 }  // namespace lgl

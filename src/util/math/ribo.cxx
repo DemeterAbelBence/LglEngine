@@ -1,14 +1,34 @@
 #include "ribo.hxx"
 
 namespace lgl {
-glm::mat3 ribo::star(glm::vec3 a) {
-  glm::mat3 result =
-      glm::mat3(glm::vec3(0.0f, -a[2], a[1]), glm::vec3(a[2], 0.0f, -a[0]),
-                glm::vec3(-a[1], a[0], 0.0f));
 
-  return result;
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+ * labore et dolore magna aliqua.
+ *
+ * @param p1 lorem ipsum
+ * @param p2 lorem ipsum
+ *
+ * @return lorem ipsum
+ */
+glm::mat3 ribo::star(glm::vec3 a) {
+  return glm::mat3(glm::vec3(0.0f, -a[2], a[1]), glm::vec3(a[2], 0.0f, -a[0]),
+                   glm::vec3(-a[1], a[0], 0.0f));
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+ * labore et dolore magna aliqua.
+ *
+ * @param p1 lorem ipsum
+ * @param p2 lorem ipsum
+ *
+ * @return lorem ipsum
+ */
 glm::mat3 ribo::orthonormalize(const glm::mat3& R) {
   glm::vec3 cx = glm::vec3(R[0][0], R[1][0], R[2][0]);
   glm::vec3 cy = glm::vec3(R[0][1], R[1][1], R[2][1]);
@@ -18,12 +38,23 @@ glm::mat3 ribo::orthonormalize(const glm::mat3& R) {
   glm::vec3 ry = glm::normalize(glm::cross(cz, rx));
   glm::vec3 rz = glm::normalize(glm::cross(rx, ry));
 
-  return glm::mat3(glm::vec3(rx.x, ry.x, rz.x), glm::vec3(rx.y, ry.y, rz.y),
-                   glm::vec3(rx.z, ry.z, rz.z));
+  // return glm::mat3(glm::vec3(rx.x, ry.x, rz.x), glm::vec3(rx.y, ry.y, rz.y), glm::vec3(rx.z,
+  // ry.z, rz.z));
+  return R;
 }
 
-void ribo::serializeBodyDataInto(const std::string& filename,
-                                 const BodyData& body) {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+ * labore et dolore magna aliqua.
+ *
+ * @param p1 lorem ipsum
+ * @param p2 lorem ipsum
+ *
+ * @return lorem ipsum
+ */
+void ribo::serializeBodyDataInto(const std::string& filename, const BodyData& body) {
   try {
     utl::createDirectories(filename);
     std::ofstream file(filename, std::ios::binary | std::ios::out);
@@ -60,6 +91,16 @@ void ribo::serializeBodyDataInto(const std::string& filename,
   }
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+ * labore et dolore magna aliqua.
+ *
+ * @param p1 lorem ipsum
+ *
+ * @return lorem ipsum
+ */
 ribo::BodyData ribo::deserializeBodyDataFrom(const std::string& filename) {
   try {
     std::ifstream file(filename, std::ios::binary);
@@ -69,9 +110,7 @@ ribo::BodyData ribo::deserializeBodyDataFrom(const std::string& filename) {
 
     BodyData body;
 
-    auto readFloat = [&](float& v) {
-      file.read(reinterpret_cast<char*>(&v), sizeof(float));
-    };
+    auto readFloat = [&](float& v) { file.read(reinterpret_cast<char*>(&v), sizeof(float)); };
     auto readVec3 = [&](glm::vec3& v) {
       file.read(reinterpret_cast<char*>(&v[0]), 3 * sizeof(float));
     };
@@ -99,58 +138,95 @@ ribo::BodyData ribo::deserializeBodyDataFrom(const std::string& filename) {
   }
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+ * labore et dolore magna aliqua.
+ */
 ribo::PhysicsSolver::PhysicsSolver(const PhysicsSolver& other)
-    : Body(other.Body), Initial(other.Initial) {}
+    : m_body(other.m_body), m_initial(other.m_initial), m_previousStates(other.m_previousStates) {}
 
-ribo::PhysicsSolver& ribo::PhysicsSolver::operator=(
-    const PhysicsSolver& other) {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+ * labore et dolore magna aliqua.
+ */
+ribo::PhysicsSolver& ribo::PhysicsSolver::operator=(const PhysicsSolver& other) {
   if (this != &other) {
-    Body = other.Body;
-    Initial = other.Initial;
+    m_body = other.m_body;
+    m_initial = other.m_initial;
+    m_previousStates = other.m_previousStates;
   }
   return *this;
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+ * labore et dolore magna aliqua.
+ */
 void ribo::PhysicsSolver::rollbackToPrevious() {
-  if (!PreviousStates.empty()) {
-    Body = PreviousStates.back();
-    PreviousStates.pop();
+  if (!m_previousStates.empty()) {
+    m_body = m_previousStates.back();
+    m_previousStates.pop();
   }
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+ * labore et dolore magna aliqua.
+ */
 void ribo::PhysicsSolver::initForces() {
-  if (Body.invMass != 0.0f) {
-    Body.force = glm::vec3(0.0f, -9.81f, 0.0f) / Body.invMass;
+  if (m_body.invMass != 0.0f) {
+    m_body.force = glm::vec3(0.0f, -9.81f, 0.0f) / m_body.invMass;
   } else {
-    Body.force = glm::vec3(0.0f);
+    m_body.force = glm::vec3(0.0f);
   }
-  Body.torque = glm::vec3(0.0f);
+  m_body.torque = glm::vec3(0.0f);
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+ * labore et dolore magna aliqua.
+ */
 void ribo::PhysicsSolver::updateVelocities() {
-  // angular velocity
-  Body.Iinv = Body.R * Body.Ibodyinv * glm::transpose(Body.R);
-  Body.omega = Body.Iinv * Body.L;
+  m_body.Iinv = m_body.R * m_body.Ibodyinv * glm::transpose(m_body.R);
+  m_body.omega = m_body.Iinv * m_body.L;
 
-  // linear velocity
-  Body.vel = Body.invMass * Body.P;
+  m_body.vel = m_body.invMass * m_body.P;
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+ * labore et dolore magna aliqua.
+ *
+ * @param p1 lorem ipsum
+ */
 void ribo::PhysicsSolver::updateState(float dt) {
-  PreviousStates.push(Body);
-  if (PreviousStates.size() > 10) {
-    PreviousStates.pop();
+  m_previousStates.push(m_body);
+  if (m_previousStates.size() > 10) {
+    m_previousStates.pop();
   }
 
-  // update momentums
-  Body.P += Body.force * dt;
-  Body.L += Body.torque * dt;
+  m_body.P += m_body.force * dt;
+  m_body.L += m_body.torque * dt;
 
   updateVelocities();
 
-  // update position and orientation
-  Body.X += Body.vel * dt;
-  Body.R += star(Body.omega) * Body.R * dt;
-  Body.R = orthonormalize(Body.R);
+  m_body.X += m_body.vel * dt;
+  m_body.R += star(m_body.omega) * m_body.R * dt;
+
+  if (s_enableOrthonormalization) {
+    m_body.R = orthonormalize(m_body.R);
+  }
 }
 }  // namespace lgl

@@ -38,8 +38,7 @@ constexpr auto TEX_TYPE_METALNESS = ::aiTextureType_METALNESS;
 constexpr auto TEX_TYPE_DIFFUSE_ROUGHNESS = ::aiTextureType_DIFFUSE_ROUGHNESS;
 constexpr auto TEX_TYPE_AMBIENT_OCCLUSION = ::aiTextureType_AMBIENT_OCCLUSION;
 constexpr auto TEX_TYPE_EMISSION_COLOR = ::aiTextureType_EMISSION_COLOR;
-constexpr auto TEX_TYPE_GLTF_METALLIC_ROUGHNESS =
-    ::aiTextureType_GLTF_METALLIC_ROUGHNESS;
+constexpr auto TEX_TYPE_GLTF_METALLIC_ROUGHNESS = ::aiTextureType_GLTF_METALLIC_ROUGHNESS;
 
 // Post-processing flags
 constexpr auto PROCESS_TRIANGULATE = ::aiProcess_Triangulate;

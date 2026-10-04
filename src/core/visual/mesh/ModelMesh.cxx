@@ -1,16 +1,11 @@
 #include "ModelMesh.hxx"
 
 namespace lgl {
-ModelMesh::ModelMesh(const std::string& filePath, bool centerMeshes,
-                     bool loadTextures)
-    : Mesh() {
-  m_assimpModel = std::make_unique<model::AssimpModel>(filePath, centerMeshes,
-                                                       loadTextures);
+ModelMesh::ModelMesh(const std::string& filePath, bool centerMeshes, bool loadTextures) : Mesh() {
+  m_assimpModel = std::make_unique<model::AssimpModel>(filePath, centerMeshes, loadTextures);
 }
 
-void ModelMesh::scaleModelBy(const glm::vec3& scaling) {
-  m_assimpModel->downScaleMeshesBy(scaling);
-}
+void ModelMesh::scaleModelBy(const glm::vec3& scaling) { m_assimpModel->downScaleMeshesBy(scaling); }
 
 void ModelMesh::create() {}
 

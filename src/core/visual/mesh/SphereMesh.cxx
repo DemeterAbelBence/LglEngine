@@ -1,10 +1,7 @@
 #include "SphereMesh.hxx"
 
 namespace lgl {
-SphereMesh::SphereMesh(std::uint32_t N, std::uint32_t M, float radius)
-    : Surface(N, M) {
-  m_radius = radius;
-}
+SphereMesh::SphereMesh(std::uint32_t N, std::uint32_t M, float radius) : Surface(N, M) { m_radius = radius; }
 
 void SphereMesh::eval(float x, float y, glm::vec3& pos, glm::vec3& norm) {
   float u = x * 2 * 3.14159f;

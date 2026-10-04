@@ -14,8 +14,7 @@ class VertexArray {
 
  public:
   VertexArray();
-  void addBuffer(const VertexBuffer& vertexBuffer,
-                 const VertexBufferLayout& layout) const;
+  void addBuffer(const VertexBuffer& vertexBuffer, const VertexBufferLayout& layout) const;
   void bind() const;
   void unBind() const;
   ~VertexArray();

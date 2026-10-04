@@ -29,7 +29,5 @@ bool keyin::Key::handleRelease(GLFWwindow* window) {
   }
 }
 
-std::uint32_t keyin::Key::getState(GLFWwindow* window) {
-  return glfwGetKey(window, m_id);
-}
+std::uint32_t keyin::Key::getState(GLFWwindow* window) { return glfwGetKey(window, m_id); }
 }  // namespace lgl

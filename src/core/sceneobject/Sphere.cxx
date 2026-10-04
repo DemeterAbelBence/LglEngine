@@ -9,8 +9,7 @@ Sphere::Sphere(float radius) : SceneObject() {
 
   float inverseMass = 0.01f;
   float inertiaScalar = 2.0f / 5.0f * (1.0f / inverseMass) * radius * radius;
-  glm::mat3 Ibody = glm::mat3(glm::vec3(inertiaScalar, 0.0f, 0.0f),
-                              glm::vec3(0.0f, inertiaScalar, 0.0f),
+  glm::mat3 Ibody = glm::mat3(glm::vec3(inertiaScalar, 0.0f, 0.0f), glm::vec3(0.0f, inertiaScalar, 0.0f),
                               glm::vec3(0.0f, 0.0f, inertiaScalar));
   glm::mat3 Ibodyinv = glm::inverse(Ibody);
 

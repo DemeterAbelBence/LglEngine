@@ -39,6 +39,10 @@ PRIVATE
 
     ${CMAKE_CURRENT_LIST_DIR}/eng/CollisionHandler.hxx
     ${CMAKE_CURRENT_LIST_DIR}/eng/CollisionHandler.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/eng/CollisionHandlerV1.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/eng/CollisionHandlerV1.cxx
+    ${CMAKE_CURRENT_LIST_DIR}/eng/CollisionHandlerV2.hxx
+    ${CMAKE_CURRENT_LIST_DIR}/eng/CollisionHandlerV2.cxx
 
     ${CMAKE_CURRENT_LIST_DIR}/eng/ResourceRepository.hxx
     ${CMAKE_CURRENT_LIST_DIR}/eng/ResourceRepository.cxx

@@ -15,8 +15,7 @@ struct MouseData {
 class Mouse {
  private:
   static void mouseMoveCallback(GLFWwindow* window, double posX, double posY);
-  static void mouseButtonCallback(GLFWwindow* window, int button, int action,
-                                  int mods);
+  static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
  public:
   inline static double s_sensitivity = 0.1;

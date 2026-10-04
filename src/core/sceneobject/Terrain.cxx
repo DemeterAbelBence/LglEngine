@@ -1,30 +1,38 @@
 #include "Terrain.hxx"
 
 namespace lgl {
+    
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
 void Terrain::readTerrainTexturesPBR() {
   m_mesh->addTexture(std::make_shared<Texture>(
-      Texture{tex::TextureFromFile("assets/terrain/terr_base_color.jpg"),
-              "texture_base_color"}));
+      Texture{tex::TextureFromFile("assets/terrain/terr_base_color.jpg"), "texture_base_color"}));
+
+  m_mesh->addTexture(
+      std::make_shared<Texture>(Texture{tex::TextureFromFile("assets/terrain/terr_normal.jpg"), "texture_normal"}));
 
   m_mesh->addTexture(std::make_shared<Texture>(
-      Texture{tex::TextureFromFile("assets/terrain/terr_normal.jpg"),
-              "texture_normal"}));
+      Texture{tex::TextureFromFile("assets/terrain/terr_roughness.jpg"), "texture_roughness"}));
 
   m_mesh->addTexture(std::make_shared<Texture>(
-      Texture{tex::TextureFromFile("assets/terrain/terr_roughness.jpg"),
-              "texture_roughness"}));
+      Texture{tex::TextureFromFile("assets/terrain/terr_metalness.jpg"), "texture_metalness"}));
 
   m_mesh->addTexture(std::make_shared<Texture>(
-      Texture{tex::TextureFromFile("assets/terrain/terr_metalness.jpg"),
-              "texture_metalness"}));
-
-  m_mesh->addTexture(std::make_shared<Texture>(
-      Texture{tex::TextureFromFile("assets/terrain/terr_ao.jpg"),
-              "texture_ambient_occlusion"}));
+      Texture{tex::TextureFromFile("assets/terrain/terr_ao.jpg"), "texture_ambient_occlusion"}));
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
 Terrain::Terrain(float size, std::uint32_t rezolution) {
-  m_terrainData = std::make_shared<TerrainData>(TerrainData{
+  TerrainData terrainData1 = {
       0.05f,  // amplitude
       0.1f,   // frequency
       0.18f,  // phase
@@ -33,13 +41,25 @@ Terrain::Terrain(float size, std::uint32_t rezolution) {
       64,     // maximal_tesselation
       0.0f,   // minimal_distance
       50.0f   // maximal_distance
-  });
+  };
+
+  TerrainData terrainData2 = {
+      0.00f,  // amplitude
+      0.0f,   // frequency
+      0.0f,   // phase
+      6,      // iterations
+      64,     // minimal_tesselation
+      64,     // maximal_tesselation
+      0.0f,   // minimal_distance
+      0.0f    // maximal_distance
+  };
+
+  m_terrainData = std::make_shared<TerrainData>(terrainData2);
 
   m_mesh = std::make_shared<PatchSurface>(size, rezolution);
 
-  m_collider = std::make_shared<TerrainCollider>(
-      m_terrainData->amplitude, m_terrainData->frequency, m_terrainData->phase,
-      m_terrainData->iterations);
+  m_collider = std::make_shared<TerrainCollider>(m_terrainData->amplitude, m_terrainData->frequency,
+                                                 m_terrainData->phase, m_terrainData->iterations);
 
   auto bodyData = ribo::BodyData{
       0.0f,             // InvMass
@@ -68,6 +88,12 @@ Terrain::Terrain(float size, std::uint32_t rezolution) {
   readTerrainTexturesPBR();
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
 void Terrain::setParameters(float a, float f, float p, float i) {
   m_terrainData->amplitude = a;
   m_terrainData->frequency = f;
@@ -75,14 +101,25 @@ void Terrain::setParameters(float a, float f, float p, float i) {
   m_terrainData->iterations = i;
 }
 
-void Terrain::setTesselationParameters(std::uint32_t min_t, std::uint32_t max_t,
-                                       float min_d, float max_d) {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+void Terrain::setTesselationParameters(std::uint32_t min_t, std::uint32_t max_t, float min_d, float max_d) {
   m_terrainData->minimal_tesselation = min_t;
   m_terrainData->maximal_tesselation = max_t;
   m_terrainData->minimal_distance = min_d;
   m_terrainData->maximal_distance = max_d;
 }
 
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
 void Terrain::updateTerrainParameters() {
   auto program = m_mesh->getProgram();
 

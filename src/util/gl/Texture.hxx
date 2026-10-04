@@ -23,8 +23,6 @@ struct Texel {
 
 std::uint32_t TextureFromFile(const std::string& path);
 std::uint32_t TextureFromMemory(const std::byte* data, int nBytes);
-std::uint32_t TextureFromAssimpTexels(const std::byte* data,
-                                      std::uint32_t width,
-                                      std::uint32_t height);
+std::uint32_t TextureFromAssimpTexels(const std::byte* data, std::uint32_t width, std::uint32_t height);
 };  // namespace tex
 }  // namespace lgl

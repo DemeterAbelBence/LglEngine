@@ -1,3 +1,21 @@
+# Lgl design and limitations
+
+## Key Design Patterns
+
+- **Template layout injection** — `WindowManager::defineLayout<S,U>()` decouples the
+  engine from any concrete scene or UI. This is the only place application types
+  enter the engine.
+- **Double-dispatch collision** — `Collider` uses the visitor pattern so each collider
+  pair has a dedicated narrowphase implementation without runtime type switches in
+  calling code.
+- **Shared ownership for components** — `Mesh`, `Collider`, `PhysicsSolver`, and
+  `Transformation` are held as `sptr<>` so objects can share or clone components
+  independently.
+- **`KeyEventHandler<C,A>` typed callbacks** — input bindings are typed member-function
+  pointers with a fixed argument; no string-keyed action maps or virtual dispatch.
+- **xxhash shader hot-reload** — `GpuProgram::handleShaderSourceChange()` re-hashes
+  source files each frame and recompiles only on change.
+
 ## Known Architectural Limitations
 
 The following are recognised design debts, **do not work around them silently** —

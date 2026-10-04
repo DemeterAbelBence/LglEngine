@@ -1,8 +1,30 @@
 #include "TerrainCollider.hxx"
 
 namespace lgl {
-TerrainCollider::TerrainCollider(float amplitude, float frequency, float phase,
-                                 float iterations) {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+float TerrainCollider::calculate_amplitude(float f1, float f2, float A0) const {
+  float A;
+  float s = glm::sqrt(f1 * f1 + f2 * f2);
+
+  if (s > 0)
+    A = A0 / s;
+  else
+    A = A0;
+  return m_terrainAmplitude * A;
+}
+
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+TerrainCollider::TerrainCollider(float amplitude, float frequency, float phase, float iterations) {
   m_terrainAmplitude = amplitude;
   m_terrainFrequency = frequency;
   m_terrainPhase = phase;
@@ -10,8 +32,13 @@ TerrainCollider::TerrainCollider(float amplitude, float frequency, float phase,
   geomType = C_TERRAIN;
 }
 
-std::tuple<glm::vec3, glm::vec3> TerrainCollider::evaluateTerrainFormula(
-    float x, float z) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::tuple<glm::vec3, glm::vec3> TerrainCollider::evaluateTerrainFormula(float x, float z) const {
   int itr = m_terrainIterations;
   float fre = m_terrainFrequency;
 
@@ -38,39 +65,66 @@ std::tuple<glm::vec3, glm::vec3> TerrainCollider::evaluateTerrainFormula(
   return std::make_tuple(p, n);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - - - - - - - - - - - - - - //
-
-std::vector<Collider::ContactData> TerrainCollider::collidesWith(
-    const CuboidCollider& collidee) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::vector<Collider::ContactData> TerrainCollider::collidesWith(const CuboidCollider& collidee) const {
   return std::vector<ContactData>();
 }
 
-std::vector<Collider::ContactData> TerrainCollider::collidesWith(
-    const SphereCollider& collidee) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::vector<Collider::ContactData> TerrainCollider::collidesWith(const SphereCollider& collidee) const {
   return std::vector<ContactData>();
 }
 
-std::vector<Collider::ContactData> TerrainCollider::collidesWith(
-    const TerrainCollider& collidee) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::vector<Collider::ContactData> TerrainCollider::collidesWith(const TerrainCollider& collidee) const {
   return std::vector<ContactData>();
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - - - - - - - - - - - - - - //
-
-std::optional<glm::vec3> TerrainCollider::calculateDepth(
-    const CuboidCollider& collidee, const ContactData& contact) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::optional<glm::vec3> TerrainCollider::calculateDepth(const CuboidCollider& collidee,
+                                                         const ContactData& contact) const {
   return {};
 }
 
-std::optional<glm::vec3> TerrainCollider::calculateDepth(
-    const SphereCollider& collidee, const ContactData& contact) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::optional<glm::vec3> TerrainCollider::calculateDepth(const SphereCollider& collidee,
+                                                         const ContactData& contact) const {
   return {};
 }
 
-std::optional<glm::vec3> TerrainCollider::calculateDepth(
-    const TerrainCollider& collidee, const ContactData& contact) const {
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
+std::optional<glm::vec3> TerrainCollider::calculateDepth(const TerrainCollider& collidee,
+                                                         const ContactData& contact) const {
   return {};
 }
 }  // namespace lgl

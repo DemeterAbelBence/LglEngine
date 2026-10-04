@@ -32,8 +32,7 @@ class GpuProgram {
 
   std::string shaderTypeToString(std::uint32_t type);
   void displayShaderCompilationResult(std::uint32_t type, std::uint32_t id);
-  std::uint32_t compileShaderSource(std::uint32_t type,
-                                    const std::string& source);
+  std::uint32_t compileShaderSource(std::uint32_t type, const std::string& source);
   void readShaderSource(std::string& shaderSource, const std::string& filePath);
 
  public:

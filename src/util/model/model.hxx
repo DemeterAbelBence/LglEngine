@@ -34,8 +34,8 @@ class AssimpMesh {
   void centerToOrigin(std::vector<Vertex>& vertices);
 
  public:
-  AssimpMesh(std::vector<Vertex> vertices, std::vector<std::uint32_t> indices,
-             std::vector<Texture> textures, bool centerMeshes);
+  AssimpMesh(std::vector<Vertex> vertices, std::vector<std::uint32_t> indices, std::vector<Texture> textures,
+             bool centerMeshes);
   void downScaleMeshBy(const glm::vec3& scaling);
   void draw(const lgl::GpuProgram& program);
   void setupMesh();
@@ -54,8 +54,7 @@ class AssimpModel {
   void loadModel(const std::string& filePath);
   void processNode(asim::aiNode* node, const aiScene* scene);
   AssimpMesh processMesh(asim::aiMesh* mesh, const aiScene* scene);
-  std::vector<Texture> loadMaterialTextures(asim::aiMaterial* mat,
-                                            asim::aiTextureType type,
+  std::vector<Texture> loadMaterialTextures(asim::aiMaterial* mat, asim::aiTextureType type,
                                             const std::string& typeName);
 
  public:

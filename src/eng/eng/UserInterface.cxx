@@ -5,14 +5,12 @@ void UserInterface::renderObjectPicker() {
   ImGui::Begin("Select object");
 
   static float cameraSpeed = 8.0f;
-  if (ImGui::SliderFloat("Camera move speed", &cameraSpeed, 0.01f, 50.0f,
-                         "%.2f", 0)) {
+  if (ImGui::SliderFloat("Camera move speed", &cameraSpeed, 0.01f, 50.0f, "%.2f", 0)) {
     m_scene->setCameraMoveSpeed(cameraSpeed);
   }
 
   static float objectSpeed = 0.05f;
-  if (ImGui::SliderFloat("Object move speed", &objectSpeed, 0.01f, 2.0f, "%.2f",
-                         0)) {
+  if (ImGui::SliderFloat("Object move speed", &objectSpeed, 0.01f, 2.0f, "%.2f", 0)) {
     m_scene->setObjectMoveSpeed(objectSpeed);
   }
 
@@ -52,14 +50,12 @@ void UserInterface::renderPrimitivePicker() {
   ImGui::ListBox("primitives", &currentItem, items, IM_ARRAYSIZE(items));
   ImGui::End();
 
-  currentItem == 0 ? m_scene->setPrimitiveType(GL_TRIANGLES)
-                   : m_scene->setPrimitiveType(GL_LINE);
+  currentItem == 0 ? m_scene->setPrimitiveType(GL_TRIANGLES) : m_scene->setPrimitiveType(GL_LINE);
 }
 
 void UserInterface::renderFrameRateBox() {
   ImGui::Begin("Performance:");
-  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-              1000.0f / io->Framerate, io->Framerate);
+  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
   ImGui::End();
 }
 
@@ -68,7 +64,7 @@ void UserInterface::renderSceneObjectLabels() {
 
 for (const auto& sceneObject : m_scene->getSceneObjects()) {
 utl::str label = sceneObject->getName();
-glm::vec3 objectPos = sceneObject->getPhysicsSolver()->Body.X;
+glm::vec3 objectPos = sceneObject->getPhysicsSolver()->m_body.X;
 
 // Project world position to clip space using camera projection and view
 glm::vec4 clipPos = camera->getP() * camera->getV() *

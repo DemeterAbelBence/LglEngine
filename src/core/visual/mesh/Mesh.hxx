@@ -30,24 +30,14 @@ class Mesh {
   Mesh();
 
   void setProgram(std::shared_ptr<GpuProgram> program) { m_program = program; }
-  void setMaterial(std::shared_ptr<Material> material) {
-    m_material = material;
-  }
-  void setTransformation(std::shared_ptr<Transformation> transformation) {
-    m_transformation = transformation;
-  }
-  void addTexture(std::shared_ptr<Texture> texture) {
-    m_textures.push_back(texture);
-  }
+  void setMaterial(std::shared_ptr<Material> material) { m_material = material; }
+  void setTransformation(std::shared_ptr<Transformation> transformation) { m_transformation = transformation; }
+  void addTexture(std::shared_ptr<Texture> texture) { m_textures.push_back(texture); }
 
   const std::shared_ptr<GpuProgram>& getProgram() const { return m_program; }
   const std::shared_ptr<Material>& getMaterial() const { return m_material; }
-  const std::shared_ptr<Transformation>& getTransformation() const {
-    return m_transformation;
-  }
-  const std::vector<std::shared_ptr<Texture>>& getTextures() const {
-    return m_textures;
-  }
+  const std::shared_ptr<Transformation>& getTransformation() const { return m_transformation; }
+  const std::vector<std::shared_ptr<Texture>>& getTextures() const { return m_textures; }
 
   void setPrimitive(std::uint32_t type) { m_primitiveType = type; }
   std::uint32_t getPrimitiveType() const { return m_primitiveType; }

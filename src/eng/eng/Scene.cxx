@@ -4,51 +4,33 @@ namespace lgl {
 void Scene::initCameraEvents() {
   using namespace keyin;
 
-  m_cameraEventHandler.addEvent(
-      KeyEvent<Camera, int>(Key(GLFW_KEY_S), &Camera::moveUp, -1, false));
-  m_cameraEventHandler.addEvent(
-      KeyEvent<Camera, int>(Key(GLFW_KEY_W), &Camera::moveUp, 1, false));
-  m_cameraEventHandler.addEvent(
-      KeyEvent<Camera, int>(Key(GLFW_KEY_A), &Camera::moveRight, -1, false));
-  m_cameraEventHandler.addEvent(
-      KeyEvent<Camera, int>(Key(GLFW_KEY_D), &Camera::moveRight, 1, false));
-  m_cameraEventHandler.addEvent(KeyEvent<Camera, int>(
-      Key(GLFW_KEY_LEFT_SHIFT), &Camera::moveForward, -1, false));
-  m_cameraEventHandler.addEvent(KeyEvent<Camera, int>(
-      Key(GLFW_KEY_LEFT_CONTROL), &Camera::moveForward, 1, false));
-  m_cameraEventHandler.addEvent(KeyEvent<Camera>(
-      Key(GLFW_KEY_LEFT_ALT), &Camera::toggleCaptureMode, true));
+  m_cameraEventHandler.addEvent(KeyEvent<Camera, int>(Key(GLFW_KEY_S), &Camera::moveUp, -1, false));
+  m_cameraEventHandler.addEvent(KeyEvent<Camera, int>(Key(GLFW_KEY_W), &Camera::moveUp, 1, false));
+  m_cameraEventHandler.addEvent(KeyEvent<Camera, int>(Key(GLFW_KEY_A), &Camera::moveRight, -1, false));
+  m_cameraEventHandler.addEvent(KeyEvent<Camera, int>(Key(GLFW_KEY_D), &Camera::moveRight, 1, false));
+  m_cameraEventHandler.addEvent(KeyEvent<Camera, int>(Key(GLFW_KEY_LEFT_SHIFT), &Camera::moveForward, -1, false));
+  m_cameraEventHandler.addEvent(KeyEvent<Camera, int>(Key(GLFW_KEY_LEFT_CONTROL), &Camera::moveForward, 1, false));
+  m_cameraEventHandler.addEvent(KeyEvent<Camera>(Key(GLFW_KEY_LEFT_ALT), &Camera::toggleCaptureMode, true));
 }
 
 void Scene::initObjectEvents() {
   using namespace keyin;
 
   m_objectEventHandler.addEvent(
-      KeyEvent<SceneObject, glm::vec3>(Key(GLFW_KEY_W), &SceneObject::translate,
-                                       glm::vec3(0.0f, 1.0f, 0.0f), false));
+      KeyEvent<SceneObject, glm::vec3>(Key(GLFW_KEY_W), &SceneObject::translate, glm::vec3(0.0f, 1.0f, 0.0f), false));
   m_objectEventHandler.addEvent(
-      KeyEvent<SceneObject, glm::vec3>(Key(GLFW_KEY_S), &SceneObject::translate,
-                                       glm::vec3(0.0f, -1.0f, 0.0f), false));
+      KeyEvent<SceneObject, glm::vec3>(Key(GLFW_KEY_S), &SceneObject::translate, glm::vec3(0.0f, -1.0f, 0.0f), false));
   m_objectEventHandler.addEvent(
-      KeyEvent<SceneObject, glm::vec3>(Key(GLFW_KEY_D), &SceneObject::translate,
-                                       glm::vec3(-1.0f, 0.0f, 0.0f), false));
+      KeyEvent<SceneObject, glm::vec3>(Key(GLFW_KEY_D), &SceneObject::translate, glm::vec3(-1.0f, 0.0f, 0.0f), false));
   m_objectEventHandler.addEvent(
-      KeyEvent<SceneObject, glm::vec3>(Key(GLFW_KEY_A), &SceneObject::translate,
-                                       glm::vec3(1.0f, 0.0f, 0.0f), false));
-  m_objectEventHandler.addEvent(KeyEvent<SceneObject, glm::vec3>(
-      Key(GLFW_KEY_LEFT_SHIFT), &SceneObject::translate,
-      glm::vec3(0.0f, 0.0f, 1.0f), false));
-  m_objectEventHandler.addEvent(KeyEvent<SceneObject, glm::vec3>(
-      Key(GLFW_KEY_LEFT_CONTROL), &SceneObject::translate,
-      glm::vec3(0.0f, 0.0f, -1.0f), false));
+      KeyEvent<SceneObject, glm::vec3>(Key(GLFW_KEY_A), &SceneObject::translate, glm::vec3(1.0f, 0.0f, 0.0f), false));
+  m_objectEventHandler.addEvent(KeyEvent<SceneObject, glm::vec3>(Key(GLFW_KEY_LEFT_SHIFT), &SceneObject::translate,
+                                                                 glm::vec3(0.0f, 0.0f, 1.0f), false));
+  m_objectEventHandler.addEvent(KeyEvent<SceneObject, glm::vec3>(Key(GLFW_KEY_LEFT_CONTROL), &SceneObject::translate,
+                                                                 glm::vec3(0.0f, 0.0f, -1.0f), false));
 }
 
-Scene::Scene() {
-  m_objectIndex = 0;
-  m_moveCamera = true;
-
-  m_camera = std::make_unique<Camera>();
-
+Scene::Scene() : m_objectIndex(0), m_moveCamera(true), m_camera(std::make_unique<Camera>()) {
   initCameraEvents();
   initObjectEvents();
 }
@@ -84,26 +66,24 @@ void Scene::setObjectMoveSpeed(float speed) {
 }
 
 void Scene::saveObjectStates(const std::string& path) {
-  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO,
-           "Saving object states to path: {}\n", path);
+  utl::log(utl::CONSOLE_LOGS, utl::LGL_INFO, "Saving object states to path: {}\n", path);
   for (const auto& s : m_sceneObjects) {
     std::string filepath = std::format("{}/{}.bin", path, s->getName());
-    const ribo::BodyData& body = s->getPhysicsSolver()->Body;
+    const ribo::BodyData& body = s->getPhysicsSolver()->m_body;
     ribo::serializeBodyDataInto(filepath, body);
   }
 }
 
 void Scene::loadObjectStates(const std::string& path) {
-  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO,
-           "Loading object states from path: {}\n", path);
+  utl::log(utl::CONSOLE_LOGS, utl::LGL_INFO, "Loading object states from path: {}\n", path);
   for (const auto& s : m_sceneObjects) {
     try {
       std::string filepath = std::format("{}/{}.bin", path, s->getName());
       ribo::BodyData body = ribo::deserializeBodyDataFrom(filepath);
-      s->getPhysicsSolver()->Body = body;
+      s->getPhysicsSolver()->m_body = body;
       s->updateTransformations();
     } catch (const std::runtime_error& error) {
-      utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "{}\n", error.what());
+      utl::log(utl::CONSOLE_LOGS, utl::LGL_ERROR, "{}\n", error.what());
       continue;
     }
   }

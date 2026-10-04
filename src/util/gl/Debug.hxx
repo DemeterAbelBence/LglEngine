@@ -23,8 +23,7 @@ std::string debugTypeToString(GLenum type);
 std::string debugSeverityToString(GLenum severity);
 
 // Must use APIENTRY calling convention so it matches GLDEBUGPROC on Windows
-void APIENTRY outputDebugMessage(GLenum source, GLenum type, GLuint id,
-                                 GLenum severity, GLsizei length,
+void APIENTRY outputDebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                  const GLchar* message, const void* userParam);
 
 void initializeDebugContext();

@@ -9,12 +9,8 @@ Rect::Rect(glm::vec2 corner1, glm::vec2 corner2, glm::vec3 color) {
   m_bufferLayout = std::make_unique<VertexBufferLayout>();
 
   m_shader = std::make_unique<GpuProgram>("Rectangle Shader");
-  m_shader->addShader(
-      GL_FRAGMENT_SHADER,
-      std::format("{}/shaders/basic/rect-frag.glsl", utl::lglResourceFolder));
-  m_shader->addShader(
-      GL_VERTEX_SHADER,
-      std::format("{}/shaders/basic/rect-vert.glsl", utl::lglResourceFolder));
+  m_shader->addShader(GL_FRAGMENT_SHADER, std::format("{}/shaders/basic/rect-frag.glsl", utl::lglResourceFolder));
+  m_shader->addShader(GL_VERTEX_SHADER, std::format("{}/shaders/basic/rect-vert.glsl", utl::lglResourceFolder));
   m_shader->createProgram(false);
   m_shader->bind();
   m_shader->setVec3("rectColor", color);
@@ -36,8 +32,7 @@ Rect::Rect(glm::vec2 corner1, glm::vec2 corner2, glm::vec3 color) {
   vertexData.push_back(corner2);
   vertexData.push_back(corner1);
 
-  m_vertexBuffer->setData((const void*)&vertexData[0],
-                          vertexData.size() * sizeof(glm::vec2));
+  m_vertexBuffer->setData((const void*)&vertexData[0], vertexData.size() * sizeof(glm::vec2));
   m_bufferLayout->push(GL_FLOAT, 2);
   m_vertexArray->addBuffer(*m_vertexBuffer, *m_bufferLayout);
 }

@@ -10,13 +10,20 @@ import std;
 #include <visual/mesh/ModelMesh.hxx>
 
 namespace lgl {
+
+/**
+ * @brief lorem ipsum
+ *
+ * lorem ipsum dolor sit amet et consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+ * dolore magna aliqua.
+ */
 class Box final : public SceneObject {
  private:
-  bool m_isStationary;
-  const float m_massFactor = 1.0f;
+  bool m_isStationary;			   ///< lorem ipsum
+  const float m_massFactor = 1.0f; ///< lorem ipsum
 
  public:
-  Box();
+  Box() : SceneObject() {}
   Box(bool isStationary, std::shared_ptr<ModelMesh> modelMesh);
   Box(bool isStationary);
 

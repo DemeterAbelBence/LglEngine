@@ -11,8 +11,7 @@ void Mouse::mouseMoveCallback(GLFWwindow* window, double posX, double posY) {
   s_data.offsetY *= s_sensitivity;
 }
 
-void Mouse::mouseButtonCallback(GLFWwindow* window, int button, int action,
-                                int mods) {
+void Mouse::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
     s_isLeftButtonPressed = true;
   } else {

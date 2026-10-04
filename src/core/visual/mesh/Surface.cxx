@@ -22,14 +22,11 @@ void Surface::create() {
   std::uint32_t M = m_verticesPerStrip / 2 - 1;
   for (std::uint32_t i = 0; i < N; i++) {
     for (std::uint32_t j = 0; j <= M; j++) {
-      m_vertexData.push_back(
-          generateVertexData(m_size * (float)j / M, m_size * (float)i / N));
-      m_vertexData.push_back(generateVertexData(m_size * (float)j / M,
-                                                m_size * (float)(i + 1) / N));
+      m_vertexData.push_back(generateVertexData(m_size * (float)j / M, m_size * (float)i / N));
+      m_vertexData.push_back(generateVertexData(m_size * (float)j / M, m_size * (float)(i + 1) / N));
     }
   }
-  setBufferData((const void*)&m_vertexData[0],
-                m_vertexData.size() * sizeof(VertexData));
+  setBufferData((const void*)&m_vertexData[0], m_vertexData.size() * sizeof(VertexData));
 }
 
 void Surface::draw(const Camera& camera) const {
