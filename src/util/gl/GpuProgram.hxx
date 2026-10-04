@@ -25,6 +25,7 @@ class GpuProgram {
   std::uint32_t m_programId;
   std::string m_programName;
   const XXHash64 m_hasher = XXHash64(0);
+  bool m_logShaderCompilation = true;
 
  private:
   std::unordered_map<std::uint32_t, Shader> m_shaders;
@@ -51,6 +52,6 @@ class GpuProgram {
   void setMat4(const std::string& name, glm::mat4 value) const;
   void setFloat(const std::string& name, float value) const;
   void setInt(const std::string& name, int value) const;
-  virtual void createProgram();
+  virtual void createProgram(bool logShaderCompilation = true);
 };
 }  // namespace lgl

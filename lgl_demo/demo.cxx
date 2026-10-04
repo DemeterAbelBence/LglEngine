@@ -1,21 +1,19 @@
 #include <eng/WindowManager.hxx>
 
-#include "SimulationScene.hxx"
 #include "SimulationInterface.hxx"
+#include "SimulationScene.hxx"
 
-int main(void) {
-	try {
-		utl::log(utl::LGL_INFO, "Starting application...\n");
+int main(int argc, char** argv) {
+  try {
+    lgl::WindowManager windowManager("Simulation App", 1200, 800, 800, 800);
+    windowManager.defineLayout<SimulationScene, SimulationInterface>(
+        argc > 1 ? argv[1] : "");
+    windowManager.renderWindowLoop();
 
-		lgl::WindowManager windowManager("Simulation App", 1200, 800, 800, 800);
-		windowManager.defineLayout<SimulationScene, SimulationInterface>();
-		windowManager.renderWindowLoop();
-	}
-	catch (const std::exception& error) {
-		utl::log(utl::LGL_ERROR, "Exception: {}\n", error.what());
-	}
+  } catch (const std::exception& error) {
+    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "Exception: {}\n",
+             error.what());
+  }
 
-	utl::log(utl::LGL_INFO, "Exiting application...\n");
-
-    return 0;
+  return 0;
 }

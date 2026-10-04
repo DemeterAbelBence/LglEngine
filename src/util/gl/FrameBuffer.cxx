@@ -45,13 +45,13 @@ FrameBuffer::FrameBuffer(const std::string& name, std::uint32_t width,
   }
 
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-    utl::log(utl::LGL_ERROR, "Framebuffer {} is not complete!\n", name);
+    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "Framebuffer {} is not complete!\n", name);
 
   } else {
-    utl::log(utl::LGL_INFO, "Framebuffer {} is complete!\n\n", name);
+    utl::log(utl::GENERAL_LOGS, utl::LGL_INFO, "Framebuffer {} is complete!\n\n", name);
     textureUnitId = textureUnitIdCount++;
     if (textureUnitIdCount >= 16) {
-      utl::log(utl::LGL_WARN,
+      utl::log(utl::GENERAL_LOGS, utl::LGL_WARN,
                "Texture unit ID count has reached the maximum limit!\n");
     }
   }

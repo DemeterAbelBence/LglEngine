@@ -2,20 +2,24 @@
 
 namespace lgl {
 void UserInterface::renderObjectPicker() {
-  static float cameraSpeed = 8.0f;
-  static float objectSpeed = 0.05f;
-
-  // BEGIN WIDGET
   ImGui::Begin("Select object");
 
+  static float cameraSpeed = 8.0f;
   if (ImGui::SliderFloat("Camera move speed", &cameraSpeed, 0.01f, 50.0f,
                          "%.2f", 0)) {
     m_scene->setCameraMoveSpeed(cameraSpeed);
   }
 
+  static float objectSpeed = 0.05f;
   if (ImGui::SliderFloat("Object move speed", &objectSpeed, 0.01f, 2.0f, "%.2f",
                          0)) {
     m_scene->setObjectMoveSpeed(objectSpeed);
+  }
+
+  std::shared_ptr<SceneObject> currentObject = m_scene->getCurrentSceneObject();
+  float currentScale = currentObject->getTransformation()->getScaling().x;
+  if (ImGui::SliderFloat("Object scale", &currentScale, 0.01f, 20.0f, "%.3f", 0)) {
+    currentObject->scale(glm::vec3(currentScale, currentScale, currentScale));
   }
 
   bool moveCamera = m_scene->getMoveCamera();
@@ -37,7 +41,6 @@ void UserInterface::renderObjectPicker() {
   ImGui::Text("LSHIFT-forward, LCTRL-backward");
   ImGui::Text("Alt-toggle camera mouse capture");
 
-  // END WIDGET
   ImGui::End();
 }
 

@@ -36,16 +36,20 @@ class WindowManager {
   ~WindowManager();
 
   template <typename U, typename V>
-  void defineLayout() {
+  void defineLayout(const std::string& configName) {
     try {
       m_scene = std::make_shared<U>();
       m_scene->create();
+
       m_userInterface = std::make_shared<V>(m_mainWindow, m_scene);
+
+      readConfig(configName);
     } catch (const std::exception& error) {
       throw error;
     }
   }
 
+  void readConfig(const std::string& configName);
   void renderWindowLoop();
 };
 }  // namespace lgl

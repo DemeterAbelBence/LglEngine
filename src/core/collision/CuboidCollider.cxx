@@ -82,7 +82,7 @@ std::optional<Collider::ContactData> CuboidCollider::calculateEdgeIntersection(
     glm::vec3 pa, glm::vec3 va, float a, glm::vec3 pb, glm::vec3 vb,
     float b) const {
   if (va == glm::nullvec || vb == glm::nullvec) {
-    utl::logIf(false, utl::LGL_ERROR,
+    utl::logIf(false, utl::CONTACT_LOGS, utl::LGL_ERROR,
                "Edge direction vector is zero : va = ({:.2f}, {:.2f}, {:.2f}), "
                "vb = ({:.2f}, {:.2f}, {:.2f})\n",
                va.x, va.y, va.z, vb.x, vb.y, vb.z);

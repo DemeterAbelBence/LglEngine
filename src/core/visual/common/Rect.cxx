@@ -9,9 +9,13 @@ Rect::Rect(glm::vec2 corner1, glm::vec2 corner2, glm::vec3 color) {
   m_bufferLayout = std::make_unique<VertexBufferLayout>();
 
   m_shader = std::make_unique<GpuProgram>("Rectangle Shader");
-  m_shader->addShader(GL_FRAGMENT_SHADER, "shaders/basic/rect-frag.glsl");
-  m_shader->addShader(GL_VERTEX_SHADER, "shaders/basic/rect-vert.glsl");
-  m_shader->createProgram();
+  m_shader->addShader(
+      GL_FRAGMENT_SHADER,
+      std::format("{}/shaders/basic/rect-frag.glsl", utl::lglResourceFolder));
+  m_shader->addShader(
+      GL_VERTEX_SHADER,
+      std::format("{}/shaders/basic/rect-vert.glsl", utl::lglResourceFolder));
+  m_shader->createProgram(false);
   m_shader->bind();
   m_shader->setVec3("rectColor", color);
 

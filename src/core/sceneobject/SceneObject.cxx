@@ -38,7 +38,7 @@ void SceneObject::setProgram(std::shared_ptr<GpuProgram> program) {
   if (m_mesh) {
     m_mesh->setProgram(program);
   } else {
-    utl::log(utl::LGL_WARN, "No mesh to set program for SceneObject {}\n",
+    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN, "No mesh to set program for SceneObject {}\n",
              m_name);
   }
 }
@@ -47,7 +47,7 @@ void SceneObject::setMaterial(std::shared_ptr<Material> material) {
   if (m_mesh) {
     m_mesh->setMaterial(material);
   } else {
-    utl::log(utl::LGL_WARN, "No mesh to set material for SceneObject {}\n",
+    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN, "No mesh to set material for SceneObject {}\n",
              m_name);
   }
 }
@@ -59,7 +59,7 @@ void SceneObject::setTextures(
       m_mesh->addTexture(texture);
     }
   } else {
-    utl::log(utl::LGL_WARN, "No mesh to set textures for SceneObject {}\n",
+    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN, "No mesh to set textures for SceneObject {}\n",
              m_name);
   }
 }
@@ -108,7 +108,7 @@ void SceneObject::draw(const Camera& camera) const {
   if (m_mesh) {
     m_mesh->draw(camera);
   } else {
-    utl::log(utl::LGL_WARN, "No mesh to draw for SceneObject {}\n", m_name);
+    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN, "No mesh to draw for SceneObject {}\n", m_name);
   }
 }
 
@@ -123,7 +123,7 @@ void SceneObject::handleLighting(const Light& light,
     program->setMat4("L", L);
     depthMap.bindTexture(*program);
   } else {
-    utl::log(utl::LGL_WARN,
+    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN,
              "No program to handle lighting for SceneObject {}\n", m_name);
   }
 }

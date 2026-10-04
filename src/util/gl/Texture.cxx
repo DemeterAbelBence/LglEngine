@@ -29,7 +29,7 @@ std::uint32_t tex::TextureFromFile(const std::string& path) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     stbi_image_free(stbi_data);
   } else {
-    utl::log(utl::LGL_ERROR, "Failed to load texture from file at path: {}",
+    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "Failed to load texture from file at path: {}",
              path);
     stbi_image_free(stbi_data);
   }
@@ -73,7 +73,7 @@ std::uint32_t tex::TextureFromMemory(const std::byte* sourceData, int nBytes) {
         (nBytes == 0 ? "(zero byte texture data)"
                      : "(non-zero byte texture data, but stbi_load_from_memory "
                        "failed to decode it)");
-    utl::log(utl::LGL_ERROR, "{}", errorMessage);
+    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "{}", errorMessage);
     stbi_image_free(stbi_data);
   }
   return textureID;
@@ -97,7 +97,7 @@ std::uint32_t tex::TextureFromAssimpTexels(const std::byte* data,
         reinterpret_cast<const std::byte*>(processedTexels.data());
     textureID = TextureFromMemory(processedData, nBytes);
   } else {
-    utl::log(utl::LGL_ERROR,
+    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR,
              "Assimp texture load from aiTexture failed: zero height indicates "
              "compressed texture, which is not supported. Texture data will be "
              "ignored.");

@@ -21,7 +21,7 @@ class CollisionHandler {
   inline static bool enableRestingForces = true;
   inline static bool enableDepenetration = false;
   inline static bool pushApartOnce = false;
-  inline static bool enableContactLog = false;
+  inline static bool enableContactLog = true;
   inline static bool enableBisectionLog = false;
   inline static bool enablePhysicsLog = false;
   inline static bool drawVectors = false;
@@ -33,6 +33,8 @@ class CollisionHandler {
   inline static float PSDTolerance = 1e-6f;
   inline static float depthBias = 0.000001f;
   inline static float maxRestingForce = 2143289344.0f / 2.0f;
+  inline static float bisectedTime = -1.0f;
+  inline static float deepestInterpenetration = 0.0f;
 
   enum ContactType { COLLIDING, SEPARATING, RESTING };
 
@@ -40,9 +42,6 @@ class CollisionHandler {
                              SceneObject*>;
   inline static std::vector<CONTACT> currentContacts = std::vector<CONTACT>();
   inline static std::vector<CONTACT> restingContacts = std::vector<CONTACT>();
-
-  inline static bool logContacts = false;
-  inline static float bisectedTime = -1.0f;
 
  private:
   // Calculate contacts
@@ -64,8 +63,9 @@ class CollisionHandler {
   static void resolveRestingContacts();
 
   // Interpenetration resolution
-  static void resolveInterpenetrations(
-      std::vector<std::shared_ptr<SceneObject>>& sceneObjects);
+  static std::vector<CONTACT> findInterpenetratingContacts(
+      const std::vector<std::shared_ptr<SceneObject>>& sceneObjects);
+  static void resolveInterpenetrations(const std::vector<CONTACT>& contacts);
 
   // Debug and draw
   static void debugContacts(const Camera& camera);

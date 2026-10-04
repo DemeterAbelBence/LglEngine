@@ -1,178 +1,209 @@
 #include "SimulationScene.hxx"
-#include "SimulationResourceRepository.hxx"
 
 #include <collision/TerrainData.hxx>
 #include <sceneobject/Box.hxx>
 
+#include "SimulationResourceRepository.hxx"
+
 using namespace lgl;
 
 void SimulationScene::initSimulationEvents() {
-	using namespace keyin;
+  using namespace keyin;
 
-	m_simulationEventHandler.addEvent(KeyEvent<SimulationScene, float>(
-		Key(GLFW_KEY_LEFT), &SimulationScene::advanceSimulation, -1.0f, false));
+  m_simulationEventHandler.addEvent(KeyEvent<SimulationScene, float>(
+      Key(GLFW_KEY_LEFT), &SimulationScene::advanceSimulation, -1.0f, false));
 
-	m_simulationEventHandler.addEvent(KeyEvent<SimulationScene, float>(
-		Key(GLFW_KEY_RIGHT), &SimulationScene::advanceSimulation, 1.0f, false));
+  m_simulationEventHandler.addEvent(KeyEvent<SimulationScene, float>(
+      Key(GLFW_KEY_RIGHT), &SimulationScene::advanceSimulation, 1.0f, false));
 }
 
 void SimulationScene::castShadowsOnTerrain() {
-	m_sun->directPerspectiveOf(*m_camera);
+  m_sun->directPerspectiveOf(*m_camera);
 
-	int depthBufferWidth = m_resources->getBuffer("DEPTH")->getWidth();
-	int depthBufferHeight = m_resources->getBuffer("DEPTH")->getHeight();
-	glViewport(0, 0, depthBufferWidth, depthBufferHeight);
+  int depthBufferWidth = m_resources->getBuffer("DEPTH")->getWidth();
+  int depthBufferHeight = m_resources->getBuffer("DEPTH")->getHeight();
+  glViewport(0, 0, depthBufferWidth, depthBufferHeight);
 
-	m_terrain->getMesh()->setProgram(m_resources->getProgram("PATCH_DEPTH"));
-	m_resources->getBuffer("DEPTH")->bind();
-	for (const auto& s : m_sceneObjects) {
-		if (s.get() == m_sun.get()) {
-			continue;
-		}
-		s->draw(*m_camera);
-	}
-	m_resources->getBuffer("DEPTH")->unBind();
-	m_terrain->getMesh()->setProgram(m_resources->getProgram("PATCH_PBR"));
+  m_terrain->getMesh()->setProgram(m_resources->getProgram("PATCH_DEPTH"));
+  m_resources->getBuffer("DEPTH")->bind();
+  for (const auto& s : m_sceneObjects) {
+    if (s.get() == m_sun.get()) {
+      continue;
+    }
+    s->draw(*m_camera);
+  }
+  m_resources->getBuffer("DEPTH")->unBind();
+  m_terrain->getMesh()->setProgram(m_resources->getProgram("PATCH_PBR"));
 
-	m_camera->resetProjection();
-	m_camera->resetView();
+  m_camera->resetProjection();
+  m_camera->resetView();
 }
 
-void SimulationScene::loadFromFile(const std::string& path) {
-
+SimulationScene::~SimulationScene() {
+  if (s_saveObjectStates) {
+    saveObjectStates(std::format("{}/saves/save{}", utl::lglResourceFolder,
+                                 utl::lglStartTime));
+  }
 }
 
 void SimulationScene::rollbackToinitial() {
-	for (int i = 2; i < m_sceneObjects.size(); ++i) {
-		auto s = m_sceneObjects[i];
-		s->getPhysicsSolver()->rollbackToInitial();
-		s->updateTransformations();
-	}
+  for (int i = 2; i < m_sceneObjects.size(); ++i) {
+    auto s = m_sceneObjects[i];
+    s->getPhysicsSolver()->rollbackToInitial();
+    s->updateTransformations();
+  }
 
-	if (s_randomizeRollback) {
-		std::random_device rd;
-		std::mt19937 gen(rd());
-		std::uniform_real_distribution<float> momentumDist(-10.0f, 10.0f);
-		std::uniform_real_distribution<float> angleDist(0.0f, 2.0f * 3.14159f);
-		std::uniform_real_distribution<float> axisDist(-1.0f, 1.0f);
+  if (s_randomizeRollback) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> momentumDist(-10.0f, 10.0f);
+    std::uniform_real_distribution<float> angleDist(0.0f, 2.0f * 3.14159f);
+    std::uniform_real_distribution<float> axisDist(-1.0f, 1.0f);
 
-		for (int i = 2; i < m_sceneObjects.size(); ++i) {
-			auto s = m_sceneObjects[i];
-			glm::vec3 axis = glm::normalize(glm::vec3(axisDist(gen), axisDist(gen), axisDist(gen)));
-			s->setRotation(Transformation::makeRotationMatrix(axis, angleDist(gen)));
-			s->getPhysicsSolver()->Body.P = glm::vec3(momentumDist(gen), momentumDist(gen), momentumDist(gen));
-			s->getPhysicsSolver()->makeStateInitial();
-		}
-	}
+    for (int i = 2; i < m_sceneObjects.size(); ++i) {
+      auto s = m_sceneObjects[i];
+      glm::vec3 axis = glm::normalize(
+          glm::vec3(axisDist(gen), axisDist(gen), axisDist(gen)));
+      s->setRotation(Transformation::makeRotationMatrix(axis, angleDist(gen)));
+      s->getPhysicsSolver()->Body.P =
+          glm::vec3(momentumDist(gen), momentumDist(gen), momentumDist(gen));
+      s->getPhysicsSolver()->makeStateInitial();
+    }
+  }
 }
 
 void SimulationScene::rollbackToPrevious() {
-	for (int i = 2; i < m_sceneObjects.size(); ++i) {
-		auto s = m_sceneObjects[i];
-		s->getPhysicsSolver()->rollbackToPrevious();
-		s->updateTransformations();
-	}
+  for (int i = 2; i < m_sceneObjects.size(); ++i) {
+    auto s = m_sceneObjects[i];
+    s->getPhysicsSolver()->rollbackToPrevious();
+    s->updateTransformations();
+  }
 }
 
 void SimulationScene::advanceSimulation(float deltaTime) {
-	for (const auto& sceneObject : m_sceneObjects) {
-		sceneObject->stepPhysicsBy(deltaTime);
-	}
-	CollisionHandler::handleCollisions(m_sceneObjects);
+  for (const auto& sceneObject : m_sceneObjects) {
+    sceneObject->stepPhysicsBy(deltaTime);
+  }
+  CollisionHandler::handleCollisions(m_sceneObjects);
 }
 
 void SimulationScene::setSimulationSpeed(float speed) {
-	for (auto& event : m_simulationEventHandler.getArgEvents()) {
-		auto& arg = event.getArgRef();
-		arg = arg < 0.0f ? -speed : speed;
-	}
+  Time::s_fixedDeltaTime = speed;
+  for (auto& event : m_simulationEventHandler.getArgEvents()) {
+    auto& arg = event.getArgRef();
+    arg = arg < 0.0f ? -speed : speed;
+  }
+}
+
+void SimulationScene::readConfig(const utl::LglConf& lglConf) {
+  s_lockSimulation = false;
+
+  try {
+    s_lockSimulation = utl::getCurrentBooleanConfig("lockSimulation");
+    s_saveObjectStates = utl::getCurrentBooleanConfig("saveObjectStates");
+    s_randomizeRollback = utl::getCurrentBooleanConfig("enableRandomRollback");
+    s_simulationDelay = utl::getCurrentIntConfig("simulationDelay");
+    setSimulationSpeed(utl::getCurrentFloatConfig("simulationSpeed"));
+    loadObjectStates(std::format("{}/saves/{}", utl::lglResourceFolder,
+                                 utl::getCurrentStringConfig("sceneSave")));
+    
+    for (const auto& s : m_sceneObjects) {
+      s->getPhysicsSolver()->makeStateInitial();
+    }
+  } catch (const std::exception& error) {
+    throw error;
+  }
 }
 
 void SimulationScene::create() {
-	try {
-		initSimulationEvents();
-		setObjectMoveSpeed(0.05f);
-		setSimulationSpeed(0.005f);
+  try {
+    initSimulationEvents();
+    setObjectMoveSpeed(0.05f);
+    setSimulationSpeed(0.005f);
 
-		m_resources = std::make_unique<SimulationResourceRepository>();
+    m_resources = std::make_unique<SimulationResourceRepository>();
 
-		m_sun = std::make_shared<Sun>(2.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-		m_sun->setName("sun");
-		m_sun->setProgram(m_resources->getProgram("TEX"));
-		m_sun->setTextures({ m_resources->getTexture("SUN") });
-		m_sun->translate(glm::vec3(15.0f, 50.0f, -15.0f));
-		m_sceneObjects.push_back(m_sun);
+    m_sun = std::make_shared<Sun>(2.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    m_sun->setName("sun");
+    m_sun->setProgram(m_resources->getProgram("TEX"));
+    m_sun->setTextures({m_resources->getTexture("SUN")});
+    m_sun->translate(glm::vec3(15.0f, 50.0f, -15.0f));
+    m_sceneObjects.push_back(m_sun);
 
-		m_terrain = std::make_shared<Terrain>(1.0f, 4);
-		m_terrain->setName("terrain");
-		m_terrain->getTransformation()->setScaleMatrix(glm::vec3(400.0f, 50.0f, 400.0f));
-		m_terrain->translate(glm::vec3(-200.0f, -20.0f, -200.0f));
-		m_terrain->getMesh()->setProgram(m_resources->getProgram("PATCH_PBR"));
-		m_terrain->getPhysicsSolver()->makeStateInitial();
-		m_sceneObjects.push_back(m_terrain);
+    m_terrain = std::make_shared<Terrain>(1.0f, 4);
+    m_terrain->setName("terrain");
+    m_terrain->getTransformation()->setScaleMatrix(
+        glm::vec3(400.0f, 50.0f, 400.0f));
+    m_terrain->translate(glm::vec3(-200.0f, -20.0f, -200.0f));
+    m_terrain->getMesh()->setProgram(m_resources->getProgram("PATCH_PBR"));
+    m_terrain->getPhysicsSolver()->makeStateInitial();
+    m_sceneObjects.push_back(m_terrain);
 
-		for (int i = 0; i < 2; i++) {
-			float s = 10.0f / (i + 1);
-			auto woodBox = std::make_shared<Box>(false);
-			woodBox->setName(std::format("wood_box_{}", i));
-			woodBox->getMesh()->setProgram(m_resources->getProgram("PHONG"));
-			woodBox->getMesh()->setMaterial(m_resources->getMaterial("WHITE"));
-			woodBox->getMesh()->addTexture(m_resources->getTexture("WOOD"));
-			woodBox->translate(glm::vec3(i, 10.0f + i * 10.0f, 0.0f));
-			woodBox->scale(glm::vec3(s, s, s));
-			woodBox->getPhysicsSolver()->makeStateInitial();
-			m_sceneObjects.push_back(woodBox);
-		}
-	} 
-	catch (const std::exception& error) {
-		throw error;
-	}
+    for (int i = 0; i < 2; i++) {
+      float s = 10.0f / (i + 1);
+      auto woodBox = std::make_shared<Box>(false);
+      woodBox->setName(std::format("wood_box_{}", i));
+      woodBox->getMesh()->setProgram(m_resources->getProgram("PHONG"));
+      woodBox->getMesh()->setMaterial(m_resources->getMaterial("WHITE"));
+      woodBox->getMesh()->addTexture(m_resources->getTexture("WOOD"));
+      woodBox->translate(glm::vec3(i, 10.0f + i * 10.0f, 0.0f));
+      woodBox->scale(glm::vec3(s, s, s));
+      woodBox->getPhysicsSolver()->makeStateInitial();
+      m_sceneObjects.push_back(woodBox);
+    }
+  } catch (const std::exception& error) {
+    throw error;
+  }
 }
 
 void SimulationScene::draw() const {
-	CollisionHandler::debugDrawCollisions(m_sceneObjects, *m_camera);
+  CollisionHandler::debugDrawCollisions(m_sceneObjects, *m_camera);
 
-	for (const auto& s : m_sceneObjects) {
-		s->draw(*m_camera);
-	}
-	auto objectInFocus = m_sceneObjects[m_objectIndex];
-	if (objectInFocus.get() != m_terrain.get()) {
-		objectInFocus->getMesh()->drawMeshFrame(*m_camera);
-	}
+  for (const auto& s : m_sceneObjects) {
+    s->draw(*m_camera);
+  }
+  auto objectInFocus = m_sceneObjects[m_objectIndex];
+  if (objectInFocus.get() != m_terrain.get()) {
+    objectInFocus->getMesh()->drawMeshFrame(*m_camera);
+  }
 }
 
 void SimulationScene::update(GLFWwindow* window) {
-	try {
-		if (m_moveCamera) {
-			m_cameraEventHandler.handleEvents(window, m_camera.get());
-			m_camera->resetView();
-			m_camera->resetProjection();
-			if (Mouse::s_isCaptured) {
-				m_camera->mouseUpdate();
-			}
-		}
-		else {
-			m_objectEventHandler.handleEvents(window, m_sceneObjects[m_objectIndex].get());
-		}
+  try {
+    if (m_moveCamera) {
+      m_cameraEventHandler.handleEvents(window, m_camera.get());
+      m_camera->resetView();
+      m_camera->resetProjection();
+      if (Mouse::s_isCaptured) {
+        m_camera->mouseUpdate();
+      }
+    } else {
+      m_objectEventHandler.handleEvents(window,
+                                        m_sceneObjects[m_objectIndex].get());
+    }
 
-		m_resources->handleShaderChanges();
+    m_resources->handleShaderChanges();
 
-		m_terrain->updateTerrainParameters();
+    m_terrain->updateTerrainParameters();
 
-		if (s_lockSimulation) {
-			advanceSimulation(Time::s_fixedDeltaTime);
-		}
-		else {
-			m_simulationEventHandler.handleEvents(window, this);
-		}
+    if (s_lockSimulation) {
+      advanceSimulation(Time::s_fixedDeltaTime);
+    } else {
+      m_simulationEventHandler.handleEvents(window, this);
+    }
 
-		castShadowsOnTerrain();
-		m_sun->lightUpScene(m_sceneObjects, *m_resources->getBuffer("DEPTH"));
-	}
-	catch (const std::exception& error) {
-		utl::log(utl::LGL_ERROR, "Simulation scene update exception: {}\n", error.what());
-	}
-	catch (...) {
-		utl::log(utl::LGL_ERROR, "Simulation scene update exception\n");
-	}
+    castShadowsOnTerrain();
+    m_sun->lightUpScene(m_sceneObjects, *m_resources->getBuffer("DEPTH"));
+
+    if (s_simulationDelay > 0) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(s_simulationDelay));
+    }
+
+  } catch (const std::exception& error) {
+    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR,
+             "Simulation scene update exception: {}\n", error.what());
+  } catch (...) {
+    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR,
+             "Simulation scene update exception\n");
+  }
 }

@@ -93,8 +93,7 @@ void APIENTRY outputDebugMessage(GLenum source, GLenum type, GLuint id,
   unsigned long long msgId = static_cast<unsigned long long>(id);
   std::string msgText = message ? std::string(message) : std::string("(null)");
 
-  utl::log(
-      logLevel,
+  utl::log(utl::GENERAL_LOGS, logLevel,
       "OpenGL Debug message (id={}): {}\nSource: {}\nType: {}\nSeverity: {}\n",
       msgId, msgText, src, tp, sev);
 }
@@ -117,17 +116,16 @@ void displayOpenGlInfo() {
   glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
   glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
 
-  utl::setLogMode(utl::GENERAL_LOGS);
-  utl::log(utl::LGL_INFO, "GL Vendor    : {}\n",
+  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO, "GL Vendor    : {}\n",
            reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
-  utl::log(utl::LGL_INFO, "GL Renderer  : {}\n",
+  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO, "GL Renderer  : {}\n",
            reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
-  utl::log(utl::LGL_INFO, "GL Version (string)  : {}\n",
+  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO, "GL Version (string)  : {}\n",
            reinterpret_cast<const char*>(glGetString(GL_VERSION)));
-  utl::log(utl::LGL_INFO, "GL Version (integer) : {}.{}\n", majorVersion,
+  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO, "GL Version (integer) : {}.{}\n", majorVersion,
            minorVersion);
   utl::log(
-      utl::LGL_INFO, "GLSL Version : {}\n\n",
+      utl::GENERAL_LOGS, utl::LGL_INFO, "GLSL Version : {}\n\n",
       reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
 }
 }  // namespace lgl

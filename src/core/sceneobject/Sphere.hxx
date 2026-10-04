@@ -3,7 +3,7 @@
 import utl;
 import glm;
 
-#include <collision  //SphereCollider.hxx>
+#include <collision/SphereCollider.hxx>
 #include <sceneobject/SceneObject.hxx>
 #include <visual/mesh/SphereMesh.hxx>
 

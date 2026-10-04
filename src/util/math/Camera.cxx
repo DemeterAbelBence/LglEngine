@@ -51,7 +51,7 @@ glm::mat4 Camera::createViewMatrix() {
 
   float dot = glm::dot(dir, m_up);
   if (glm::abs(dot) > 0.9999f) {
-    utl::log(utl::LGL_WARN,
+    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN,
              "Camera direction and up vector are nearly parallel (dot = {})\n",
              dot);
   }

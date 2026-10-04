@@ -99,7 +99,7 @@ void lgl::model::AssimpModel::loadModel(const std::string& filePath) {
 
   if (!m_scene || m_scene->mFlags & asim::SCENE_FLAGS_INCOMPLETE ||
       !m_scene->mRootNode) {
-    utl::log(utl::LGL_ERROR, "Assimp load error: {}\n",
+    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "Assimp load error: {}\n",
              modelimport.GetErrorString());
     return;
   }

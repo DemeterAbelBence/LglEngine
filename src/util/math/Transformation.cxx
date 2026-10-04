@@ -121,7 +121,7 @@ glm::mat4 Transformation::makeModelInverseMatrix() const {
   if (D != 0.0f) {
     return glm::inverse(M);
   } else {
-    utl::log(utl::LGL_ERROR, "Model matrix has no inverse!");
+    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "Model matrix has no inverse!");
     return glm::mat4(1.0f);
   }
 }

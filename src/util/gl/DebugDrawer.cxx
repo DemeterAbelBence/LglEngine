@@ -3,8 +3,8 @@
 namespace lgl {
 void DebugDrawer::initProgram() {
   m_program = std::make_shared<GpuProgram>("DEBUG SHADER");
-  m_program->addShader(GL_FRAGMENT_SHADER, "shaders/basic/debug-frag.glsl");
-  m_program->addShader(GL_VERTEX_SHADER, "shaders/basic/debug-vert.glsl");
+  m_program->addShader(GL_FRAGMENT_SHADER, std::format("{}/shaders/basic/debug-frag.glsl", utl::lglResourceFolder));
+  m_program->addShader(GL_VERTEX_SHADER, std::format("{}/shaders/basic/debug-vert.glsl", utl::lglResourceFolder));
   m_program->createProgram();
 }
 

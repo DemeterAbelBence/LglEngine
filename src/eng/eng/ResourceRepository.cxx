@@ -12,7 +12,7 @@ std::shared_ptr<lgl::GpuProgram> lgl::ResourceRepository::getProgram(
   try {
     gpuProgram = m_programs.at(name);
   } catch (const std::out_of_range&) {
-    utl::log(utl::LGL_WARN,
+    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN,
              "GpuProgram resource name not in repository: ", name);
   }
   return gpuProgram;
@@ -24,7 +24,7 @@ std::shared_ptr<lgl::Material> lgl::ResourceRepository::getMaterial(
   try {
     material = m_materials.at(name);
   } catch (const std::out_of_range&) {
-    utl::log(utl::LGL_WARN, "Material resource name not in repository: ", name);
+    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN, "Material resource name not in repository: ", name);
   }
   return material;
 }
@@ -35,7 +35,7 @@ std::shared_ptr<lgl::Texture> lgl::ResourceRepository::getTexture(
   try {
     texture = m_textures.at(name);
   } catch (const std::out_of_range&) {
-    utl::log(utl::LGL_WARN, "Texture resource name not in repository: ", name);
+    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN, "Texture resource name not in repository: ", name);
   }
   return texture;
 }
@@ -45,7 +45,7 @@ std::shared_ptr<lgl::Mesh> lgl::ResourceRepository::getMesh(const char* name) {
   try {
     mesh = m_meshes.at(name);
   } catch (const std::out_of_range&) {
-    utl::log(utl::LGL_WARN, "Mesh resource name not in repository: ", name);
+    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN, "Mesh resource name not in repository: ", name);
   }
   return mesh;
 }
@@ -56,7 +56,7 @@ std::shared_ptr<lgl::ModelMesh> lgl::ResourceRepository::getModelMesh(
   try {
     modelMesh = m_modelMeshes.at(name);
   } catch (const std::out_of_range&) {
-    utl::log(utl::LGL_WARN,
+    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN,
              "ModelMesh resource name not in repository: ", name);
   }
   return modelMesh;
@@ -68,7 +68,7 @@ std::shared_ptr<lgl::FrameBuffer> lgl::ResourceRepository::getBuffer(
   try {
     buffer = m_buffers.at(name);
   } catch (const std::out_of_range&) {
-    utl::log(utl::LGL_WARN,
+    utl::log(utl::GENERAL_LOGS, utl::LGL_WARN,
              "FrameBuffer resource name not in repository: ", name);
   }
   return buffer;

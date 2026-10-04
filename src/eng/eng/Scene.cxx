@@ -84,7 +84,8 @@ void Scene::setObjectMoveSpeed(float speed) {
 }
 
 void Scene::saveObjectStates(const std::string& path) {
-  utl::log(utl::LGL_INFO, "Saving object states to path: {}\n", path);
+  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO,
+           "Saving object states to path: {}\n", path);
   for (const auto& s : m_sceneObjects) {
     std::string filepath = std::format("{}/{}.bin", path, s->getName());
     const ribo::BodyData& body = s->getPhysicsSolver()->Body;
@@ -93,7 +94,8 @@ void Scene::saveObjectStates(const std::string& path) {
 }
 
 void Scene::loadObjectStates(const std::string& path) {
-  utl::log(utl::LGL_INFO, "Loading object states from path: {}\n", path);
+  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO,
+           "Loading object states from path: {}\n", path);
   for (const auto& s : m_sceneObjects) {
     try {
       std::string filepath = std::format("{}/{}.bin", path, s->getName());
@@ -101,7 +103,7 @@ void Scene::loadObjectStates(const std::string& path) {
       s->getPhysicsSolver()->Body = body;
       s->updateTransformations();
     } catch (const std::runtime_error& error) {
-      utl::log(utl::LGL_ERROR, "{}\n", error.what());
+      utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR, "{}\n", error.what());
       continue;
     }
   }

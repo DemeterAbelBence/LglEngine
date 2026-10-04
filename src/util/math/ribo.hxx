@@ -32,8 +32,6 @@ void serializeBodyDataInto(const std::string& filename, const BodyData& body);
 
 BodyData deserializeBodyDataFrom(const std::string& filename);
 
-static constexpr const char* baseSerializationPath = "../../../res/physics";
-
 class PhysicsSolver {
  public:
   BodyData Body;

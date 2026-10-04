@@ -30,16 +30,16 @@ void logMatrix(const Eigen::MatrixXd& matrix, bool logSwtich) {
   for (int i = 0; i < matrix.rows(); ++i) {
     for (int j = 0; j < matrix.cols(); ++j) {
       auto element = matrix(i, j);
-      utl::logIf(logSwtich, utl::LGL_EMPTY, "{:.4f}  ", element);
+      utl::logIf(logSwtich, utl::CONTACT_LOGS, utl::LGL_EMPTY, "{:.4f}  ", element);
     }
-    utl::logIf(logSwtich, utl::LGL_EMPTY, "\n");
+    utl::logIf(logSwtich, utl::CONTACT_LOGS, utl::LGL_EMPTY, "\n");
   }
 }
 
 void logVector(const Eigen::VectorXd& vector, bool logSwtich) {
   for (int i = 0; i < vector.size(); ++i) {
     auto element = vector(i);
-    utl::logIf(logSwtich, utl::LGL_EMPTY, "{:.4f}\n", element);
+    utl::logIf(logSwtich, utl::CONTACT_LOGS, utl::LGL_EMPTY, "{:.4f}\n", element);
   }
 }
 
@@ -89,7 +89,7 @@ bool solveBaraffContactForces(const Eigen::MatrixXd& contactA,
   const int n = static_cast<int>(contactB.size());
 
   if (contactA.rows() != n || contactA.cols() != n) {
-    utl::log(utl::LGL_WARN,
+    utl::log(utl::CONTACT_LOGS, utl::LGL_WARN,
              "Invalid contact matrix size: expected {}x{}, got {}x{}.", n, n,
              contactA.rows(), contactA.cols());
     return false;
@@ -124,38 +124,38 @@ bool solveBaraffContactForces(const Eigen::MatrixXd& contactA,
   solver.data()->setNumberOfConstraints(n);
 
   if (!solver.data()->setHessianMatrix(P)) {
-    utl::log(utl::LGL_WARN, "Failed to set Hessian matrix.");
+    utl::log(utl::CONTACT_LOGS, utl::LGL_WARN, "Failed to set Hessian matrix.");
     return false;
   }
 
   if (!solver.data()->setGradient(q)) {
-    utl::log(utl::LGL_WARN, "Failed to set gradient vector.");
+    utl::log(utl::CONTACT_LOGS, utl::LGL_WARN, "Failed to set gradient vector.");
     return false;
   }
 
   if (!solver.data()->setLinearConstraintsMatrix(C)) {
-    utl::log(utl::LGL_WARN, "Failed to set constraint matrix.");
+    utl::log(utl::CONTACT_LOGS, utl::LGL_WARN, "Failed to set constraint matrix.");
     return false;
   }
 
   if (!solver.data()->setLowerBound(lowerBound)) {
-    utl::log(utl::LGL_WARN, "Failed to set lower bound.");
+    utl::log(utl::CONTACT_LOGS, utl::LGL_WARN, "Failed to set lower bound.");
     return false;
   }
 
   if (!solver.data()->setUpperBound(upperBound)) {
-    utl::log(utl::LGL_WARN, "Failed to set upper bound.");
+    utl::log(utl::CONTACT_LOGS, utl::LGL_WARN, "Failed to set upper bound.");
     return false;
   }
 
   if (!solver.initSolver()) {
-    utl::log(utl::LGL_WARN, "Failed to initialize OSQP solver.");
+    utl::log(utl::CONTACT_LOGS, utl::LGL_WARN, "Failed to initialize OSQP solver.");
     return false;
   }
 
   const OsqpEigen::ErrorExitFlag solveResult = solver.solveProblem();
   if (solveResult != OsqpEigen::ErrorExitFlag::NoError) {
-    utl::log(utl::LGL_WARN, "OSQP failed to solve problem (error flag: {}).",
+    utl::log(utl::CONTACT_LOGS, utl::LGL_WARN, "OSQP failed to solve problem (error flag: {}).",
              static_cast<int>(solveResult));
     return false;
   }

@@ -28,7 +28,7 @@ void WindowManager::initMainWindow() {
 void WindowManager::initOpenGl() {
   GLenum err = glewInit();
 
-  utl::log(utl::LGL_INFO, "Glew message: {}\n",
+  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO, "Glew message: {}\n",
            (const char*)glewGetErrorString(err));
 
   lgl::displayOpenGlInfo();
@@ -59,6 +59,8 @@ WindowManager::WindowManager(const char* mainWindowName,
                              std::uint32_t mainWindowHeight,
                              std::uint32_t sceneWidth,
                              std::uint32_t sceneHeight) {
+  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO, "Starting application...\n");
+
   m_mainWindowName = mainWindowName;
   m_mainWindowWidth = mainWindowWidth;
   m_mainWindowHeight = mainWindowHeight;
@@ -78,8 +80,42 @@ WindowManager::WindowManager(const char* mainWindowName,
 WindowManager::~WindowManager() {
   m_userInterface.reset();
   m_scene.reset();
+
   glfwDestroyWindow(m_mainWindow);
   glfwTerminate();
+
+  utl::log(utl::GENERAL_LOGS, utl::LGL_INFO, "Exiting application...\n");
+}
+
+void WindowManager::readConfig(const std::string& configName) {
+  std::string configPath =
+      std::format("{}/config/{}", utl::lglResourceFolder, configName);
+  utl::currentLglConf = utl::readLglConfFromFile(configPath);
+
+  try {
+    CollisionHandler::enableRestingForces = utl::getCurrentBooleanConfig("enableRestingForces");
+    CollisionHandler::enableImpulses = utl::getCurrentBooleanConfig("enableImpulses");
+    CollisionHandler::enableBisection = utl::getCurrentBooleanConfig("enableBisection");
+    CollisionHandler::enableBisectionLog = utl::getCurrentBooleanConfig("enableBisectionLog");
+    CollisionHandler::enableContactLog = utl::getCurrentBooleanConfig("enableContactLog");
+    CollisionHandler::enablePhysicsLog = utl::getCurrentBooleanConfig("enablePhysicsLog");
+
+    utl::enableSimulationLogging = CollisionHandler::enableBisectionLog ||
+                                   CollisionHandler::enableContactLog ||
+                                   CollisionHandler::enablePhysicsLog;
+    utl::log(utl::GENERAL_LOGS, utl::LGL_INFO,
+             "Simulation logging enabled, logging under {}/logs\n", utl::lglOutFolder);
+
+    CollisionHandler::elasticity = utl::getCurrentFloatConfig("elasticity");
+    CollisionHandler::bisectionBias = utl::getCurrentFloatConfig("bisectionBias");
+    CollisionHandler::contactBias = utl::getCurrentFloatConfig("contactBias");
+    CollisionHandler::PSDTolerance = utl::getCurrentFloatConfig("PSDtolerance");
+
+    m_scene->readConfig(utl::currentLglConf);
+  } catch (const std::exception& error) {
+    utl::log(utl::GENERAL_LOGS, utl::LGL_ERROR,
+             "WindowManager::readConfig exception: {}\n", error.what());
+  }
 }
 
 void WindowManager::renderWindowLoop() {

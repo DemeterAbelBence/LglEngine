@@ -29,12 +29,12 @@ void GpuProgram::displayShaderCompilationResult(std::uint32_t type,
     char* message = new char[length];
     glGetShaderInfoLog(id, length, &length, message);
 
-    utl::log(utl::LGL_ERROR, "Failed to compile {} at path {}\n{}",
+    utl::logIf(m_logShaderCompilation, utl::GENERAL_LOGS, utl::LGL_ERROR, "Failed to compile {} at path {}\n{}",
              shaderTypeToString(type), m_shaders[type].m_path, message);
 
     delete[] message;
   } else if (result == GL_TRUE) {
-    utl::log(utl::LGL_OK, "Successful {} compilation!\n",
+    utl::logIf(m_logShaderCompilation, utl::GENERAL_LOGS, utl::LGL_OK, "Successful {} compilation!\n",
              shaderTypeToString(type));
   }
 }
@@ -77,12 +77,13 @@ GpuProgram::GpuProgram(const std::string& programName) : m_programId(0) {
   m_shaders[GL_GEOMETRY_SHADER] = Shader();
 }
 
-void GpuProgram::createProgram() {
+void GpuProgram::createProgram(bool logShaderCompilation) {
+  m_logShaderCompilation = logShaderCompilation;
+
   glDeleteProgram(m_programId);
   std::uint32_t id = glCreateProgram();
 
-  utl::setLogMode(utl::GENERAL_LOGS);
-  utl::log(utl::LGL_INFO, "Compilation result of {}:\n", m_programName);
+  utl::logIf(m_logShaderCompilation, utl::GENERAL_LOGS, utl::LGL_INFO, "Compilation result of {}:\n", m_programName);
   std::vector<std::uint32_t> shaderIds;
   for (const auto& shader : m_shaders) {
     if (!shader.second.empty()) {
@@ -91,7 +92,7 @@ void GpuProgram::createProgram() {
       shaderIds.push_back(shaderId);
     }
   }
-  utl::log(utl::LGL_EMPTY, "\n");
+  utl::logIf(m_logShaderCompilation, utl::GENERAL_LOGS, utl::LGL_EMPTY, "\n");
 
   for (std::uint32_t shaderId : shaderIds) {
     glAttachShader(id, shaderId);
@@ -114,9 +115,8 @@ void GpuProgram::addShader(std::uint32_t type, const std::string& filePath) {
           std::format("Not available shader type: {}", type));
     }
 
-    std::string path = std::format("../../../res/{}", filePath);
     std::string& shaderSource = m_shaders[type].m_source;
-    shaderSource = utl::readFileToString(path);
+    shaderSource = utl::readFileToString(filePath);
     m_shaders[type].m_hash =
         m_hasher.hash(shaderSource.c_str(), shaderSource.size(), 0);
     m_shaders[type].m_path = filePath;
